@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ pageTitle }} - E-shop Platform{% endblock %}
+
+{% block body %}
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-gray-600 mb-4">
+        <a href="{{ path('app_home_index') }}" class="hover:text-gray-900">Domů</a>
+        <span>/</span>
+        <span class="font-medium text-gray-900">{{ pageTitle }}</span>
+    </nav>
+
+    <!-- Main Content Card -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">{{ pageTitle }}</h1>
+                <p class="text-sm text-gray-500 mt-1">Správa lokalizací a překlados</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="px-3 py-1 text-sm font-medium bg-indigo-100 text-indigo-800 rounded-full">CS: 100%</span>
+                    <span class="px-3 py-1 text-sm font-medium bg-gray-100 text-gray-600 rounded-full">EN: 75%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex flex-col items-center justify-center py-12 text-center">
+            <div class="w-16 h-16 mb-4 rounded-full bg-indigo-50 flex items-center justify-center">
+                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088-.9h12m-1.161 6.343a4.99 4.99 0 01-3.84 1.159h-12.996a4.99 4.99 0 01-3.842-1.159M12 15.5h.01"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H8a1 1 0 00-1 1v2m4 0v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2m3 0v2a1 1 0 001 1h1a1 1 0 001-1v-2a1 1 0 00-1-1h-1a1 1 0 00-1 1v2"/>
+                </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Překlady</h3>
+            <p class="text-sm text-gray-500 max-w-md">
+                Spravujte překlady pro vaše produkty, stránky a e-maily v různých jazycích.
+            </p>
+        </div>
+    </div>
+{% endblock %}

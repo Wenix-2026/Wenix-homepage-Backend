@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% set active_module_id = app.active_module_id ?? null %}
+{% block styles %}
+    <style>
+        .category-icon {
+            font-size: 2rem;
+            transition: transform 0.2s ease;
+        }
+        .category-card:hover .category-icon {
+            transform: scale(1.15);
+        }
+        .recommended-card .card-icon {
+            transition: all 0.3s ease;
+        }
+        .recommended-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Banner -->
+    <section class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-6 py-8">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                Rozšiřte své možnosti díky dalším modulům
+            </h2>
+            <p class="text-indigo-100 text-sm md:text-base max-w-3xl">
+                Prozkoumejte naše kategorie a objevte funkcionality, které váš e-shop učiní ještě výkonnějším.
+                Aktivujte moduly podle svých potřeb a zvyšte konkurenceschopnost.
+            </p>
+        </div>
+    </section>
+
+    <!-- Categories Grid -->
+    <section class="px-6 py-6">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Kategorie</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {% for category in categories|default([]) %}
+                    <a href="{{ path('app_home_index', {'active_category_id': category.id}) }}" class="group category-card flex flex-col items-center p-6 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all duration-200 {% if category.id == app.active_category_id ?? null %}ring-2 ring-indigo-500{% endif %}">
+                        <div class="w-16 h-16 mb-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:from-indigo-50 group-hover:to-purple-50 transition-colors">
+                            <i class="{{ category.icon_class|default('bx bx-box') }}"></i>
+                        </div>
+                        <h4 class="text-base font-medium text-gray-900 text-center mb-1">{{ category.name }}</h4>
+                        <span class="text-sm text-gray-500">{{ category.total_count|default(0) }} modulů</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommended Modules -->
+    <section class="px-6 py-6 pb-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Doporučujeme</h3>
+                <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                    Zobrazit všechny
+                </a>
+            </div>
+
+            <div class="space-y-3">
+                {% for module in recommended_modules|default([]) %}
+                    <div class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-sm transition-all duration-200 recommended-card {% if not module.is_active|default(true) %}opacity-75{% endif %}">
+                        <!-- Colored Icon -->
+                        <div class="flex-shrink-0 w-12 h-12 rounded-lg {% if module.badge_class %}{{ module.badge_class }}{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                            <i class="{{ module.icon_class|default('bx bx-box') }}"></i>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="text-base font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                    {{ module.name }}
+                                </h4>
+                                {% if module.is_active|default(true) %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Aktivní
+                                    </span>
+                                {% endif %}
+                                {% if module.is_recommended|default(false) %}
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Doporučujeme
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <p class="text-sm text-gray-600">{{ module.description }}</p>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex-shrink-0">
+                            <a href="{{ path('app_module_detail', {'id': module.id}) }}" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors {% if not module.is_active|default(true) %}opacity-50 cursor-not-allowed{% endif %}">
+                                <span>Detail modulu</span>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (optional) -->
+    <footer class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+        <div class="max-w-7xl mx-auto flex items-center justify-between text-sm text-gray-500">
+            <p>&copy; 2026 E-shop Platform. Všechna práva vyhrazena.</p>
+            <div class="flex items-center gap-4">
+                <a href="#" class="hover:text-gray-700 transition-colors">Podpora</a>
+                <a href="#" class="hover:text-gray-700 transition-colors">Privacy</a>
+                <a href="#" class="hover:text-gray-700 transition-colors">Podmínky</a>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
