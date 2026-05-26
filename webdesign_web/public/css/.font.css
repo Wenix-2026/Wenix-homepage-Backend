@@ -1,0 +1,252 @@
+:root {
+    --neon-purple: #a855f7;
+    --neon-indigo: #6366f1;
+    --neon-glow: 0 0 20px rgba(168, 85, 247, 0.4), 0 0 60px rgba(99, 102, 241, 0.2);
+    --card-border: rgba(168, 85, 247, 0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+    background: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+/* ── Prvotřídní jemný šum na celém pozadí webu ── */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: .03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+}
+
+.font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
+
+/* ── HERO ambientní gradient – přesná Figma barevnost (teal/blue/olive) ── */
+.hero-bg {
+    background:
+        radial-gradient(ellipse 70% 80% at 30% 30%, rgba(20,150,140,0.7) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 60% at 80% 10%, rgba(60,100,160,0.55) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 70% at 60% 70%, rgba(80,130,80,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 10% 80%, rgba(20,80,120,0.45) 0%, transparent 50%),
+        #0a0a0a;
+    animation: heroShift 14s ease-in-out infinite alternate;
+}
+@keyframes heroShift {
+    0%   { filter: hue-rotate(0deg) brightness(1); }
+    50%  { filter: hue-rotate(6deg) brightness(1.03); }
+    100% { filter: hue-rotate(0deg) brightness(1); }
+}
+
+/* ── Čistá navigace (pouze ikony a burger na obou zařízeních) ── */
+header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.nav-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.75rem;
+    letter-spacing: .05em;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+.logo-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.25);
+}
+
+.burger-btn { background: none; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center; color: #fff; }
+
+.nav-right { display: flex; align-items: center; gap: 20px; }
+.nav-social { display: flex; align-items: center; gap: 14px; }
+.nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.35rem; line-height: 1; }
+.nav-social a:hover { opacity: 1; }
+
+/* Celoobrazovkové překryvné dravé burger menu */
+#burger-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(0,0,0,0.98);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+#burger-overlay.open { display: flex; opacity: 1; }
+#burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 32px; }
+
+#burger-overlay a.menu-link {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.5rem);
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color .2s;
+}
+#burger-overlay a.menu-link:hover { color: #fff; }
+#burger-overlay .sub-text { display: block; font-family: 'Inter', sans-serif; font-size: 0.8rem; letter-spacing: 0; color: #a855f7; text-transform: uppercase; margin-top: 4px; }
+
+/* ── Tlačítka ── */
+.btn-primary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 26px;
+    background: #fff; color: #000;
+    font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 500;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    cursor: pointer; text-decoration: none;
+    transition: background .2s, color .2s, transform .15s;
+    white-space: nowrap;
+}
+.btn-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+
+.btn-secondary {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 26px;
+    background: transparent; color: #fff;
+    font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 400;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 6px;
+    cursor: pointer; text-decoration: none;
+    transition: border-color .2s, background .2s, transform .15s;
+    white-space: nowrap;
+}
+.btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+
+.btn-dark {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 11px 24px;
+    background: transparent; color: #fff;
+    font-size: .875rem; font-weight: 400;
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 6px;
+    cursor: pointer; text-decoration: none;
+    transition: border-color .2s, background .2s;
+    white-space: nowrap;
+}
+.btn-dark:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
+
+/* ── Karty a specifické textury z Figmy ── */
+.content-card { display: flex; flex-direction: column; gap: 16px; }
+.content-card-img {
+    width: 100%; aspect-ratio: 4/3;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.grad-noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: .14;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 150px;
+    mix-blend-mode: overlay;
+}
+
+/* Figma Polka Dot vzor */
+.dot-pattern {
+    background-color: #f9c0d8;
+    background-image: radial-gradient(circle, #e53e3e 16%, transparent 16%), radial-gradient(circle, #e53e3e 16%, transparent 16%);
+    background-size: 40px 40px;
+    background-position: 0 0, 20px 20px;
+}
+
+.feature-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: center;
+}
+@media (max-width: 767px) {
+    .feature-row { grid-template-columns: 1fr; gap: 24px; }
+    .feature-row-reverse .feature-img { order: -1; }
+}
+.feature-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; }
+.feature-text { display: flex; flex-direction: column; gap: 14px; }
+
+.three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+@media (max-width: 767px) { .three-col { grid-template-columns: 1fr; gap: 36px; } }
+
+.checker {
+    background-color: #1c1c1c;
+    background-image:
+        linear-gradient(45deg, #252525 25%, transparent 25%),
+        linear-gradient(-45deg, #252525 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #252525 75%),
+        linear-gradient(-45deg, transparent 75%, #252525 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Floating particles */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: float linear infinite;
+    opacity: 0;
+}
+@keyframes float {
+    0%   { transform: translateY(100vh) translateX(0);    opacity: 0; }
+    10%  { opacity: .6; }
+    90%  { opacity: .3; }
+    100% { transform: translateY(-10vh) translateX(40px); opacity: 0; }
+}
+
+/* ── Textové sekce ── */
+.text-row {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 32px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 36px;
+}
+@media (max-width: 767px) { .text-row { grid-template-columns: 1fr; gap: 24px; } }
+.text-block h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem; letter-spacing: .05em;
+    color: #fff; margin-bottom: 8px;
+}
+.text-block p { font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+.logo-strip { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 40px; }
+.logo-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.4); font-size: .85rem; font-weight: 500; }
+
+/* ── Špičkový scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
