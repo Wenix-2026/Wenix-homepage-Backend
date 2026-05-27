@@ -179,6 +179,16 @@
             position: relative;
         }
 
+        .UI-UX-img {
+            background-image: url("{{ asset('/images/Figma-navrh.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+
+            display: block;
+        }
+
+
         .grad-noise::after {
             content: '';
             position: absolute;
@@ -512,10 +522,11 @@
                 </div>
 
                 {# Karta 2 #}
-                <div class="content-card">
-                    <div class="content-card-img dot-pattern grad-noise" style="min-height: 230px;"></div>
-                    <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">UX / UI PROJEKCE</h3>
+                <div class="content-card" data-aos="fade-up" data-aos-delay="100">
+                    {# Tady běží čistě tvoje třída UI-UX-img s natvrdo definovanou výškou #}
+                    <div class="content-card-img UI-UX-img" style="height: 230px; min-height: 230px; width: 100%;"></div>
+                    <div style="padding: 24px;">
+                        <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px; margin-top: 45px;" class="font-bebas tracking-wide text-lg">UX / UI PROJEKCE</h3>
                         <p style="font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6;">Prémiové kreativní návrhy s přísným zaměřením na maximální konverzní poměr.</p>
                     </div>
                 </div>
