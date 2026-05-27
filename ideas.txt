@@ -1,0 +1,47 @@
+Backend a databázová struktura produktů
+
+    Návrh databázové entity Product: Definovat sloupce v databázi (id, název, slug, popis, cena, stav na skladě, datum vytvoření).
+
+    Generování databázové migrace: Spustit příkaz php bin/console make:migration a ověřit správnost vytvořené tabulky v databázi.
+
+    Služba pro nahrávání obrázků: Vytvořit samostatnou servisní třídu, která zpracuje soubor z formuláře, vygeneruje bezpečný unikátní název a uloží jej do adresáře public/uploads/products/.
+
+    Validace vstupních dat: Implementovat validační pravidla v entitě pomocí Symfony atributů (např. NotBlank, PositiveOrZero), aby se zabránilo ukládání neúplných dat nebo záporných cen.
+
+Zabezpečení a správa uživatelů
+
+    Inicializace Symfony Security: Spustit php bin/console make:user pro vytvoření uživatelské entity a php bin/console make:auth pro vygenerování přihlašovacího kontroleru a formuláře.
+
+    Omezení přístupu do administrace: V souboru config/packages/security.yaml nastavit pravidla access_control tak, aby všechny routy začínající na /admin vyžadovaly roli ROLE_ADMIN.
+
+    Hashování hesel v testovacích datech: Použít UserPasswordHasherInterface uvnitř databázových fixtures pro bezpečné uložení výchozího administrátorského účtu.
+
+    CSRF ochrana formulářů: Ověřit, že všechny formuláře v administraci (včetně asynchronních požadavků přes popup okna) obsahují a validují CSRF token.
+
+Klientská část a e-commerce logika
+
+    Výpis produktů na hlavní stránce: Propojit kontroler s ProductRepository a předat pole aktivních produktů do Twig šablony pro zobrazení v mřížce.
+
+    Dynamický detail produktu: Vytvořit routu typu /produkt/{slug}, která na základě unikátního textového řetězce vyhledá a zobrazí konkrétní produkt.
+
+    Správa nákupního košíku v Session: Implementovat metody pro přidání, odebrání a úpravu množství položek v uživatelské relaci (Session), bez nutnosti okamžitého zápisu do databáze.
+
+
+Nasazení na testovací server
+
+    Konfigurace DNS a subdomény: Vytvořit A nebo CNAME záznam pro provizorní subdoménu WDA.daniel-server.eu v DNS správě domény a nasměrovat ji na cílový server.
+
+    Nastavení webového serveru: Nakonfigurovat virtuální hostitel (VirtualHost v Apache nebo server blok v Nginx) tak, aby root adresář subdomény ukazoval do složky public/ v projektu.
+
+    Příprava produkčního prostředí: Vytvořit soubor .env.local na serveru, nastavit APP_ENV=prod, vygenerovat nový APP_SECRET a nakonfigurovat ostré přístupy k produkční databázi.
+
+    Deployment a migrace: Naklonovat kód z GitHubu na server, spustit composer install --no-dev --optimize-autoloader, provést produkční databázové migrace a vyčistit cache.
+
+    Zabezpečení přenosu: Vygenerovat bezplatný SSL certifikát Let's Encrypt přes Certbot pro subdoménu WDA.daniel-server.eu a nastavit automatické přesměrování z HTTP na HTTPS.
+
+
+Optimalizace a údržba vývojového prostředí
+
+    Konfigurace šablony prostředí: Připravit vzorový soubor .env.dist s popisem potřebných proměnných, aby bylo snazší projekt zprovoznit na jiných zařízeních.
+
+    Kontrola databázových dotazů: Využít Symfony Profiler ke kontrole počtu prováděných SQL dotazů na stránku, aby se eliminoval problém efektivity n+1 dotazů při výpisu produktů.
