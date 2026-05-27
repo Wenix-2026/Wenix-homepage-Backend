@@ -1,14 +1,16 @@
 <?php
-// src/Entity/Tenant.php
+// src/Entity/Master/Tenant.php
 
-namespace App\Entity;
+namespace App\Entity\Master;
 
+use App\Repository\Master\TenantRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: TenantRepository::class)]
 #[ORM\Table(name: 'tenants')]
 class Tenant
 {
+    // ... zbytek zůstává stejný
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

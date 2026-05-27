@@ -30,6 +30,11 @@
             <a href="{{ path('app_home_index') }}" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors {% if app.request.attributes.get('_route') == 'app_home_index' %}bg-indigo-600{% endif %}">
                 Administrace
             </a>
+            <a href="{{ path('admin_users_index') }}"
+               class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') starts with 'admin_users_' %}bg-indigo-600 text-white{% endif %}">
+                Uživatelé
+            </a>
+
             <a href="{{ path('app_products_index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') == 'app_products_index' %}bg-indigo-600 text-white{% endif %}">
                 Zboží
             </a>
@@ -54,15 +59,28 @@
         </nav>
 
         <!-- Right Side Links -->
+        <!-- Right Side Links -->
         <div class="flex items-center gap-4">
-            <a href="http://localhost:8000" class="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden sm:block">
+            <a href="http://localhost:8000"
+               class="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden sm:block">
                 E-shop
             </a>
-            <a href="#" class="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12c0 1.551-1.449 2.8-3.2 2.8-1.115 0-2.128-.722-2.882-1.768l-3.637 3.637a4.5 4.5 0 1 1-6.364-6.364l3.637-3.637a3.89 3.89 0 0 1 1.04-1.04l-3.637-3.637a4.5 4.5 0 1 1 6.364-6.364l3.637 3.637a3.89 3.89 0 0 1-1.04 1.04M6 12a6 6 0 1 0 12 0 6 6 0 0 0-12 0Z"/>
-                </svg>
-            </a>
+
+            {% if app.user %}
+                <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 hidden sm:block">
+                {{ app.user.email }}
+            </span>
+                    <a href="{{ path('app_logout') }}"
+                       class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                        Odhlásit
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </header>

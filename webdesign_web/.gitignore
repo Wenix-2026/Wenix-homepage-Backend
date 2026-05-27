@@ -18,3 +18,19 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+
+# ── PHPSTORM ──
+# Ignoruje interní nastavení PhpStormu, které se vytváří pro každý počítač zvlášť
+.idea/
+
+# ── WINDOWS ──
+# Ignoruje systémové soubory Windows (např. cache náhledů obrázků ve složce public)
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── DOCKER & OSTATNÍ (Pro strýčka Příhodu) ──
+# Pokud bys někdy lokálně zkoušel Docker nebo jiné lokální setupy
+.composer/
+.phpunit.result.cache
