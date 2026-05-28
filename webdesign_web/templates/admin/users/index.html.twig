@@ -2,8 +2,32 @@
 
 {% block title %}Správa uživatelů{% endblock %}
 
-{% block body %}
+{% block content %}
     <div class="p-6 max-w-7xl mx-auto">
+
+        {# Horní panel s informacemi o přihlášeném uživateli #}
+        <div class="mb-6 p-4 bg-gray-900 text-white rounded-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-sm uppercase">
+                    {{ app.user.email|slice(0, 2) }}
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 font-medium tracking-wide uppercase">Přihlášený účet</p>
+                    <p class="text-sm font-semibold text-white break-all">{{ app.user.email }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-center">
+                {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                    <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-md">
+                        Superadmin
+                    </span>
+                {% else %}
+                    <span class="px-3 py-1 text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-md">
+                        Admin
+                    </span>
+                {% endif %}
+            </div>
+        </div>
 
         {# Flash zprávy #}
         {% for message in app.flashes('success') %}
@@ -14,6 +38,7 @@
                 {{ message }}
             </div>
         {% endfor %}
+
         {% for message in app.flashes('error') %}
             <div class="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg flex items-center gap-2">
                 <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,89 +48,85 @@
             </div>
         {% endfor %}
 
-        {# Header #}
-        <div class="flex items-center justify-between mb-6">
+        {# Header sekce #}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Správa uživatelů</h1>
-                <p class="text-sm text-gray-500 mt-1">Celkem {{ users|length }} uživatelů</p>
+                <p class="text-sm text-gray-500 mt-1">Celkem {{ users|length }} uživatelů v tenant databázi [cite: 4]</p>
             </div>
-            <a href="{{ path('admin_users_new') }}"
-               class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors">
+            <button onclick="openAddUserModal()"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors w-full sm:w-auto shadow-sm cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 Přidat uživatele
-            </a>
+            </button>
         </div>
 
         {# Tabulka #}
-        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <table class="w-full text-sm">
+        <div class="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm">
+            <table class="w-full text-sm min-w-[600px]">
                 <thead class="bg-gray-50 border-b border-gray-200">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Uživatel</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stav</th>
-                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Vytvořen</th>
                     <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Akce</th>
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                 {% for user in users %}
+                    {% set user_name = user.name ?? 'Nepojmenováno' %}
+                    {% set user_role = 'ROLE_USER' %}
+                    {% if 'ROLE_SUPER_ADMIN' in user.roles %}{% set user_role = 'ROLE_SUPER_ADMIN' %}
+                    {% elseif 'ROLE_ADMIN' in user.roles %}{% set user_role = 'ROLE_ADMIN' %}{% endif %}
+
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-                                <span class="text-white text-xs font-semibold">
-                                    {{ (user.name ?? user.email)|slice(0,1)|upper }}
-                                </span>
+                                    <span class="text-white text-xs font-semibold">
+                                        {{ (user.name ?? user.email)|slice(0,1)|upper }}
+                                    </span>
                                 </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ user.name ?? '—' }}</p>
-                                    <p class="text-xs text-gray-500">{{ user.email }}</p>
+                                <div class="max-w-[180px] sm:max-w-xs truncate">
+                                    <p class="font-medium text-gray-900 truncate">{{ user_name }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            {% if 'ROLE_ADMIN' in user.roles %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                Admin
-                            </span>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            {% if user_role == 'ROLE_SUPER_ADMIN' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">Superadmin</span>
+                            {% elseif user_role == 'ROLE_ADMIN' %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Admin</span>
                             {% else %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                                Uživatel
-                            </span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">Uživatel</span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             {% if user.active %}
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                Aktivní
-                            </span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Aktivní
+                                </span>
                             {% else %}
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                Neaktivní
-                            </span>
+                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> Neaktivní
+                                </span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 text-gray-500 text-xs">
-                            {{ user.createdAt|date('d.m.Y') }}
-                        </td>
-                        <td class="px-6 py-4">
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center justify-end gap-2">
 
-                                {# Editovat #}
-                                <a href="{{ path('admin_users_edit', {id: user.id}) }}"
-                                   class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                   title="Editovat">
+                                {# Tlačítko Editovat #}
+                                <button onclick="openEditUserModal('{{ user.id }}', '{{ user_name|e('js') }}', '{{ user.email|e('js') }}', '{{ user_role }}', '{{ csrf_token('user_edit_' ~ user.id) }}')"
+                                        class="p-1.5 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                                        title="Editovat">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
-                                </a>
+                                </button>
 
-                                {# Aktivovat/Deaktivovat #}
                                 {% if user.getUserIdentifier() != app.user.getUserIdentifier() %}
                                     <form method="post" action="{{ path('admin_users_toggle', {id: user.id}) }}" class="inline">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('user_toggle_' ~ user.id) }}">
@@ -124,20 +145,16 @@
                                         </button>
                                     </form>
 
-                                    {# Smazat #}
-                                    <form method="post" action="{{ path('admin_users_delete', {id: user.id}) }}" class="inline"
-                                          onsubmit="return confirm('Opravdu smazat uživatele {{ user.email }}?')">
-                                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('user_delete_' ~ user.id) }}">
-                                        <button type="submit"
-                                                class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                                title="Smazat">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
+                                    {# Tlačítko Smazat #}
+                                    <button type="button" onclick="openDeleteUserModal('{{ user.id }}', '{{ user_name|e('js') }}', '{{ user.email|e('js') }}', '{{ csrf_token('user_delete_' ~ user.id) }}')"
+                                            class="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                                            title="Smazat">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 {% else %}
-                                    <span class="text-xs text-gray-400 px-2">Váš účet</span>
+                                    <span class="text-xs text-indigo-600 font-medium bg-indigo-50 px-2.5 py-1 rounded">Váš účet</span>
                                 {% endif %}
 
                             </div>
@@ -145,12 +162,11 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center text-gray-400">
+                        <td colspan="4" class="px-6 py-12 text-center text-gray-400">
                             <svg class="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
                             <p class="font-medium">Žádní uživatelé</p>
-                            <p class="text-sm mt-1">Přidejte prvního uživatele kliknutím na tlačítko výše.</p>
                         </td>
                     </tr>
                 {% endfor %}
@@ -158,4 +174,208 @@
             </table>
         </div>
     </div>
+
+    {# MODAL 1: PŘIDÁNÍ UŽIVATELE #}
+    <div id="add-user-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
+                <h2 class="text-lg font-bold text-gray-900">Nový uživatel administrace</h2>
+                <button type="button" onclick="closeAddUserModal()" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            {# OPRAVA: Action posíláme natvrdo na čistou url bez lomítka na konci, jak to definuje Route v PHP #}
+            <form method="post" action="/admin/users/new" class="space-y-4">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('user_new') }}">
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Jméno a příjmení</label>
+                    <input type="text" name="name" required placeholder="Daniel Auersvald" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">E-mail</label>
+                    <input type="email" name="email" required placeholder="admin@eshop.cz" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Heslo</label>
+                    <input type="password" name="password" required minlength="6" placeholder="Minimálně 6 znaků" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Oprávnění</label>
+                    <select name="role" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="ROLE_ADMIN" selected>Administrátor (Admin)</option>
+                        <option value="ROLE_SUPER_ADMIN">Hlavní správce (Superadmin)</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-3 border-t border-gray-100 mt-5">
+                    <button type="button" onclick="closeAddUserModal()" class="flex-1 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer">Zrušit</button>
+                    <button type="submit" class="flex-1 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-sm cursor-pointer">Vytvořit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# MODAL 2: EDITACE UŽIVATELE #}
+    <div id="edit-user-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-5 border-b border-gray-100 pb-3">
+                <h2 class="text-lg font-bold text-gray-900">Upravit uživatele</h2>
+                <button type="button" onclick="closeEditUserModal()" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="edit-user-form" method="post" action="" class="space-y-4">
+                <input type="hidden" id="edit-csrf-token" name="_csrf_token" value="">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Jméno a příjmení</label>
+                    <input type="text" id="edit-name" name="name" required class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">E-mail</label>
+                    <input type="email" id="edit-email" name="email" required class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Nové heslo (nechte prázdné pro zachování)</label>
+                    <input type="password" name="password" minlength="6" placeholder="Ponechte prázdné, pokud neměníte" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Oprávnění</label>
+                    <select id="edit-role" name="role" class="w-full px-3 py-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="ROLE_USER">Uživatel</option>
+                        <option value="ROLE_ADMIN">Administrátor (Admin)</option>
+                        <option value="ROLE_SUPER_ADMIN">Hlavní správce (Superadmin)</option>
+                    </select>
+                </div>
+                <div class="flex gap-3 pt-3 border-t border-gray-100 mt-5">
+                    <button type="button" onclick="closeEditUserModal()" class="flex-1 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer">Zrušit</button>
+                    <button type="submit" class="flex-1 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors shadow-sm cursor-pointer">Uložit změny</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# MODAL 3: BEZPEČNOSTNÍ ODSTRANĚNÍ UŽIVATELE #}
+    <div id="delete-user-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                <h2 class="text-lg font-bold text-red-600 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    Smazat uživatele?
+                </h2>
+                <button type="button" onclick="closeDeleteUserModal()" class="p-1 text-gray-400 hover:text-gray-600 rounded-lg transition-colors cursor-pointer">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">
+                Opravdu chcete trvale smazat účet <strong id="delete-user-email" class="text-gray-900"></strong>? Tato akce je nevratná.
+            </p>
+
+            <form id="delete-user-form" method="post" action="">
+                <input type="hidden" id="delete-csrf-token" name="_csrf_token" value="">
+
+                <div class="mb-5 bg-red-50 border border-red-100 p-3 rounded-lg">
+                    <label for="delete-confirm-input" class="block text-xs font-semibold text-red-700 uppercase tracking-wider mb-1">
+                        Pro potvrzení zadejte celé jméno uživatele: <span id="delete-expected-name" class="font-bold underline"></span>
+                    </label>
+                    <input type="text" id="delete-confirm-input" autocomplete="off" placeholder="Napište přesné jméno"
+                           class="w-full px-3 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeDeleteUserModal()" class="flex-1 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors cursor-pointer">Zrušit</button>
+                    <button type="submit" id="delete-submit-btn" disabled
+                            class="flex-1 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer">
+                        Potvrdit smazání
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# JAVASCRIPT LOGIKA #}
+    {# JAVASCRIPT LOGIKA PRO VŠECHNY MODALY #}
+    <script>
+        let rawExpectedName = "";
+
+        // --- MODAL: PŘIDÁNÍ ---
+        function openAddUserModal() {
+            document.getElementById('add-user-modal')?.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeAddUserModal() {
+            document.getElementById('add-user-modal')?.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // --- MODAL: EDITACE ---
+        function openEditUserModal(id, name, email, role, csrfToken) {
+            const form = document.getElementById('edit-user-form');
+            if (form) {
+                // OPRAVA: Odstraněno koncové lomítko, aby to přesně sedělo na Symfony routu
+                form.action = `/admin/users/${id}/edit`;
+
+                document.getElementById('edit-csrf-token').value = csrfToken;
+                document.getElementById('edit-name').value = name === 'Nepojmenováno' ? '' : name;
+                document.getElementById('edit-email').value = email;
+                document.getElementById('edit-role').value = role;
+
+                document.getElementById('edit-user-modal')?.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('edit-user-modal')?.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // --- MODAL: SMAZÁNÍ ---
+        function openDeleteUserModal(id, name, email, csrfToken) {
+            const form = document.getElementById('delete-user-form');
+            if (form) {
+                // OPRAVA: Odstraněno koncové lomítko, aby to přesně sedělo na Symfony routu
+                form.action = `/admin/users/${id}/delete`;
+
+                document.getElementById('delete-csrf-token').value = csrfToken;
+                document.getElementById('delete-user-email').textContent = email;
+                document.getElementById('delete-expected-name').textContent = name;
+
+                // Ořízneme mezery a převedeme na malá písmena pro spolehlivé porovnání
+                rawExpectedName = name.trim().toLowerCase();
+
+                const input = document.getElementById('delete-confirm-input');
+                const btn = document.getElementById('delete-submit-btn');
+                input.value = "";
+                btn.disabled = true;
+
+                document.getElementById('delete-user-modal')?.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+                setTimeout(() => input.focus(), 100);
+            }
+        }
+
+        function closeDeleteUserModal() {
+            document.getElementById('delete-user-modal')?.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // OPRAVA: Porovnáváme trimovaný text převedený na malá písmena, takže to vezme jakýkoliv zápis
+        document.getElementById('delete-confirm-input')?.addEventListener('input', function(e) {
+            const btn = document.getElementById('delete-submit-btn');
+            if (e.target.value.trim().toLowerCase() === rawExpectedName) {
+                btn.disabled = false;
+            } else {
+                btn.disabled = true;
+            }
+        });
+
+        // Obecné zavírání modalů kliknutím mimo
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('add-user-modal')) closeAddUserModal();
+            if (e.target === document.getElementById('edit-user-modal')) closeEditUserModal();
+            if (e.target === document.getElementById('delete-user-modal')) closeDeleteUserModal();
+        });
+    </script>
 {% endblock %}

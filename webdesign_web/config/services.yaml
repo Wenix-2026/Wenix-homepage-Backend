@@ -19,6 +19,8 @@ services:
     App\Command\CreateTenantCommand:
         arguments:
             $masterEm: '@doctrine.orm.master_entity_manager'
+            $tenantEm: '@doctrine.orm.tenant_entity_manager'
+            $projectDir: '%kernel.project_dir%'
 
     App\Command\CreateUserCommand:
         arguments:
@@ -27,6 +29,7 @@ services:
     App\EventListener\TenantListener:
         arguments:
             $tenantConnection: '@doctrine.dbal.tenant_connection'
+            $tenantEm: '@doctrine.orm.tenant_entity_manager'
             $projectDir: '%kernel.project_dir%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 255 }

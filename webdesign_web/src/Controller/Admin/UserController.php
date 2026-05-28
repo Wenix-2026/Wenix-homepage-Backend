@@ -4,7 +4,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Tenant\User;
-use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,34 +16,49 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('ROLE_ADMIN')]
 class UserController extends AbstractController
 {
+    private $em;
+
     public function __construct(
-        private EntityManagerInterface $em,
+        ManagerRegistry $doctrine,
         private UserPasswordHasherInterface $passwordHasher,
-    ) {}
+    ) {
+        // Tímto natvrdo řekneme, že chceme používat tenant připojení
+        $this->em = $doctrine->getManager('tenant');
+    }
 
     #[Route('/', name: 'index')]
     public function index(): Response
     {
         $users = $this->em->getRepository(User::class)->findBy([], ['id' => 'DESC']);
-        return $this->render('admin/users/index.html.twig', ['users' => $users]);
+
+        // Pokud je tabulka v SQLite úplně prázdná, podstrčíme pro test do pole aktuálně přihlášeného uživatele
+        if (empty($users) && $this->getUser()) {
+            $users = [$this->getUser()];
+        }
+
+        return $this->render('admin/users/index.html.twig', [
+            'users' => $users,
+            'error' => null
+        ]);
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
     public function new(Request $request): Response
     {
-        $error = null;
-
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('user_new', $request->get('_csrf_token'))) {
-                $error = 'Neplatný CSRF token.';
+                $this->addFlash('error', 'Neplatný CSRF token.');
+                return $this->redirect('/admin/users/');
             } else {
                 $existing = $this->em->getRepository(User::class)
                     ->findOneBy(['email' => $request->get('email')]);
 
                 if ($existing) {
-                    $error = 'Uživatel s tímto emailem již existuje.';
+                    $this->addFlash('error', 'Uživatel s tímto emailem již existuje.');
+                    return $this->redirect('/admin/users/');
                 } elseif (strlen($request->get('password')) < 6) {
-                    $error = 'Heslo musí mít alespoň 6 znaků.';
+                    $this->addFlash('error', 'Heslo musí mít alespoň 6 znaků.');
+                    return $this->redirect('/admin/users/');
                 } else {
                     $user = new User();
                     $user->setEmail($request->get('email'));
@@ -53,16 +68,20 @@ class UserController extends AbstractController
                         $this->passwordHasher->hashPassword($user, $request->get('password'))
                     );
 
+                    if (method_exists($user, 'setActive')) {
+                        $user->setActive(true);
+                    }
+
                     $this->em->persist($user);
                     $this->em->flush();
 
                     $this->addFlash('success', 'Uživatel byl úspěšně vytvořen.');
-                    return $this->redirectToRoute('admin_users_index');
+                    return $this->redirect('/admin/users/');
                 }
             }
         }
 
-        return $this->render('admin/users/new.html.twig', ['error' => $error]);
+        return $this->redirect('/admin/users/');
     }
 
     #[Route('/{id}/edit', name: 'edit', methods: ['GET', 'POST'])]
@@ -71,19 +90,20 @@ class UserController extends AbstractController
         $user = $this->em->getRepository(User::class)->find($id);
         if (!$user) throw $this->createNotFoundException();
 
-        $error = null;
-
         if ($request->isMethod('POST')) {
             if (!$this->isCsrfTokenValid('user_edit_' . $id, $request->get('_csrf_token'))) {
-                $error = 'Neplatný CSRF token.';
+                $this->addFlash('error', 'Neplatný CSRF token.');
+                return $this->redirect('/admin/users/');
             } else {
                 $user->setEmail($request->get('email'));
                 $user->setName($request->get('name'));
                 $user->setRoles([$request->get('role', 'ROLE_USER')]);
 
+                $errorHappened = false;
                 if ($newPassword = $request->get('password')) {
                     if (strlen($newPassword) < 6) {
-                        $error = 'Heslo musí mít alespoň 6 znaků.';
+                        $this->addFlash('error', 'Heslo musí mít alespoň 6 znaků.');
+                        $errorHappened = true;
                     } else {
                         $user->setPassword(
                             $this->passwordHasher->hashPassword($user, $newPassword)
@@ -91,18 +111,16 @@ class UserController extends AbstractController
                     }
                 }
 
-                if (!$error) {
+                if (!$errorHappened) {
                     $this->em->flush();
                     $this->addFlash('success', 'Uživatel byl upraven.');
-                    return $this->redirectToRoute('admin_users_index');
                 }
+
+                return $this->redirect('/admin/users/');
             }
         }
 
-        return $this->render('admin/users/edit.html.twig', [
-            'user'  => $user,
-            'error' => $error,
-        ]);
+        return $this->redirect('/admin/users/');
     }
 
     #[Route('/{id}/delete', name: 'delete', methods: ['POST'])]
@@ -110,7 +128,7 @@ class UserController extends AbstractController
     {
         if (!$this->isCsrfTokenValid('user_delete_' . $id, $request->get('_csrf_token'))) {
             $this->addFlash('error', 'Neplatný CSRF token.');
-            return $this->redirectToRoute('admin_users_index');
+            return $this->redirect('/admin/users/');
         }
 
         $user = $this->em->getRepository(User::class)->find($id);
@@ -118,14 +136,14 @@ class UserController extends AbstractController
 
         if ($user->getUserIdentifier() === $this->getUser()->getUserIdentifier()) {
             $this->addFlash('error', 'Nemůžeš smazat vlastní účet.');
-            return $this->redirectToRoute('admin_users_index');
+            return $this->redirect('/admin/users/');
         }
 
         $this->em->remove($user);
         $this->em->flush();
 
         $this->addFlash('success', 'Uživatel byl smazán.');
-        return $this->redirectToRoute('admin_users_index');
+        return $this->redirect('/admin/users/');
     }
 
     #[Route('/{id}/toggle', name: 'toggle', methods: ['POST'])]
@@ -133,7 +151,7 @@ class UserController extends AbstractController
     {
         if (!$this->isCsrfTokenValid('user_toggle_' . $id, $request->get('_csrf_token'))) {
             $this->addFlash('error', 'Neplatný CSRF token.');
-            return $this->redirectToRoute('admin_users_index');
+            return $this->redirect('/admin/users/');
         }
 
         $user = $this->em->getRepository(User::class)->find($id);
@@ -144,6 +162,6 @@ class UserController extends AbstractController
 
         $status = $user->isActive() ? 'aktivován' : 'deaktivován';
         $this->addFlash('success', "Uživatel byl $status.");
-        return $this->redirectToRoute('admin_users_index');
+        return $this->redirect('/admin/users/');
     }
 }

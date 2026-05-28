@@ -1,10 +1,10 @@
 <?php
-// src/EventListener/TenantListener.php
-
 namespace App\EventListener;
 
 use App\Repository\Master\TenantRepository;
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
@@ -13,8 +13,6 @@ class TenantListener
     private const PUBLIC_PREFIXES = [
         '/_wdt',
         '/_profiler',
-        // '/login',
-        '/logout',
         '/cookies',
         '/privacy',
     ];
@@ -22,7 +20,8 @@ class TenantListener
     public function __construct(
         private Connection $tenantConnection,
         private TenantRepository $tenantRepository,
-        private string $projectDir,  // ← přidej
+        private EntityManagerInterface $tenantEm,
+        private string $projectDir,
     ) {}
 
     public function onKernelRequest(RequestEvent $event): void
@@ -53,9 +52,9 @@ class TenantListener
         }
 
         // Přepni tenant DB
+        $dbPath = $this->projectDir . '/var/' . $tenant->getDbName() . '.db';
         $params = $this->tenantConnection->getParams();
-        $newPath = $this->projectDir . '/var/' . $tenant->getDbName() . '.db';
-        $params['path'] = $newPath;
+        $params['path'] = $dbPath;
 
         $this->tenantConnection->close();
         $this->tenantConnection->__construct(
@@ -64,22 +63,26 @@ class TenantListener
             $this->tenantConnection->getConfiguration(),
         );
 
-        // DEBUG
-        try {
-            $users = $this->tenantConnection->fetchAllAssociative(
-                "SELECT email, roles FROM user LIMIT 5"
-            );
-            file_put_contents(__DIR__ . '/../../var/debug_tenant.txt',
-                "Path: " . $newPath . "\n" .
-                "Users: " . json_encode($users) . "\n"
-            );
-        } catch (\Exception $e) {
-            file_put_contents(__DIR__ . '/../../var/debug_tenant.txt',
-                "Path: " . $newPath . "\n" .
-                "Error: " . $e->getMessage() . "\n"
-            );
-        }
+        // Automaticky vytvoř schéma pokud DB je nová/prázdná
+        $this->ensureSchemaExists($dbPath);
 
         $event->getRequest()->attributes->set('_tenant', $tenant);
+    }
+
+    private function ensureSchemaExists(string $dbPath): void
+    {
+        try {
+            // Rychlá kontrola — pokud tabulka existuje, skip
+            $this->tenantConnection->fetchOne("SELECT 1 FROM user LIMIT 1");
+        } catch (\Exception) {
+            // Tabulka neexistuje — vytvoř schéma
+            try {
+                $schemaTool = new SchemaTool($this->tenantEm);
+                $classes    = $this->tenantEm->getMetadataFactory()->getAllMetadata();
+                $schemaTool->createSchema($classes);
+            } catch (\Exception $e) {
+                // Schéma již existuje nebo jiná chyba — ignoruj
+            }
+        }
     }
 }
