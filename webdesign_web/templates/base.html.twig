@@ -126,6 +126,10 @@
 
 
 <body class="bg-gray-50 font-sans antialiased">
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-[10001] space-y-3"></div>
+
 <!-- Top Navigation Bar -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
     <div class="flex items-center justify-between px-4 h-16">
@@ -387,101 +391,141 @@
 {% block javascript %}
 <script>
     (function() {
-    // Pomocná funkce pro zápis cookie
-    function setCookie(name, value, days) {
-        const expires = new Date(Date.now() + days * 864e5).toUTCString();
-        document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+        // Pomocná funkce pro zápis cookie
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+        }
+
+        // Pomocná funkce pro čtení cookie
+        function getCookie(name) {
+            return document.cookie.split('; ').reduce((acc, c) => {
+                const [k, v] = c.split('=');
+                return k === name ? decodeURIComponent(v) : acc;
+            }, null);
+        }
+
+        // Načti skripty podle souhlasu
+        function loadConsentedScripts(consentValue) {
+            const hasAnalytics  = consentValue.includes('analytics');
+            const hasMarketing  = consentValue.includes('marketing');
+
+            if (hasAnalytics) {
+                // Google Analytics — načte se až po souhlasu
+                const script = document.createElement('script');
+                script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+                script.async = true;
+                document.head.appendChild(script);
+
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-XXXXXXXXXX');
+            }
+
+            if (hasMarketing) {
+                // Marketingové skripty (Facebook Pixel atd.)
+                // fbq('init', 'PIXEL_ID');
+            }
+        }
+
+        const banner = document.getElementById('cookie-banner');
+        const modal  = document.getElementById('cookie-modal');
+        const existing = getCookie('wda_cookie_consent');
+
+        // Pokud souhlas již existuje — načti skripty okamžitě
+        if (existing) {
+            loadConsentedScripts(existing);
+            return;
+        }
+
+        if (banner) {
+            // Přijmout vše
+            document.getElementById('cookie-accept')?.addEventListener('click', () => {
+                setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+                loadConsentedScripts('necessary_analytics_marketing');
+                banner.remove();
+            });
+
+            // Odmítnout — pouze nezbytné
+            document.getElementById('cookie-reject')?.addEventListener('click', () => {
+                setCookie('wda_cookie_consent', 'necessary', 365);
+                banner.remove();
+            });
+
+            // Otevřít nastavení
+            document.getElementById('cookie-settings')?.addEventListener('click', () => {
+                if (modal) modal.classList.remove('hidden');
+            });
+        }
+
+        if (modal) {
+            // Zavřít modal
+            document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            // Uložit vlastní nastavení
+            document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+                const analytics = document.getElementById('toggle-analytics')?.checked;
+                const marketing = document.getElementById('toggle-marketing')?.checked;
+
+                const parts = ['necessary'];
+                if (analytics) parts.push('analytics');
+                if (marketing) parts.push('marketing');
+
+                const consentValue = parts.join('_');
+                setCookie('wda_cookie_consent', consentValue, 365);
+                loadConsentedScripts(consentValue);
+
+                modal.classList.add('hidden');
+                if (banner) banner.remove();
+            });
+
+            // Zavřít modal kliknutím mimo
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        }
+    })();
+
+    // --- Toast Notifikace ---
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+        const icon = type === 'success'
+            ? `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+            : `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+
+        toast.className = `flex items-center gap-4 p-4 rounded-lg shadow-lg text-white ${bgColor} transform transition-all duration-300 opacity-0 translate-x-10`;
+        toast.innerHTML = `
+            ${icon}
+            <span class="font-medium">${message}</span>
+        `;
+        container.appendChild(toast);
+
+        // Fade in
+        setTimeout(() => {
+            toast.classList.remove('opacity-0', 'translate-x-10');
+        }, 10);
+
+        // Fade out and remove
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+            toast.addEventListener('transitionend', () => toast.remove());
+        }, 4000);
     }
 
-    // Pomocná funkce pro čtení cookie
-    function getCookie(name) {
-    return document.cookie.split('; ').reduce((acc, c) => {
-    const [k, v] = c.split('=');
-    return k === name ? decodeURIComponent(v) : acc;
-}, null);
-}
-
-    // Načti skripty podle souhlasu
-    function loadConsentedScripts(consentValue) {
-    const hasAnalytics  = consentValue.includes('analytics');
-    const hasMarketing  = consentValue.includes('marketing');
-
-    if (hasAnalytics) {
-    // Google Analytics — načte se až po souhlasu
-    const script = document.createElement('script');
-    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
-    script.async = true;
-    document.head.appendChild(script);
-
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-}
-
-    if (hasMarketing) {
-    // Marketingové skripty (Facebook Pixel atd.)
-    // fbq('init', 'PIXEL_ID');
-}
-}
-
-    const banner = document.getElementById('cookie-banner');
-    const modal  = document.getElementById('cookie-modal');
-    const existing = getCookie('wda_cookie_consent');
-
-    // Pokud souhlas již existuje — načti skripty okamžitě
-    if (existing) {
-    loadConsentedScripts(existing);
-    return; // Banner se nezobrazí (Twig ho ani nevyrenderoval)
-}
-
-    if (!banner) return;
-
-    // Přijmout vše
-    document.getElementById('cookie-accept')?.addEventListener('click', () => {
-    setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
-    loadConsentedScripts('necessary_analytics_marketing');
-    banner.remove();
-});
-
-    // Odmítnout — pouze nezbytné
-    document.getElementById('cookie-reject')?.addEventListener('click', () => {
-    setCookie('wda_cookie_consent', 'necessary', 365);
-    banner.remove();
-});
-
-    // Otevřít nastavení
-    document.getElementById('cookie-settings')?.addEventListener('click', () => {
-    if (modal) modal.classList.remove('hidden');
-});
-
-    // Zavřít modal
-    document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
-    if (modal) modal.classList.add('hidden');
-});
-
-    // Uložit vlastní nastavení
-    document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
-    const analytics = document.getElementById('toggle-analytics')?.checked;
-    const marketing = document.getElementById('toggle-marketing')?.checked;
-
-    const parts = ['necessary'];
-    if (analytics) parts.push('analytics');
-    if (marketing) parts.push('marketing');
-
-    const consentValue = parts.join('_');
-    setCookie('wda_cookie_consent', consentValue, 365);
-    loadConsentedScripts(consentValue);
-
-    if (modal) modal.classList.add('hidden');
-    if (banner) banner.remove();
-});
-
-    // Zavřít modal kliknutím mimo
-    modal?.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.add('hidden');
-});
-})();
+    document.addEventListener('DOMContentLoaded', () => {
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                showToast("{{ message|e('js') }}", "{{ type }}");
+            {% endfor %}
+        {% endfor %}
+    });
 </script>
 {% endblock %}
 </body>

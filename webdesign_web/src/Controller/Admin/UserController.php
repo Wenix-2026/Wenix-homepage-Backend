@@ -4,6 +4,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Tenant\User;
+use App\Entity\Tenant\AuditLog;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +25,18 @@ class UserController extends AbstractController
     ) {
         // Tímto natvrdo řekneme, že chceme používat tenant připojení
         $this->em = $doctrine->getManager('tenant');
+    }
+
+    private function logAction(Request $request, string $action): void
+    {
+        $log = new AuditLog();
+        $user = $this->getUser();
+        $log->setUserEmail($user ? $user->getUserIdentifier() : 'Neznámý');
+        $log->setAction($action);
+        $log->setIpAddress($request->getClientIp());
+
+        $this->em->persist($log);
+        $this->em->flush();
     }
 
     #[Route('/', name: 'index')]
@@ -50,8 +63,8 @@ class UserController extends AbstractController
                 $this->addFlash('error', 'Neplatný CSRF token.');
                 return $this->redirect('/admin/users/');
             } else {
-                $existing = $this->em->getRepository(User::class)
-                    ->findOneBy(['email' => $request->get('email')]);
+                $email = $request->get('email');
+                $existing = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
 
                 if ($existing) {
                     $this->addFlash('error', 'Uživatel s tímto emailem již existuje.');
@@ -61,7 +74,7 @@ class UserController extends AbstractController
                     return $this->redirect('/admin/users/');
                 } else {
                     $user = new User();
-                    $user->setEmail($request->get('email'));
+                    $user->setEmail($email);
                     $user->setName($request->get('name'));
                     $user->setRoles([$request->get('role', 'ROLE_USER')]);
                     $user->setPassword(
@@ -74,6 +87,8 @@ class UserController extends AbstractController
 
                     $this->em->persist($user);
                     $this->em->flush();
+
+                    $this->logAction($request, "Vytvořen nový uživatel: $email");
 
                     $this->addFlash('success', 'Uživatel byl úspěšně vytvořen.');
                     return $this->redirect('/admin/users/');
@@ -113,6 +128,7 @@ class UserController extends AbstractController
 
                 if (!$errorHappened) {
                     $this->em->flush();
+                    $this->logAction($request, "Upraven uživatel: {$user->getEmail()}");
                     $this->addFlash('success', 'Uživatel byl upraven.');
                 }
 
@@ -131,6 +147,12 @@ class UserController extends AbstractController
             return $this->redirect('/admin/users/');
         }
 
+        $sudoPassword = $request->get('sudo_password');
+        if (!$sudoPassword || !$this->passwordHasher->isPasswordValid($this->getUser(), $sudoPassword)) {
+            $this->addFlash('error', 'Neplatné heslo administrátora. Uživatel nebyl smazán.');
+            return $this->redirect('/admin/users/');
+        }
+
         $user = $this->em->getRepository(User::class)->find($id);
         if (!$user) throw $this->createNotFoundException();
 
@@ -139,8 +161,11 @@ class UserController extends AbstractController
             return $this->redirect('/admin/users/');
         }
 
+        $email = $user->getEmail();
         $this->em->remove($user);
         $this->em->flush();
+
+        $this->logAction($request, "Smazán uživatel: $email");
 
         $this->addFlash('success', 'Uživatel byl smazán.');
         return $this->redirect('/admin/users/');
@@ -160,8 +185,11 @@ class UserController extends AbstractController
         $user->setActive(!$user->isActive());
         $this->em->flush();
 
-        $status = $user->isActive() ? 'aktivován' : 'deaktivován';
-        $this->addFlash('success', "Uživatel byl $status.");
+        $statusText = $user->isActive() ? 'aktivní' : 'neaktivní';
+        $this->logAction($request, "Změněn stav uživatele {$user->getEmail()} na $statusText");
+
+        $statusFlash = $user->isActive() ? 'aktivován' : 'deaktivován';
+        $this->addFlash('success', "Uživatel byl $statusFlash.");
         return $this->redirect('/admin/users/');
     }
 }
