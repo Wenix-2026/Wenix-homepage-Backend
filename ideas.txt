@@ -18,6 +18,9 @@ Zabezpečení a správa uživatelů
 
     CSRF ochrana formulářů: Ověřit, že všechny formuláře v administraci (včetně asynchronních požadavků přes popup okna) obsahují a validují CSRF token.
 
+Světlejší pozadí,
+Sekce kariéra.
+
 Klientská část a e-commerce logika
 
     Výpis produktů na hlavní stránce: Propojit kontroler s ProductRepository a předat pole aktivních produktů do Twig šablony pro zobrazení v mřížce.
@@ -45,3 +48,5 @@ Optimalizace a údržba vývojového prostředí
     Konfigurace šablony prostředí: Připravit vzorový soubor .env.dist s popisem potřebných proměnných, aby bylo snazší projekt zprovoznit na jiných zařízeních.
 
     Kontrola databázových dotazů: Využít Symfony Profiler ke kontrole počtu prováděných SQL dotazů na stránku, aby se eliminoval problém efektivity n+1 dotazů při výpisu produktů.
+
+
