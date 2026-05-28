@@ -344,6 +344,162 @@
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
     </style>
 </head>
+
+
+{# ═══ COOKIE LIŠTA ═══ #}
+{% if not app.request.cookies.has('wda_cookie_consent') %}
+    <div id="cookie-banner"
+         style="z-index:99999"
+         class="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-4 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <p class="text-sm text-gray-400 leading-relaxed flex-1">
+                Používáme cookies ke zlepšení vašeho zážitku a analýze návštěvnosti.
+                <a href="{{ path('app_cookie_policy') }}" class="text-white underline underline-offset-2 hover:text-gray-300 transition-colors">
+                    Více informací
+                </a>
+            </p>
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <button id="cookie-reject"
+                        class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-white border border-white/20 hover:border-white/40 rounded-lg transition-colors">
+                    Odmítnout
+                </button>
+                <button id="cookie-settings-btn"
+                        class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-white/30 hover:border-white/50 rounded-lg transition-colors">
+                    Nastavení
+                </button>
+                <button id="cookie-accept"
+                        class="px-4 py-2 text-sm font-medium text-white bg-white/15 hover:bg-white/25 border border-white/20 rounded-lg transition-colors backdrop-blur-sm">
+                    Přijmout vše
+                </button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{# ═══ COOKIE MODAL ═══ #}
+<div id="cookie-modal"
+     style="z-index:100000"
+     class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg p-6">
+        <h2 class="text-lg font-semibold text-white mb-5">Nastavení cookies</h2>
+        <div class="space-y-3 mb-6">
+
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Nezbytné cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Nutné pro fungování webu.</p>
+                </div>
+                <span class="text-xs text-emerald-400 font-medium">Vždy aktivní</span>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Analytické cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Pomáhají nám pochopit návštěvnost.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-analytics" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors
+                                after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                                after:bg-black after:rounded-full after:w-4 after:h-4
+                                after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Marketingové cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Cílená reklama a personalizace.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-marketing" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors
+                                after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                                after:bg-black after:rounded-full after:w-4 after:h-4
+                                after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+
+        </div>
+        <div class="flex gap-3">
+            <button id="cookie-save-settings"
+                    class="flex-1 py-2 text-sm font-medium text-black bg-white hover:bg-gray-100 rounded-lg transition-colors">
+                Uložit nastavení
+            </button>
+            <button id="cookie-modal-close"
+                    class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white border border-white/20 rounded-lg transition-colors">
+                Zavřít
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+        }
+
+        function loadConsentedScripts(consent) {
+            if (consent.includes('analytics')) {
+                // Google Analytics zde
+            }
+            if (consent.includes('marketing')) {
+                // Facebook Pixel zde
+            }
+        }
+
+        const existing = document.cookie.split('; ')
+            .find(c => c.startsWith('wda_cookie_consent='))
+            ?.split('=')[1];
+
+        if (existing) {
+            loadConsentedScripts(decodeURIComponent(existing));
+            return;
+        }
+
+        const banner = document.getElementById('cookie-banner');
+        const modal  = document.getElementById('cookie-modal');
+        if (!banner) return;
+
+        document.getElementById('cookie-accept')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+            loadConsentedScripts('necessary_analytics_marketing');
+            banner.remove();
+        });
+
+        document.getElementById('cookie-reject')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary', 365);
+            banner.remove();
+        });
+
+        document.getElementById('cookie-settings-btn')?.addEventListener('click', () => {
+            modal?.classList.remove('hidden');
+        });
+
+        document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+            modal?.classList.add('hidden');
+        });
+
+        document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+            const parts = ['necessary'];
+            if (document.getElementById('toggle-analytics')?.checked) parts.push('analytics');
+            if (document.getElementById('toggle-marketing')?.checked) parts.push('marketing');
+            const val = parts.join('_');
+            setCookie('wda_cookie_consent', val, 365);
+            loadConsentedScripts(val);
+            modal?.classList.add('hidden');
+            banner?.remove();
+        });
+
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+    })();
+</script>
+
+
 <body>
 
 {# ════════════════════════════════ HEADER ════════════════════════════════ #}
@@ -609,6 +765,8 @@
                     <h4>Systém</h4>
                     <ul>
                         <li><a href="#contact">Kontakt</a></li>
+                        <li><a href="/cookies" class="text-white underline ...">Více informací</a></li>
+                        <li><a href="/privacy" class="text-white/60 hover:text-white underline ...">Ochrana údajů</a></li>
                         <li><a href="{{ path('app_home_index') }}"><i class="bx bx-lock-alt text-xs mr-1"></i>Administrace</a></li>
                     </ul>
                 </div>

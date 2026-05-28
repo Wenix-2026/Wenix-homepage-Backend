@@ -1,0 +1,42 @@
+{# templates/front_layout.html.twig #}
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WDA{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
+    </style>
+    {% block styles %}{% endblock %}
+</head>
+<body class="bg-black text-white min-h-screen">
+
+{# Jednoduchá navigace zpět #}
+<header class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-lg border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="{{ path('app_front_home') }}"
+           class="font-bebas text-2xl text-white hover:text-gray-300 transition-colors">
+            WDA
+        </a>
+        <a href="{{ path('app_front_home') }}"
+           class="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Zpět na web
+        </a>
+    </div>
+</header>
+
+<div class="pt-16">
+    {% block body %}{% endblock %}
+</div>
+
+{% block javascript %}{% endblock %}
+</body>
+</html>

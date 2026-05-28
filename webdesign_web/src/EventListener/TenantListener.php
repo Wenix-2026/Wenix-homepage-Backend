@@ -15,6 +15,8 @@ class TenantListener
         '/_profiler',
         // '/login',
         '/logout',
+        '/cookies',
+        '/privacy',
     ];
 
     public function __construct(

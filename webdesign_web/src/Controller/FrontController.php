@@ -15,4 +15,16 @@ class FrontController extends AbstractController
     {
         return $this->render('front/home.html.twig');
     }
+
+    #[Route('/cookies', name: 'app_cookie_policy')]
+    public function cookiePolicy(): Response
+    {
+        return $this->render('front/cookies.html.twig');
+    }
+
+    #[Route('/privacy', name: 'app_privacy_policy')]
+    public function privacyPolicy(): Response
+    {
+        return $this->render('front/privacy.html.twig');
+    }
 }

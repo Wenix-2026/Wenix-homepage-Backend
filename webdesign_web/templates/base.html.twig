@@ -8,7 +8,123 @@
     {% set active_category_id = app.active_category_id ?? 1 %}
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel="stylesheet">
     {% block styles %}{% endblock %}
+
+    {# V <head> sekci base.html.twig #}
+    {% set consent = app.request.cookies.get('wda_cookie_consent', '') %}
+
+    {% if 'analytics' in consent %}
+        {# Google Analytics — pouze pokud souhlas existuje v cookie #}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XXXXXXXXXX');
+        </script>
+    {% endif %}
+
+    {% if 'marketing' in consent %}
+        {# Facebook Pixel nebo jiné marketingové skripty #}
+    {% endif %}
 </head>
+
+{# Cookie lišta — zobrazí se jen pokud souhlas ještě nebyl udělen #}
+{% if not app.request.cookies.has('wda_cookie_consent') %}
+    <div id="cookie-banner"
+         class="fixed bottom-0 left-0 right-0 z-[9999] bg-gray-950 border-t border-gray-800 px-4 py-4 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+            <div class="flex-1">
+                <p class="text-sm text-gray-300 leading-relaxed">
+                    Používáme cookies ke zlepšení vašeho zážitku, analýze návštěvnosti a marketingovým účelům.
+                    <a href="/cookies" class="text-indigo-400 hover:text-indigo-300 underline underline-offset-2 transition-colors">
+                        Více informací
+                    </a>
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3 flex-shrink-0">
+                <button id="cookie-reject"
+                        class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded-lg transition-colors">
+                    Odmítnout
+                </button>
+                <button id="cookie-settings"
+                        class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-gray-600 hover:border-gray-400 rounded-lg transition-colors">
+                    Nastavení
+                </button>
+                <button id="cookie-accept"
+                        class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors">
+                    Přijmout vše
+                </button>
+            </div>
+
+        </div>
+    </div>
+{% endif %}
+
+{# Nastavení cookies — modal #}
+<div id="cookie-modal"
+     class="hidden fixed inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-lg p-6">
+        <h2 class="text-lg font-bold text-white mb-4">Nastavení cookies</h2>
+
+        <div class="space-y-4 mb-6">
+
+            {# Nezbytné — vždy zapnuto #}
+            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-white">Nezbytné cookies</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Nutné pro fungování webu, nelze vypnout.</p>
+                </div>
+                <span class="text-xs text-green-400 font-medium">Vždy aktivní</span>
+            </div>
+
+            {# Analytické #}
+            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-white">Analytické cookies</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Pomáhají nám pochopit, jak web používáte.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-analytics" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-gray-600 peer-checked:bg-indigo-600 rounded-full transition-colors
+                                after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                                after:bg-white after:rounded-full after:w-4 after:h-4
+                                after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+
+            {# Marketingové #}
+            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-white">Marketingové cookies</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Slouží k cílené reklamě a personalizaci.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-marketing" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-gray-600 peer-checked:bg-indigo-600 rounded-full transition-colors
+                                after:content-[''] after:absolute after:top-0.5 after:left-0.5
+                                after:bg-white after:rounded-full after:w-4 after:h-4
+                                after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+
+        </div>
+
+        <div class="flex gap-3">
+            <button id="cookie-save-settings"
+                    class="flex-1 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors">
+                Uložit nastavení
+            </button>
+            <button id="cookie-modal-close"
+                    class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white border border-gray-700 rounded-lg transition-colors">
+                Zavřít
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <body class="bg-gray-50 font-sans antialiased">
 <!-- Top Navigation Bar -->
 <header class="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b border-gray-200">
@@ -274,14 +390,113 @@
                 <p>&copy; 2026 E-shop Platform. Všechna práva vyhrazena.</p>
                 <div class="flex items-center gap-4">
                     <a href="#" class="hover:text-gray-700 transition-colors">Podpora</a>
-                    <a href="#" class="hover:text-gray-700 transition-colors">Privacy</a>
-                    <a href="#" class="hover:text-gray-700 transition-colors">Podmínky</a>
+                    <a href="{{ path('app_privacy_policy') }}" class="hover:text-gray-700 transition-colors">Privacy</a>
+                    <a href="{{ path('app_cookie_policy') }}" class="hover:text-gray-700 transition-colors">Podmínky</a>
                 </div>
             </div>
         </footer>
     </main>
 </div>
 
-{% block javascript %}{% endblock %}
+{% block javascript %}
+<script>
+    (function() {
+    // Pomocná funkce pro zápis cookie
+    function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+    }
+
+    // Pomocná funkce pro čtení cookie
+    function getCookie(name) {
+    return document.cookie.split('; ').reduce((acc, c) => {
+    const [k, v] = c.split('=');
+    return k === name ? decodeURIComponent(v) : acc;
+}, null);
+}
+
+    // Načti skripty podle souhlasu
+    function loadConsentedScripts(consentValue) {
+    const hasAnalytics  = consentValue.includes('analytics');
+    const hasMarketing  = consentValue.includes('marketing');
+
+    if (hasAnalytics) {
+    // Google Analytics — načte se až po souhlasu
+    const script = document.createElement('script');
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+    script.async = true;
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+}
+
+    if (hasMarketing) {
+    // Marketingové skripty (Facebook Pixel atd.)
+    // fbq('init', 'PIXEL_ID');
+}
+}
+
+    const banner = document.getElementById('cookie-banner');
+    const modal  = document.getElementById('cookie-modal');
+    const existing = getCookie('wda_cookie_consent');
+
+    // Pokud souhlas již existuje — načti skripty okamžitě
+    if (existing) {
+    loadConsentedScripts(existing);
+    return; // Banner se nezobrazí (Twig ho ani nevyrenderoval)
+}
+
+    if (!banner) return;
+
+    // Přijmout vše
+    document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+    loadConsentedScripts('necessary_analytics_marketing');
+    banner.remove();
+});
+
+    // Odmítnout — pouze nezbytné
+    document.getElementById('cookie-reject')?.addEventListener('click', () => {
+    setCookie('wda_cookie_consent', 'necessary', 365);
+    banner.remove();
+});
+
+    // Otevřít nastavení
+    document.getElementById('cookie-settings')?.addEventListener('click', () => {
+    if (modal) modal.classList.remove('hidden');
+});
+
+    // Zavřít modal
+    document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+    if (modal) modal.classList.add('hidden');
+});
+
+    // Uložit vlastní nastavení
+    document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+    const analytics = document.getElementById('toggle-analytics')?.checked;
+    const marketing = document.getElementById('toggle-marketing')?.checked;
+
+    const parts = ['necessary'];
+    if (analytics) parts.push('analytics');
+    if (marketing) parts.push('marketing');
+
+    const consentValue = parts.join('_');
+    setCookie('wda_cookie_consent', consentValue, 365);
+    loadConsentedScripts(consentValue);
+
+    if (modal) modal.classList.add('hidden');
+    if (banner) banner.remove();
+});
+
+    // Zavřít modal kliknutím mimo
+    modal?.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+});
+})();
+</script>
+{% endblock %}
 </body>
 </html>

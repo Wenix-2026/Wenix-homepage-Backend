@@ -54,4 +54,6 @@ class HomeController extends AbstractController
         // ... toto klidně může zůstat stejné jako doteď ...
         return $this->json([]);
     }
+
+
 }

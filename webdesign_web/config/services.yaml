@@ -30,3 +30,9 @@ services:
             $projectDir: '%kernel.project_dir%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, priority: 255 }
+    App\Controller\Api\SuperadminController:
+        arguments:
+            $superadminToken: '%env(SUPERADMIN_API_TOKEN)%'
+    App\EventListener\AdminEnabledListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 100 }
