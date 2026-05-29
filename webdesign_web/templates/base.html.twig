@@ -124,8 +124,8 @@
     </div>
 </div>
 
-
-<body class="bg-gray-50 font-sans antialiased">
+{# ÚPRAVA: Přidán sloupeček flex a minimální výška okna, aby footer držel dole #}
+<body class="bg-gray-50 font-sans antialiased flex flex-col min-h-screen">
 
 <!-- Toast Container -->
 <div id="toast-container" class="fixed top-5 right-5 z-[10001] space-y-3"></div>
@@ -187,7 +187,6 @@
         </nav>
 
         <!-- Right Side Links -->
-        <!-- Right Side Links -->
         <div class="flex items-center gap-4">
             <a href="http://localhost:8000"
                class="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors hidden sm:block">
@@ -196,9 +195,9 @@
 
             {% if app.user %}
                 <div class="flex items-center gap-3">
-            <span class="text-sm text-gray-600 hidden sm:block">
-                {{ app.user.email }}
-            </span>
+                    <span class="text-sm text-gray-600 hidden sm:block">
+                        {{ app.user.email }}
+                    </span>
                     <a href="{{ path('app_logout') }}"
                        class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,7 +213,8 @@
 </header>
 
 <!-- Main Layout Container -->
-<div class="flex pt-16 h-screen">
+{# ÚPRAVA: Odebráno h-screen, nahrazeno flex-grow a min-h-0, aby se kontejner choval flexibilně #}
+<div class="flex pt-16 flex-grow min-h-0">
     <!-- Sidebar -->
     <aside class="w-64 bg-gray-900 text-gray-300 flex-shrink-0 hidden lg:block">
         <!-- Sidebar Header -->
@@ -231,11 +231,6 @@
                 <svg class="absolute left-3 top-2.5 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
-                <button class="absolute right-2 top-1.5 p-1 text-gray-500 hover:text-white transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                </button>
             </div>
         </div>
 
@@ -265,12 +260,6 @@
                                 <p class="text-sm truncate">{{ module.name }}</p>
                                 <p class="text-xs text-gray-600 truncate">{{ module.description|slice(0, 50) }}</p>
                             </div>
-                            <button class="text-gray-600 hover:text-indigo-400 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                </svg>
-                            </button>
                         </a>
                     {% endfor %}
                 </div>
@@ -280,7 +269,6 @@
         <div class="p-4 border-t border-gray-800">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold uppercase">
-                    {# Vytáhneme první dvě písmena z mailu jako iniciály #}
                     {{ app.user ? app.user.email|slice(0, 2) : 'AD' }}
                 </div>
                 <div class="flex-1 min-w-0">
@@ -305,8 +293,8 @@
     </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto">
-        <div class="lg:hidden sticky top-0 z-40 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
+    <main class="flex-1 flex flex-col">
+        <div class="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,69 +310,72 @@
             </button>
         </div>
 
-        {# TADY ZAČÍNÁ ÚPRAVA: Všechno schováme pod blok 'content' #}
-        {% block content %}
-            <section class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-6 py-8">
-                <div class="max-w-7xl mx-auto">
-                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
-                        Rozšiřte své možnosti díky dalším modulům
-                    </h2>
-                    <p class="text-indigo-100 text-sm md:text-base max-w-3xl">
-                        Prozkoumejte naše kategorie a objevte funkcionality, které váš e-shop učiní ještě výkonnějším.
-                        Aktivujte moduly podle svých potřeb a zvyšte konkurenceschopnost.
-                    </p>
-                </div>
-            </section>
-
-            <section class="px-6 py-6">
-                <div class="max-w-7xl mx-auto">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Kategorie</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {% for category in categories|default([]) %}
-                            <a href="{{ path('app_home_index', {'active_category_id': category.id}) }}" class="group flex flex-col items-center p-6 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all duration-200 {% if category.id == app.active_category_id ?? null %}ring-2 ring-indigo-500{% endif %}">
-                                <div class="w-16 h-16 mb-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:from-indigo-50 group-hover:to-purple-50 transition-colors">
-                                    <i class="{{ category.icon_class|default('bx bx-box') }}"></i>
-                                </div>
-                                <h4 class="text-base font-medium text-gray-900 text-center mb-1">{{ category.name }}</h4>
-                                <span class="text-sm text-gray-500">{{ category.total_count|default(0) }} modulů</span>
-                            </a>
-                        {% endfor %}
+        {# ÚPRAVA: Obalový div obsahu bloku dostane flex-grow, aby vyplnil prostor a odtlačil patku dolů #}
+        <div class="flex-grow">
+            {% block content %}
+                <section class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 px-6 py-8">
+                    <div class="max-w-7xl mx-auto">
+                        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">
+                            Rozšiřte své možnosti díky dalším modulům
+                        </h2>
+                        <p class="text-indigo-100 text-sm md:text-base max-w-3xl">
+                            Prozkoumejte naše kategorie a objevte funkcionality, které váš e-shop učiní ještě výkonnějším.
+                            Aktivujte moduly podle svých potřeb a zvyšte konkurenceschopnost.
+                        </p>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <section class="px-6 py-6 pb-8">
-                <div class="max-w-7xl mx-auto">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Doporučujeme</h3>
-                        <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
-                            Zobrazit všechny
-                        </a>
-                    </div>
-
-                    <div class="space-y-3">
-                        {% for module in recommended_modules|default([]) %}
-                            <div class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-sm transition-all duration-200 group {% if not module.is_active|default(true) %}opacity-75{% endif %}">
-                                <div class="flex-shrink-0 w-12 h-12 rounded-lg {% if module.badge_class %}{{ module.badge_class }}{% else %}bg-gray-100{% endif %} flex items-center justify-center">
-                                    <i class="{{ module.icon_class|default('bx bx-box') }}"></i>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <h4 class="text-base font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                            {{ module.name }}
-                                        </h4>
+                <section class="px-6 py-6">
+                    <div class="max-w-7xl mx-auto">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Kategorie</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {% for category in categories|default([]) %}
+                                <a href="{{ path('app_home_index', {'active_category_id': category.id}) }}" class="group flex flex-col items-center p-6 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all duration-200 {% if category.id == app.active_category_id ?? null %}ring-2 ring-indigo-500{% endif %}">
+                                    <div class="w-16 h-16 mb-4 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:from-indigo-50 group-hover:to-purple-50 transition-colors">
+                                        <i class="{{ category.icon_class|default('bx bx-box') }}"></i>
                                     </div>
-                                    <p class="text-sm text-gray-600">{{ module.description }}</p>
-                                </div>
-                            </div>
-                        {% endfor %}
+                                    <h4 class="text-base font-medium text-gray-900 text-center mb-1">{{ category.name }}</h4>
+                                    <span class="text-sm text-gray-500">{{ category.total_count|default(0) }} modulů</span>
+                                </a>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            </section>
-        {% endblock %}
+                </section>
 
-        <!-- Footer (optional) -->
-        <footer class="px-6 py-4 bg-gray-50 border-t border-gray-200">
+                <section class="px-6 py-6 pb-8">
+                    <div class="max-w-7xl mx-auto">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-800">Doporučujeme</h3>
+                            <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+                                Zobrazit všechny
+                            </a>
+                        </div>
+
+                        <div class="space-y-3">
+                            {% for module in recommended_modules|default([]) %}
+                                <div class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-sm transition-all duration-200 group {% if not module.is_active|default(true) %}opacity-75{% endif %}">
+                                    <div class="flex-shrink-0 w-12 h-12 rounded-lg {% if module.badge_class %}{{ module.badge_class }}{% else %}bg-gray-100{% endif %} flex items-center justify-center">
+                                        <i class="{{ module.icon_class|default('bx bx-box') }}"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h4 class="text-base font-medium text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                                {{ module.name }}
+                                            </h4>
+                                        </div>
+                                        <p class="text-sm text-gray-600">{{ module.description }}</p>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </section>
+            {% endblock %}
+        </div>
+
+        <!-- Footer -->
+        {# ÚPRAVA: Přidán mt-auto, aby se patka vždy odrazila na úplný konec #}
+        <footer class="px-6 py-4 bg-gray-50 border-t border-gray-200 mt-auto">
             <div class="max-w-7xl mx-auto flex items-center justify-between text-sm text-gray-500">
                 <p>&copy; 2026 E-shop Platform. Všechna práva vyhrazena.</p>
                 <div class="flex items-center gap-4">
@@ -400,141 +391,130 @@
 {% block javascript %}
 <script>
     (function() {
-        // Pomocná funkce pro zápis cookie
-        function setCookie(name, value, days) {
-            const expires = new Date(Date.now() + days * 864e5).toUTCString();
-            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
-        }
+    // Pomocná funkce pro zápis cookie
+    function setCookie(name, value, days) {
+        const expires = new Date(Date.now() + days * 864e5).toUTCString();
+        document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+    }
 
-        // Pomocná funkce pro čtení cookie
-        function getCookie(name) {
-            return document.cookie.split('; ').reduce((acc, c) => {
-                const [k, v] = c.split('=');
-                return k === name ? decodeURIComponent(v) : acc;
-            }, null);
-        }
+    // Pomocná funkce pro čtení cookie
+    function getCookie(name) {
+    return document.cookie.split('; ').reduce((acc, c) => {
+    const [k, v] = c.split('=');
+    return k === name ? decodeURIComponent(v) : acc;
+}, null);
+}
 
-        // Načti skripty podle souhlasu
-        function loadConsentedScripts(consentValue) {
-            const hasAnalytics  = consentValue.includes('analytics');
-            const hasMarketing  = consentValue.includes('marketing');
+    // Načti skripty podle souhlasu
+    function loadConsentedScripts(consentValue) {
+    const hasAnalytics  = consentValue.includes('analytics');
+    const hasMarketing  = consentValue.includes('marketing');
 
-            if (hasAnalytics) {
-                // Google Analytics — načte se až po souhlasu
-                const script = document.createElement('script');
-                script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
-                script.async = true;
-                document.head.appendChild(script);
+    if (hasAnalytics) {
+    const script = document.createElement('script');
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+    script.async = true;
+    document.head.appendChild(script);
 
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', 'G-XXXXXXXXXX');
-            }
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+}
 
-            if (hasMarketing) {
-                // Marketingové skripty (Facebook Pixel atd.)
-                // fbq('init', 'PIXEL_ID');
-            }
-        }
+    if (hasMarketing) {
+    // fbq('init', 'PIXEL_ID');
+}
+}
 
-        const banner = document.getElementById('cookie-banner');
-        const modal  = document.getElementById('cookie-modal');
-        const existing = getCookie('wda_cookie_consent');
+    const banner = document.getElementById('cookie-banner');
+    const modal  = document.getElementById('cookie-modal');
+    const existing = getCookie('wda_cookie_consent');
 
-        // Pokud souhlas již existuje — načti skripty okamžitě
-        if (existing) {
-            loadConsentedScripts(existing);
-            return;
-        }
+    if (existing) {
+    loadConsentedScripts(existing);
+    return;
+}
 
-        if (banner) {
-            // Přijmout vše
-            document.getElementById('cookie-accept')?.addEventListener('click', () => {
-                setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
-                loadConsentedScripts('necessary_analytics_marketing');
-                banner.remove();
-            });
+    if (banner) {
+    document.getElementById('cookie-accept')?.addEventListener('click', () => {
+    setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+    loadConsentedScripts('necessary_analytics_marketing');
+    banner.remove();
+});
 
-            // Odmítnout — pouze nezbytné
-            document.getElementById('cookie-reject')?.addEventListener('click', () => {
-                setCookie('wda_cookie_consent', 'necessary', 365);
-                banner.remove();
-            });
+    document.getElementById('cookie-reject')?.addEventListener('click', () => {
+    setCookie('wda_cookie_consent', 'necessary', 365);
+    banner.remove();
+});
 
-            // Otevřít nastavení
-            document.getElementById('cookie-settings')?.addEventListener('click', () => {
-                if (modal) modal.classList.remove('hidden');
-            });
-        }
+    document.getElementById('cookie-settings')?.addEventListener('click', () => {
+    if (modal) modal.classList.remove('hidden');
+});
+}
 
-        if (modal) {
-            // Zavřít modal
-            document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
+    if (modal) {
+    document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
 
-            // Uložit vlastní nastavení
-            document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
-                const analytics = document.getElementById('toggle-analytics')?.checked;
-                const marketing = document.getElementById('toggle-marketing')?.checked;
+    document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+    const analytics = document.getElementById('toggle-analytics')?.checked;
+    const marketing = document.getElementById('toggle-marketing')?.checked;
 
-                const parts = ['necessary'];
-                if (analytics) parts.push('analytics');
-                if (marketing) parts.push('marketing');
+    const parts = ['necessary'];
+    if (analytics) parts.push('analytics');
+    if (marketing) parts.push('marketing');
 
-                const consentValue = parts.join('_');
-                setCookie('wda_cookie_consent', consentValue, 365);
-                loadConsentedScripts(consentValue);
+    const consentValue = parts.join('_');
+    setCookie('wda_cookie_consent', consentValue, 365);
+    loadConsentedScripts(consentValue);
 
-                modal.classList.add('hidden');
-                if (banner) banner.remove();
-            });
+    modal.classList.add('hidden');
+    if (banner) banner.remove();
+});
 
-            // Zavřít modal kliknutím mimo
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) modal.classList.add('hidden');
-            });
-        }
-    })();
+    modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
+});
+}
+})();
 
     // --- Toast Notifikace ---
     function showToast(message, type = 'success') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
+    const container = document.getElementById('toast-container');
+    if (!container) return;
 
-        const toast = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-        const icon = type === 'success'
-            ? `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
-            : `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
+    const toast = document.createElement('div');
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    const icon = type === 'success'
+    ? `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+    : `<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`;
 
-        toast.className = `flex items-center gap-4 p-4 rounded-lg shadow-lg text-white ${bgColor} transform transition-all duration-300 opacity-0 translate-x-10`;
-        toast.innerHTML = `
+    toast.className = `flex items-center gap-4 p-4 rounded-lg shadow-lg text-white ${bgColor} transform transition-all duration-300 opacity-0 translate-x-10`;
+    toast.innerHTML = `
             ${icon}
             <span class="font-medium">${message}</span>
         `;
-        container.appendChild(toast);
+    container.appendChild(toast);
 
-        // Fade in
-        setTimeout(() => {
-            toast.classList.remove('opacity-0', 'translate-x-10');
-        }, 10);
+    setTimeout(() => {
+    toast.classList.remove('opacity-0', 'translate-x-10');
+}, 10);
 
-        // Fade out and remove
-        setTimeout(() => {
-            toast.classList.add('opacity-0');
-            toast.addEventListener('transitionend', () => toast.remove());
-        }, 4000);
-    }
+    setTimeout(() => {
+    toast.classList.add('opacity-0');
+    toast.addEventListener('transitionend', () => toast.remove());
+}, 4000);
+}
 
     document.addEventListener('DOMContentLoaded', () => {
-        {% for type, messages in app.flashes %}
-            {% for message in messages %}
-                showToast("{{ message|e('js') }}", "{{ type }}");
-            {% endfor %}
-        {% endfor %}
-    });
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        showToast("{{ message|e('js') }}", "{{ type }}");
+    {% endfor %}
+{% endfor %}
+});
 </script>
 {% endblock %}
 </body>
