@@ -154,6 +154,14 @@
                class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') starts with 'admin_users_' %}bg-indigo-600 text-white{% endif %}">
                 Uživatelé
             </a>
+            <a href="{{ path('admin_eshops_index') }}"
+               class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') starts with 'admin_eshops_' %}bg-indigo-600 text-white{% endif %}">
+                E-shopy
+            </a>
+            <a href="{{ path('admin_support_index') }}"
+               class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') starts with 'admin_support_' %}bg-indigo-600 text-white{% endif %}">
+                Podpora
+            </a>
 
             <a href="{{ path('app_products_index') }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors {% if app.request.attributes.get('_route') == 'app_products_index' %}bg-indigo-600 text-white{% endif %}">
                 Zboží
@@ -277,18 +285,19 @@
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-sm font-medium text-white truncate">
-                        {% if app.user %}
-                            {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
-                                Superadmin
-                            {% else %}
-                                Administrátor
-                            {% endif %}
-                        {% else %}
-                            Host
-                        {% endif %}
+                        {{ app.user.name ?? app.user.email }}
                     </p>
                     <p class="text-xs text-gray-500 truncate">
-                        {{ app.user ? app.user.email : 'nepřihlášen' }}
+                        {{ app.user.email }}
+                    </p>
+                    <p class="mt-0.5">
+                        {% if 'ROLE_SUPER_ADMIN' in app.user.roles %}
+                            <span class="text-xs text-purple-400 font-medium">Superadmin</span>
+                        {% elseif 'ROLE_ADMIN' in app.user.roles %}
+                            <span class="text-xs text-indigo-400 font-medium">Admin</span>
+                        {% else %}
+                            <span class="text-xs text-gray-500 font-medium">Uživatel</span>
+                        {% endif %}
                     </p>
                 </div>
             </div>

@@ -434,6 +434,63 @@
     </div>
 </div>
 
+
+{# ═══ MODAL: Žádost o podporu ═══ #}
+<div id="modal-zadost"
+     style="z-index:99998"
+     class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg p-6">
+        <div class="flex items-center justify-between mb-5">
+            <h2 class="font-bebas text-2xl text-white tracking-wide">Nová žádost</h2>
+            <button onclick="document.getElementById('modal-zadost').classList.add('hidden')"
+                    class="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <form id="form-zadost" class="space-y-4">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('ticket_new') }}">
+            <input type="hidden" name="type" value="Žádost">
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Kategorie</label>
+                <select name="category" required
+                        class="w-full px-4 py-2.5 text-sm border border-white/15 bg-[#1a1a1a] text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 transition appearance-none">
+                    <option value="" class="bg-[#1a1a1a] text-white">— Vyberte kategorii —</option>
+                    <option value="Nový web" class="bg-[#1a1a1a] text-white">Nový web</option>
+                    <option value="Úprava webu" class="bg-[#1a1a1a] text-white">Úprava webu</option>
+                    <option value="Jiné" class="bg-[#1a1a1a] text-white">Jiné</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1">Zpráva <span class="text-red-400">*</span></label>
+                <textarea name="message" required rows="4"
+                          placeholder="Popište váš požadavek..."
+                          class="w-full px-4 py-2.5 text-sm border border-white/15 bg-[#1a1a1a] text-white placeholder-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/30 transition resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="button"
+                        onclick="document.getElementById('modal-zadost').classList.add('hidden')"
+                        class="flex-1 py-2.5 text-sm font-medium text-gray-400 border border-white/15 hover:bg-white/5 rounded-lg transition-colors">
+                    Zrušit
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 text-sm font-medium text-black bg-white hover:bg-gray-100 rounded-lg transition-colors">
+                    Odeslat žádost
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+
+
 <script>
     (function() {
         function setCookie(name, value, days) {
@@ -535,6 +592,10 @@
         <a href="#about" class="menu-link">O NÁS</a>
         <a href="#kariera" class="menu-link">KARIÉRA</a>
         <a href="#contact" class="menu-link">KONTAKT</a>
+
+        <a href="#" onclick="event.preventDefault(); document.getElementById('burger-overlay').classList.remove('open'); document.getElementById('modal-zadost').classList.remove('hidden'); document.body.style.overflow='';" class="menu-link">
+            PODPORA <span class="sub-text">Pošlete nám žádost</span>
+        </a>
 
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
 
@@ -846,4 +907,63 @@
             container.appendChild(p);
         }
     })();
+
+
+    document.getElementById('modal-zadost')?.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.add('hidden');
+    });
+
+
+
+    // ── Toast funkce pro homepage ──
+    function showHomeToast(message, type = 'success') {
+        const existing = document.getElementById('home-toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        const bg = type === 'success' ? 'bg-white text-black' : 'bg-red-600 text-white';
+        toast.id = 'home-toast';
+        toast.className = `fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all duration-300 opacity-0 translate-y-2 ${bg}`;
+        toast.innerHTML = type === 'success'
+            ? `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>${message}`
+            : `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>${message}`;
+
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-2'), 10);
+        setTimeout(() => {
+            toast.classList.add('opacity-0');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+
+    // ── AJAX odeslání žádosti ──
+    document.getElementById('form-zadost')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Odesílám...';
+
+        try {
+            const response = await fetch('{{ path('admin_support_new') }}', {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            if (response.ok || response.redirected) {
+                document.getElementById('modal-zadost').classList.add('hidden');
+                this.reset();
+                showHomeToast('Žádost byla úspěšně odeslána.');
+            } else {
+                showHomeToast('Nepodařilo se odeslat žádost. Zkuste to znovu.', 'error');
+            }
+        } catch (err) {
+            showHomeToast('Chyba připojení. Zkuste to znovu.', 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Odeslat žádost';
+        }
+    });
 </script>
