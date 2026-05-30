@@ -5,23 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ochrana osobních údajů | Wenix</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .03;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease;
+        }
+
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 80px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 32px; }
+        .nav-social { display: flex; align-items: center; gap: 16px; }
+        .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
+        .nav-social a:hover { opacity: 1; }
+
+        #burger-overlay {
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(0,0,0,0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        #burger-overlay.open { display: flex; opacity: 1; }
+        #burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 32px; }
+        #burger-overlay a.menu-link {
+            font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 5vw, 3.5rem);
+            color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
+        }
+        #burger-overlay a.menu-link:hover { color: #fff; }
+
         .legal-section { border-left: 1px solid rgba(255,255,255,0.08); padding-left: 1.5rem; }
         .legal-section:hover { border-left-color: rgba(255,255,255,0.2); transition: border-color 0.3s ease; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
     </style>
 </head>
-<body class="bg-black text-gray-200 antialiased">
+<body>
 
-<div class="max-w-3xl mx-auto px-6 pt-16 pb-24">
+<header>
+    <div class="nav-inner">
+        <div class="flex items-center">
+            <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
+            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
+            <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
+                <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
+                <span id="line-2" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease;"></span>
+            </button>
+        </div>
+        <div class="nav-right">
+            <nav class="nav-social">
+                <a href="#" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
+                <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
+            </nav>
+        </div>
+    </div>
+</header>
 
-    <!-- Header -->
-    <div class="mb-14">
+<div id="burger-overlay">
+    <nav>
+        <a href="index.html#about" class="menu-link">O NÁS</a>
+        <a href="kariera.html" class="menu-link">KARIÉRA</a>
+        <a href="kontakt.html" class="menu-link">KONTAKT</a>
+        <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
+    </nav>
+</div>
+
+<!-- Právní Obsah -->
+<main class="relative z-20 max-w-3xl mx-auto px-6 pt-32 pb-24">
+    <div class="mb-14" data-aos="fade-up">
         <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
             </svg>
         </div>
-        <h1 class="text-6xl text-white tracking-wide mb-3 uppercase font-bold">
+        <h1 class="font-bebas text-6xl text-white tracking-wide mb-3 uppercase font-bold">
             Ochrana osobních<br>údajů
         </h1>
         <p class="text-gray-500 text-sm">
@@ -29,13 +116,11 @@
         </p>
     </div>
 
-    <!-- Úvod -->
-    <p class="text-gray-300 text-sm leading-relaxed mb-12 pb-12 border-b border-white/5">
+    <p class="text-gray-300 text-sm leading-relaxed mb-12 pb-12 border-b border-white/5" data-aos="fade-up" data-aos-delay="50">
         Provozovatelem tohoto webu a správcem osobních údajů je <strong class="text-white">Daniel Auersvald</strong>, podnikající pod značkou <strong class="text-white">Wenix</strong>. Ochrana vašich osobních údajů je pro nás prioritou. Tento dokument vysvětluje, jaké údaje shromažďujeme, proč je zpracováváme a jaká jsou vaše práva.
     </p>
 
-    <div class="space-y-12">
-
+    <div class="space-y-12" data-aos="fade-up" data-aos-delay="100">
         <!-- 1. Správce -->
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
@@ -47,9 +132,7 @@
                     <span class="text-gray-500 w-20 flex-shrink-0">Název</span>
                     <span class="text-white text-right">Daniel Auersvald - Wenix</span>
                 </div>
-                <div class="border-t border-white/5 pt-3 text-xs text-gray-600 italic">
-<!--                    ℹ Sem po založení doplň: Název s.r.o., IČO: XXXXXXXX, Sídlo: Adresa-->
-                </div>
+                <div class="border-t border-white/5 pt-3 text-xs text-gray-600 italic"></div>
                 <div class="border-t border-white/5 pt-3 flex justify-between items-center gap-4">
                     <span class="text-gray-500 w-20 flex-shrink-0">E-mail</span>
                     <a href="mailto:info@Wenix.cz" class="text-white hover:text-gray-300 transition-colors underline underline-offset-2">info@Wenix.cz</a>
@@ -198,7 +281,6 @@
                 <a href="mailto:info@Wenix.cz" class="text-white underline underline-offset-2 hover:text-gray-300 transition-colors">info@Wenix.cz</a>.
             </p>
         </div>
-
     </div>
 
     <!-- Footer navigace -->
@@ -216,7 +298,38 @@
             </svg>
         </a>
     </div>
+</main>
 
-</div>
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
+
+    const trigger = document.getElementById('burger-trigger');
+    const overlay = document.getElementById('burger-overlay');
+    const line1   = document.getElementById('line-1');
+    const line2   = document.getElementById('line-2');
+
+    trigger.addEventListener('click', () => {
+        const isOpen = overlay.classList.contains('open');
+        if (isOpen) {
+            overlay.classList.remove('open');
+            line1.style.transform = '';
+            line1.style.width = '14px';
+            line2.style.transform = '';
+            document.body.style.overflow = '';
+        } else {
+            overlay.classList.add('open');
+            line1.style.width = '14px';
+            line1.style.transform = 'translateY(3px) rotate(45deg)';
+            line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+        header.style.background = window.scrollY > 8 ? 'rgba(0,0,0,0.94)' : 'rgba(0,0,0,0.75)';
+    }, { passive: true });
+</script>
 </body>
 </html>
