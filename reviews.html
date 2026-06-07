@@ -10,7 +10,7 @@
     <meta property="og:title" content="Hodnocení a reference | Wenix - Digitální agentura">
     <meta property="og:description" content="Přečtěte si hodnocení našich klientů a zanechte vlastní recenzi na služby digitální agentury Wenix. Vaše zpětná vazba je pro nás důležitá.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.wenix.cz/reviews">
+    <meta property="og:url" content="https://www.wenix.cz/reviews.html">
     <meta property="og:image" content="https://www.wenix.cz/images/og-image-reviews.jpg">
     <meta property="og:image:alt" content="Ikona hvězdiček pro hodnocení">
 
@@ -231,7 +231,7 @@
 <header>
     <div class="nav-inner">
         <div class="flex items-center">
-            <a href="/" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
+            <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
             <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
             <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
                 <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
@@ -253,11 +253,11 @@
 
 <div id="burger-overlay">
     <nav>
-        <a href="/#about" class="menu-link">O NÁS</a>
-        <a href="/kariera" class="menu-link">KARIÉRA</a>
-        <a href="/kontakt" class="menu-link">KONTAKT</a>
-        <a href="/blog" class="menu-link">BLOG</a>
-        <a href="/reviews" class="menu-link">HODNOCENÍ</a>
+        <a href="index.html#about" class="menu-link">O NÁS</a>
+        <a href="kariera.html" class="menu-link">KARIÉRA</a>
+        <a href="kontakt.html" class="menu-link">KONTAKT</a>
+        <a href="blog.html" class="menu-link">BLOG</a>
+        <a href="reviews.html" class="menu-link">HODNOCENÍ</a>
 
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
     </nav>
@@ -290,12 +290,16 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">Hodnocení (hvězdičky)</label>
                     <div class="flex items-center gap-1">
-                        {% for i in 5..1 %}
-                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" class="hidden peer">
-                            <label for="star{{ i }}" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="{{ i }} hvězdiček">
-                                &#9733;
-                            </label>
-                        {% endfor %}
+                        <input type="radio" id="star5" name="rating" value="5" class="hidden peer">
+                        <label for="star5" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="5 hvězdiček">&#9733;</label>
+                        <input type="radio" id="star4" name="rating" value="4" class="hidden peer">
+                        <label for="star4" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="4 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star3" name="rating" value="3" class="hidden peer">
+                        <label for="star3" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="3 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star2" name="rating" value="2" class="hidden peer">
+                        <label for="star2" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="2 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star1" name="rating" value="1" class="hidden peer">
+                        <label for="star1" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="1 hvězdička">&#9733;</label>
                     </div>
                 </div>
                 <div>
@@ -355,27 +359,27 @@
             <div class="footer-col">
                 <h4>Služby</h4>
                 <ul>
-                    <li><a href="/#services">Statické weby</a></li>
-                    <li><a href="/services-ui-ux">Grafický design a úpravy</a></li>
+                    <li><a href="index.html#services">Statické weby</a></li>
+                    <li><a href="services-ui-ux.html">Grafický design a úpravy</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>O nás</h4>
                 <ul>
-                    <li><a href="/#about">O nás</a></li>
-                    <li><a href="/kariera">Kariéra</a></li>
-                    <li><a href="/reviews">Hodnocení</a></li>
+                    <li><a href="index.html#about">O nás</a></li>
+                    <li><a href="kariera.html">Kariéra</a></li>
+                    <li><a href="reviews.html">Hodnocení</a></li>
                 </ul>
             </div>
 
             <div class="footer-col">
                 <h4>Systém</h4>
                 <ul>
-                    <li><a href="/kontakt">Kontakt</a></li>
-                    <li><a href="/privacy">Privacy Policy</a></li>
-                    <li><a href="/cookies">Cookies</a></li>
-                    <li><a href="/blog">Blog</a></li>
+                    <li><a href="kontakt.html">Kontakt</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="cookies.html">Cookies</a></li>
+                    <li><a href="blog.html">Blog</a></li>
                 </ul>
             </div>
         </div>
