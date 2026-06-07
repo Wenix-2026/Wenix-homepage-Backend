@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wenix - Statické weby a design</title>
+    <title>Wenix - Tvorba webů a designu | Moderní digitální agentura</title>
+    <meta name="description" content="Wenix je moderní digitální agentura specializující se na tvorbu rychlých statických webů, grafický design a UX/UI. Získejte efektivní online prezentaci.">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Wenix - Tvorba webů a designu | Moderní digitální agentura">
+    <meta property="og:description" content="Wenix je moderní digitální agentura specializující se na tvorbu rychlých statických webů, grafický design a UX/UI. Získejte efektivní online prezentaci.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.wenix.cz/">
+    <meta property="og:image" content="https://www.wenix.cz/images/og-image.jpg">
+    <meta property="og:image:alt" content="Logo Wenix a ukázka moderního webdesignu">
+
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,7 +125,7 @@
         .content-card-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; position: relative; }
         .grad-noise::after {
             content: ''; position: absolute; inset: 0; opacity: .14;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3Cfilter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 150px; mix-blend-mode: overlay;
         }
 
@@ -222,7 +233,7 @@
 <header>
     <div class="nav-inner">
         <div class="flex items-center">
-            <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
+            <a href="/" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
             <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
             <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
                 <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
@@ -245,8 +256,8 @@
 <div id="burger-overlay">
     <nav>
         <a href="#about" class="menu-link">O NÁS</a>
-        <a href="kariera.html" class="menu-link">KARIÉRA</a>
-        <a href="kontakt.html" class="menu-link">KONTAKT</a>
+        <a href="/kariera" class="menu-link">KARIÉRA</a>
+        <a href="/kontakt" class="menu-link">KONTAKT</a>
 
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
     </nav>
@@ -268,7 +279,7 @@
         </p>
 
         <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;" data-aos="fade-up" data-aos-delay="120">
-            <a href="gmail.com" onclick="copyEmailToClipboard(event)" class="btn-primary">Chci konzultaci</a>
+            <a href="mailto:auersvald@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary">Chci konzultaci</a>
             <a href="#about" class="btn-secondary">O nás</a>
         </div>
     </div>
@@ -287,7 +298,7 @@
                     Jsme technologický partner pro vaši online prezentaci. Navrhujeme a kódujeme čisté statické weby, které plní svůj účel a nemají zbytečný technologický dluh.
                 </p>
                 <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 24px;">
-                    <a href="kontakt.html" class="btn-primary">Napište nám</a>
+                    <a href="/kontakt" class="btn-primary">Napište nám</a>
                     <a href="#services" class="btn-dark">Naše služby</a>
                 </div>
             </div>
@@ -300,16 +311,18 @@
                             Vyvíjíme webové stránky přímo v kódu. Bez použití těžkopádných redakčních systémů dosahujeme dokonalé rychlosti a stability na jakémkoliv zařízení.
                         </p>
                         <div>
-                            <a href="gmail.com" onclick="copyEmailToClipboard(event)" class="btn-primary" style="margin-top: 4px;">Poptat řešení</a>
+                            <a href="mailto:auersvald@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary" style="margin-top: 4px;">Poptat řešení</a>
                         </div>
                     </div>
                     <div class="feature-img grad-noise" style="position: relative; min-height: 280px; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(20,160,150,0.8) 0%, rgba(40,100,150,0.5) 50%, rgba(0,0,0,0) 100%);">
-                        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(20,150,140,0.4) 0%, rgba(60,100,160,0.2) 100%);"></div>
+                        <!-- Background image, no alt needed for div -->
                     </div>
                 </div>
 
                 <div class="feature-row feature-row-reverse" data-aos="fade-up">
-                    <div class="feature-img grad-noise" style="order: -1 !important; min-height: 280px; background: url('images/figma.png') center/cover no-repeat;"></div>
+                    <div class="feature-img grad-noise" style="order: -1 !important; min-height: 280px; background: url('images/figma.png') center/cover no-repeat;">
+                        <!-- Background image, no alt needed for div -->
+                    </div>
                     <div class="feature-text">
                         <h3 class="font-bebas" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); color: #fff; line-height: 1.1;">GRAFICKÝ DESIGN A UX</h3>
                         <p style="font-size: .9rem; color: rgba(255,255,255,0.5); line-height: 1.7;">
@@ -356,12 +369,14 @@
     <section id="services" style="padding: 96px 24px 64px;">
         <div style="max-width: 1280px; margin: 0 auto;">
             <div data-aos="fade-up" style="width: 100%; aspect-ratio: 16/5; border-radius: 14px; overflow: hidden; position: relative; margin-bottom: 64px; background-color: #ffffff;">
-                <img src="images/web-banner.png" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.05);" alt="wenix baner"></im   g>
+                <img src="images/web-banner.png" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.05);" alt="Banner s ukázkou moderního webového designu a technologií Wenix.">
             </div>
 
             <div class="three-col" data-aos="fade-up">
                 <div class="content-card">
-                    <div class="content-card-img grad-noise"  style="min-height: 230px; background: url('images/code.jpg') center/cover no-repeat;);"></div>
+                    <div class="content-card-img grad-noise"  style="min-height: 230px; background: url('images/code.jpg') center/cover no-repeat;">
+                        <!-- Background image, no alt needed for div -->
+                    </div>
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">STATICKÉ WEBY</h3>
                         <p style="font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6;">Rychlé a čisté webové prezentace vytvořené v HTML, CSS a JS bez zbytečné pomalé zátěže.</p>
@@ -369,7 +384,9 @@
                 </div>
 
                 <div class="content-card" data-aos="fade-up" data-aos-delay="100">
-                    <div class="content-card-img grad-noise" style="min-height: 230px; width: 100%; background: url('images/figma2.jpg') center/cover no-repeat;);"></div>
+                    <div class="content-card-img grad-noise" style="min-height: 230px; width: 100%; background: url('images/figma2.jpg') center/cover no-repeat;">
+                        <!-- Background image, no alt needed for div -->
+                    </div>
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">UX / UI A ÚPRAVY</h3>
                         <p style="font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6;">Grafický design a úpravy již stávajících webů s důrazem na lepší uživatelskou zkušenost.</p>
@@ -414,16 +431,16 @@
                     <h4>O nás</h4>
                     <ul>
                         <li><a href="#about">O nás</a></li>
-                        <li><a href="kariera.html">Kariéra</a></li>
+                        <li><a href="/kariera">Kariéra</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-col">
                     <h4>Systém</h4>
                     <ul>
-                        <li><a href="kontakt.html">Kontakt</a></li>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="cookies.html">Cookies</a></li>
+                        <li><a href="/kontakt">Kontakt</a></li>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/cookies">Cookies</a></li>
                     </ul>
                 </div>
             </div>
@@ -562,7 +579,7 @@
     function copyEmailToClipboard(e) {
         if(e) e.preventDefault();
         navigator.clipboard.writeText('auersvald@wenix.cz').then(() => {
-            showHomeToast('E-mail info@wenix.cz byl zkopírován do schránky.');
+            showHomeToast('E-mail auersvald@wenix.cz byl zkopírován do schránky.');
         }).catch(() => {
             showHomeToast('Nepodařilo se zkopírovat e-mail.', 'error');
         });
