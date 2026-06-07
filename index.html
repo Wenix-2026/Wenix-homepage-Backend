@@ -215,6 +215,48 @@
         #back-to-top:hover {
             background: rgba(255,255,255,0.15);
         }
+
+
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .faq-trigger {
+            width: 100%; display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 0; background: none; border: none; cursor: pointer;
+            color: #fff; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500;
+            text-align: left; gap: 16px; transition: color .2s;
+        }
+        .faq-trigger:hover { color: rgba(255,255,255,0.7); }
+        .faq-icon { font-size: 1.2rem; flex-shrink: 0; transition: transform .3s ease; color: rgba(255,255,255,0.4); }
+        .faq-item.open .faq-icon { transform: rotate(45deg); color: #fff; }
+        .faq-answer {
+            max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease;
+        }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-answer p { color: rgba(255,255,255,0.55); font-size: .9rem; line-height: 1.8; }
+        .faq-answer strong { color: #fff; }
+
+
+        @media (max-width: 767px) {
+            .portfolio-grid { grid-template-columns: 1fr !important; }
+        }
+
+
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .faq-trigger {
+            width: 100%; display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 0; background: none; border: none; cursor: pointer;
+            color: #fff; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500;
+            text-align: left; gap: 16px; transition: color .2s;
+        }
+        .faq-trigger:hover { color: rgba(255,255,255,0.7); }
+        .faq-icon { font-size: 1.2rem; flex-shrink: 0; transition: transform .3s ease; color: rgba(255,255,255,0.4); }
+        .faq-item.open .faq-icon { transform: rotate(45deg); color: #fff; }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-answer p { color: rgba(255,255,255,0.55); font-size: .9rem; line-height: 1.8; }
+        .faq-answer strong { color: #fff; }
     </style>
 </head>
 
@@ -305,6 +347,8 @@
         <a href="index.html#about" class="menu-link">O NÁS</a>
         <a href="kariera.html" class="menu-link">KARIÉRA</a>
         <a href="kontakt.html" class="menu-link">KONTAKT</a>
+        <a href="#faq" class="menu-link">FAQ</a>
+        <a href="#portfolio" class="menu-link">PORTFOLIO</a>
 
 
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
@@ -327,7 +371,7 @@
         </p>
 
         <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;" data-aos="fade-up" data-aos-delay="120">
-            <a href="mailto:auersvald@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary">Chci konzultaci</a>
+            <a href="mailto:info@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary">Chci konzultaci</a>
             <a href="#about" class="btn-secondary">O nás</a>
         </div>
     </div>
@@ -498,6 +542,125 @@
         </div>
     </section>
 
+    <!-- FAQ sekce -->
+    <section id="faq" style="padding: 96px 24px 64px; background: #000; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="max-width: 860px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">ČASTÉ OTÁZKY</h2>
+                <p style="color: rgba(255,255,255,0.5); font-size: .95rem; line-height: 1.7;">Odpovědi na to co nás zákazníci ptají nejčastěji.</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 2px;" data-aos="fade-up">
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Jak dlouho trvá vytvoření webu?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Celý proces od první konzultace po spuštění trvá typicky <strong>1–2 týdny</strong>. Grafický návrh ve Figmě zabere 2–3 dny, samotné kódování dalších 3–5 dní a nasazení na server 1 den. U složitějších projektů může trvat déle — vždy vás dopředu informujeme.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Kolik web stojí?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Cena závisí na rozsahu projektu. Jednoduchá prezentační stránka začíná od <strong>5 000 Kč</strong>, web s více sekcemi a grafikou na míru od <strong>10 000 Kč</strong>. Orientační nabídku dostanete zdarma po první konzultaci.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Potřebuji vlastní doménu a hosting?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Doménu si zaregistrujete sami (např. na Wedos.cz nebo Forpsi.cz, cena cca 200–300 Kč/rok). Hosting zajistíme my — statické weby lze hostovat zdarma na platformách jako Netlify nebo Vercel. Pokud preferujete vlastní hosting, nastavení provedeme za vás.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Co se stane po spuštění webu?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Předáme vám přístupy ke všem účtům a zůstaneme k dispozici pro případné úpravy. Drobné změny textu nebo obrázků řešíme zdarma v prvních <strong>30 dnech</strong>. Větší rozšíření webu nacenujeme individuálně.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Mohu web později rozšířit?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Ano. Kód píšeme čistě a strukturovaně, takže přidání nových sekcí, stránek nebo funkcí je kdykoli možné. Není potřeba web předělávat od začátku.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Děláte také e-shopy?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Aktuálně se specializujeme na <strong>statické prezentační weby</strong>. E-shopy vyžadují komplexní backend — pro tyto projekty doporučujeme platformy jako Shoptet nebo WooCommerce. Rádi ale navrhneme grafiku nebo landing page i pro e-shop projekt.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Portfolio sekce -->
+    <section id="portfolio" style="padding: 96px 24px 64px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="max-width: 1280px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">NAŠE PRÁCE</h2>
+                <p style="color: rgba(255,255,255,0.5); font-size: .95rem; line-height: 1.7; max-width: 480px; margin: 0 auto;">
+                    Aktuálně pracujeme na prvních klientských projektech. Brzy zde uvidíte ukázky naší práce.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;" class="portfolio-grid" data-aos="fade-up">
+
+                <!-- Placeholder 1 -->
+                <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(20,150,140,0.15) 0%, transparent 70%);"></div>
+                    <i class="bx bx-code-alt" style="font-size: 2rem; color: rgba(255,255,255,0.15);"></i>
+                    <p style="color: rgba(255,255,255,0.2); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;">Připravujeme</p>
+                </div>
+
+                <!-- Placeholder 2 -->
+                <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(60,100,160,0.15) 0%, transparent 70%);"></div>
+                    <i class="bx bx-palette" style="font-size: 2rem; color: rgba(255,255,255,0.15);"></i>
+                    <p style="color: rgba(255,255,255,0.2); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;">Připravujeme</p>
+                </div>
+
+                <!-- Placeholder 3 -->
+                <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(80,130,80,0.15) 0%, transparent 70%);"></div>
+                    <i class="bx bx-globe" style="font-size: 2rem; color: rgba(255,255,255,0.15);"></i>
+                    <p style="color: rgba(255,255,255,0.2); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;">Připravujeme</p>
+                </div>
+
+            </div>
+
+            <!-- CTA pod portfoliem -->
+            <div style="text-align: center; margin-top: 48px;" data-aos="fade-up">
+                <p style="color: rgba(255,255,255,0.4); font-size: .9rem; margin-bottom: 20px;">Chcete být jedním z prvních klientů?</p>
+                <a href="kontakt.html" class="btn-primary">Získat web za zvýhodněnou cenu</a>
+            </div>
+
+        </div>
+    </section>
+
 <!--    <section style="padding: 48px 24px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">-->
 <!--        <div style="max-width: 1280px; margin: 0 auto;">-->
 <!--            <p style="text-align: center; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 28px;" data-aos="fade-up">-->
@@ -578,6 +741,8 @@
                     <ul>
                         <li><a href="#about">O nás</a></li>
                         <li><a href="kariera.html">Kariéra</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
                     </ul>
                 </div>
 
@@ -755,6 +920,14 @@
         e.preventDefault();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+
+
+    function toggleFaq(btn) {
+        const item = btn.parentElement;
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+    }
 </script>
 </body>
 <div id="progress-bar"></div>
