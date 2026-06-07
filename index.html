@@ -172,8 +172,55 @@
         .footer-socials { display: flex; gap: 14px; }
         .footer-socials a { color: rgba(255,255,255,0.5); font-size: 1.25rem; transition: color .2s; }
         .footer-socials a:hover { color: #fff; }
+
+
+        /* Scroll progress bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #14968c, #3c64a0);
+            z-index: 200;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Zpět nahoru */
+        #back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 150;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s, transform 0.3s, background 0.2s;
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        #back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #back-to-top:hover {
+            background: rgba(255,255,255,0.15);
+        }
     </style>
 </head>
+
+<a href="#" id="back-to-top" aria-label="Zpět nahoru">
+    <i class="bx bx-chevron-up"></i>
+</a>
 
 <body>
 
@@ -353,6 +400,104 @@
         </div>
     </section>
 
+    <section id="process" style="padding: 96px 24px 64px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="max-width: 1280px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">JAK TO FUNGUJE</h2>
+                <p style="color: rgba(255,255,255,0.5); font-size: .95rem; max-width: 480px; margin: 0 auto; line-height: 1.7;">
+                    Od první zprávy po spuštění webu — transparentní proces bez překvapení.
+                </p>
+            </div>
+
+            <!-- Kroky -->
+            <div style="position: relative;">
+                <!-- Spojovací linka -->
+                <div style="position: absolute; left: 50%; top: 24px; bottom: 24px; width: 1px; background: linear-gradient(180deg, rgba(20,150,140,0.6) 0%, rgba(60,100,160,0.3) 100%); transform: translateX(-50%);" class="hidden md:block"></div>
+
+                <div style="display: flex; flex-direction: column; gap: 48px;">
+
+                    <!-- Krok 1 -->
+                    <div style="display: grid; grid-template-columns: 1fr 48px 1fr; gap: 24px; align-items: center;" data-aos="fade-up">
+                        <div style="text-align: right; padding-right: 32px;">
+                            <span style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">01</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">KONZULTACE</h3>
+                            <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7;">Napíšete nám, probereme váš projekt, cíle a představy. Zdarma, bez závazků. Obvykle odpovídáme do 24 hodin.</p>
+                        </div>
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-chat" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="padding-left: 32px;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Co získáte</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Jasnou představu o rozsahu projektu, časovém harmonogramu a orientační ceně.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Krok 2 -->
+                    <div style="display: grid; grid-template-columns: 1fr 48px 1fr; gap: 24px; align-items: center;" data-aos="fade-up">
+                        <div style="padding-right: 32px; text-align: right; order: 0;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Nástroje</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Figma pro wireframy a prototypy. Sdílíme náhled, vy komentujete přímo v designu.</p>
+                            </div>
+                        </div>
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-palette" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="padding-left: 32px;">
+                            <span style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">02</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">NÁVRH</h3>
+                            <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7;">Navrhneme vzhled webu ve Figmě. Zapracujeme vaše připomínky dokud nebudete 100% spokojeni.</p>
+                        </div>
+                    </div>
+
+                    <!-- Krok 3 -->
+                    <div style="display: grid; grid-template-columns: 1fr 48px 1fr; gap: 24px; align-items: center;" data-aos="fade-up">
+                        <div style="text-align: right; padding-right: 32px;">
+                            <span style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">03</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">VÝVOJ</h3>
+                            <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7;">Kódujeme čistý HTML/CSS/JS bez zbytečných frameworků. Průběžně sdílíme náhled na testovací adrese.</p>
+                        </div>
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-code-alt" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="padding-left: 32px;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Technologie</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">HTML · CSS · JavaScript · Nginx · Docker</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Krok 4 -->
+                    <div style="display: grid; grid-template-columns: 1fr 48px 1fr; gap: 24px; align-items: center;" data-aos="fade-up">
+                        <div style="padding-right: 32px; text-align: right;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Co zahrnuje</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Nasazení na doménu, SSL certifikát, základní SEO nastavení a předání přístupů.</p>
+                            </div>
+                        </div>
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-rocket" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div style="padding-left: 32px;">
+                            <span style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">04</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">SPUŠTĚNÍ</h3>
+                            <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7;">Web nasadíme na váš hosting nebo zajistíme hosting my. Předáme přístupy a zůstaneme k dispozici.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div style="text-align: center; margin-top: 64px;" data-aos="fade-up">
+                <a href="kontakt.html" class="btn-primary">Začít konzultaci zdarma</a>
+            </div>
+        </div>
+    </section>
+
 <!--    <section style="padding: 48px 24px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05);">-->
 <!--        <div style="max-width: 1280px; margin: 0 auto;">-->
 <!--            <p style="text-align: center; font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 28px;" data-aos="fade-up">-->
@@ -455,6 +600,8 @@
 
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script>
+    
+    
     AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
 
     // JS pro Cookies
@@ -585,6 +732,30 @@
             showHomeToast('Nepodařilo se zkopírovat e-mail.', 'error');
         });
     }
+
+
+    // Scroll progress bar + zpět nahoru
+    const progressBar = document.getElementById('progress-bar');
+    const backToTop = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / docHeight) * 100;
+        progressBar.style.width = progress + '%';
+
+        if (scrollTop > 400) {
+            backToTop.classList.add('visible');
+        } else {
+            backToTop.classList.remove('visible');
+        }
+    }, { passive: true });
+
+    backToTop.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 </script>
 </body>
+<div id="progress-bar"></div>
 </html>
