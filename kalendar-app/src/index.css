@@ -1,0 +1,21 @@
+@import "tailwindcss";
+@variant dark (&:is(.dark *));
+
+@theme {
+  --font-display: "Bebas Neue", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --color-teal: #14968C;
+  --color-blue: #3C64A0;
+  --color-surface: #131313;
+  --color-surface-card: #1a1a1a;
+  --color-surface-modal: #0f0f0f;
+  --color-surface-900: #131313;
+}
+
+html, body {
+  @apply bg-white text-black dark:bg-surface-900 dark:text-[#e2e2e2] transition-colors duration-200;
+}
+
+* {
+  font-family: var(--font-body);
+}

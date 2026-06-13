@@ -1,0 +1,5 @@
+vendor/
+node_modules/
+.env
+webdesign_web/var/cache/
+webdesign_web/var/log/

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalendář - WENIX</title>
+
+    <!-- Nainstalovaný font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Naše stylizace -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Overlay pro login/registraci (vždy viditelný, překryje kalendář) -->
+    <div id="auth-overlay" class="auth-overlay"></div>
+
+    <!-- Header s navigací a uživatelskými kontrolami -->
+    <header class="main-header">
+        <div class="logo-container">
+            <h1 class="logo-text logo-primary">WENIX</h1>
+            <nav class="mini-nav">Domů | O nás | Kontakt</nav>
+        </div>
+
+        <!-- Profilové ovládání, tlačítko Logout + Avatar -->
+        <div id="user-controls" class="user-controls d-none">
+            <span id="user-email-display"></span>
+            <button id="btn-logout" class="mini-button variant-warning">Odhlásit</button>
+
+            <!-- Tlačítka pro změnu pohledu -->
+            <div class="view-selector-container flex-row align-center gap-small items-baseline">
+                <select id="calendar-view-select" class="dropdown-calendary"></select>
+
+                <!-- Karta přidat schůzku (mimo view selector) -->
+                <button id="btn-add-event-modal-trigger"
+                        class="mini-button variant-primary flex-1 justify-center rounded-full">
+                    + Přidat událost
+                </button>
+            </div>
+        </div>
+
+        <!-- Login/registrace formulář (vždy viditelný, překryje kalendář) -->
+        <form id="auth-form" class="mini-modal flex-row gap-medium p-normal items-center">
+
+            <!-- Registrace -->
+            <div id="register-panel-container-mini"></div>
+
+            <!-- Přihlášení -->
+            <div id="login-error-msg-miniform-class-name d-none text-warning min-text mb-small">Chyba přihlašování</div>
+
+            <button type="submit" class="btn-full-width flex-1 rounded-xl variant-primary">Přihlásit se / Registrovat</button>
+        </form>
+
+    </header>
+
+    <!-- Hlavní obsah - kalendářní grid (skrývá se pod overlay) -->
+    <main id="calendar-container" class="d-none calendar-main-body">
+        <!-- Nadpis měsíce/nástroje na vrchu kalendáře -->
+
+        <!-- Kalendářní widget: Měsíc/Týden/Den -->
+        <div id="calendar-widget"></div>
+
+    </main>
+
+    <!-- MODAL Přidat/Upravit událost (přepínací logika modalů) -->
+
+<!-- Modal detail schůzky -->
+<div id="event-detail-modal" class="modal">
+  <div class="modal-content flex-column gap-medium items-center align-middle min-w-medium max-w-large p-normal rounded-2xl bg-card backdrop-blur-xl shadow-glow">
+    <!-- Zadejte název, popis a datum/váhu -->
+
+<!-- Modal přidání/editace události (vykreslováno z modal-detail) -->
+
+</div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
