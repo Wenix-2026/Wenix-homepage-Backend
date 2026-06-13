@@ -19,3 +19,36 @@ html, body {
 * {
   font-family: var(--font-body);
 }
+
+/* ── Autofill fix — světlý režim (základní, bez třídy) ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  transition: background-color 0s 50000s;
+}
+
+/* ── Autofill fix — tmavý režim (přebije světlý) ── */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
+  transition: background-color 0s 50000s;
+}
+
+/* ── Autofill fix — vždy tmavý (auth stránka) ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0px 1000px #1a1a1a inset !important;
+  transition: background-color 0s 50000s;
+}
