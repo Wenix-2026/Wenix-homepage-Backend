@@ -1,13 +1,20 @@
 import { isSameDay, format } from 'date-fns'
 import { EventCard } from '../events/EventCard'
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const DAY_LABELS = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne']
 
 export function MonthView({ cal, events, onDayClick, onEventClick }) {
-    // Stav pro uložení dne, na který uživatel kliknul (výchozí je dnešek)
-    const [activeMobileDay, setActiveMobileDay] = useState(new Date())
+    // 1. Inicializujeme stav buď z cal.date, nebo jako nouzovku z dnešního data
+    const [activeMobileDay, setActiveMobileDay] = useState(() => cal.date || new Date())
+
+    // 2. Sledování změn v cal.date — Jakmile se nahoře změní datum přes picker/tlačítka, aktualizuje se i agenda
+    useEffect(() => {
+        if (cal.date) {
+            setActiveMobileDay(cal.date)
+        }
+    }, [cal.date])
 
     function eventsForDay(day) {
         return events.filter((e) => isSameDay(new Date(e.start_time), day))
@@ -26,7 +33,7 @@ export function MonthView({ cal, events, onDayClick, onEventClick }) {
                 ))}
             </div>
 
-            {/* Hlavní mřížka — Přidáno auto-rows na mobilu a omezení flex-grow */}
+            {/* Hlavní mřížka */}
             <div className="grid grid-cols-7 auto-rows-[45px] sm:auto-rows-auto sm:flex-1 overflow-y-auto overflow-x-hidden bg-white/[0.01] flex-shrink-0">
                 {cal.monthDays.map((day, i) => {
                     const dayEvents    = eventsForDay(day)
@@ -40,17 +47,21 @@ export function MonthView({ cal, events, onDayClick, onEventClick }) {
                             key={day.toISOString()}
                             onClick={() => {
                                 setActiveMobileDay(day)
+                                // Synchronizujeme kliknutí zpět do hlavního stavu kalendáře
+                                if (typeof cal.setDate === 'function') {
+                                    cal.setDate(day)
+                                }
                                 onDayClick(day)
                             }}
                             className={clsx(
                                 'min-h-[45px] sm:min-h-[100px] lg:min-h-[120px] p-1 sm:p-1.5 border-b border-r border-black/5 dark:border-white/4 cursor-pointer transition-colors group flex flex-col justify-between',
                                 !isThisMonth && 'opacity-30',
                                 isWeekend   && 'bg-black/[0.02] dark:bg-white/[0.01]',
-                                isActive    && 'bg-teal/10 dark:bg-teal/10', // Zvýraznění vybraného dne
+                                isActive    && 'bg-teal/10 dark:bg-teal/10',
                                 'hover:bg-black/5 dark:hover:bg-white/[0.03]'
                             )}
                         >
-                            {/* Číslo dne — Vycentrováno na mobilu pro čistší vzhled */}
+                            {/* Číslo dne */}
                             <div className="flex justify-center sm:justify-end w-full">
                                 <span
                                     className={clsx(
@@ -68,21 +79,18 @@ export function MonthView({ cal, events, onDayClick, onEventClick }) {
 
                             {/* Události v buňce */}
                             <div className="flex flex-col gap-0.5 sm:gap-1 w-full">
-                                {/* Desktop zobrazení: Celé karty */}
                                 {dayEvents.slice(0, 3).map((ev) => (
                                     <div key={ev.id} className="hidden sm:block">
                                         <EventCard event={ev} onClick={onEventClick} />
                                     </div>
                                 ))}
 
-                                {/* Mobilní zobrazení: Jedna minimalistická svítící tečka na střed */}
                                 {dayEvents.length > 0 && (
                                     <div className="flex sm:hidden justify-center pb-0.5">
                                         <div className="w-1 h-1 rounded-full bg-teal shadow-[0_0_4px_#14968C]" />
                                     </div>
                                 )}
 
-                                {/* Ukazatel dalších událostí na desktopu */}
                                 {dayEvents.length > 3 && (
                                     <span className="hidden sm:block text-[9px] sm:text-[10px] text-black/40 dark:text-white/30 font-body px-1 sm:px-2 text-right sm:text-left mt-1 sm:mt-0">
                                         +{dayEvents.length - 3} další
@@ -94,7 +102,7 @@ export function MonthView({ cal, events, onDayClick, onEventClick }) {
                 })}
             </div>
 
-            {/* Mobilní spodní lišta (Agenda pro vybraný den) — Automaticky se natáhne přes celé zbývající prázdné místo */}
+            {/* Mobilní spodní lišta (Agenda pro vybraný den) */}
             <div className="sm:hidden border-t border-black/10 dark:border-white/10 bg-white/3 dark:bg-surface-card p-4 flex flex-col flex-1 h-full overflow-y-auto">
                 <div className="flex justify-between items-center mb-3 flex-shrink-0">
                     <span className="text-[11px] font-bold font-body tracking-widest text-black/40 dark:text-white/40 uppercase">
