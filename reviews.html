@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hodnocení a reference | Wenix - Digitální agentura</title>
+    <meta name="description" content="Přečtěte si hodnocení našich klientů a zanechte vlastní recenzi na služby digitální agentury Wenix. Vaše zpětná vazba je pro nás důležitá.">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Hodnocení a reference | Wenix - Digitální agentura">
+    <meta property="og:description" content="Přečtěte si hodnocení našich klientů a zanechte vlastní recenzi na služby digitální agentury Wenix. Vaše zpětná vazba je pro nás důležitá.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.wenix.cz/reviews.html">
+    <meta property="og:image" content="https://www.wenix.cz/images/og-image-reviews.jpg">
+    <meta property="og:image:alt" content="Ikona hvězdiček pro hodnocení">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css" />
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        body::after {
+            content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .03;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 200px 200px;
+        }
+
+        .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
+
+        .hero-bg {
+            background:
+                    radial-gradient(ellipse 70% 80% at 30% 30%, rgba(20,150,140,0.7) 0%, transparent 60%),
+                    radial-gradient(ellipse 60% 60% at 80% 10%, rgba(60,100,160,0.55) 0%, transparent 55%),
+                    radial-gradient(ellipse 50% 70% at 60% 70%, rgba(80,130,80,0.35) 0%, transparent 55%),
+                    radial-gradient(ellipse 40% 40% at 10% 80%, rgba(20,80,120,0.45) 0%, transparent 50%),
+                    #0a0a0a;
+            animation: heroShift 14s ease-in-out infinite alternate;
+        }
+        @keyframes heroShift {
+            0%   { filter: hue-rotate(0deg) brightness(1); }
+            50%  { filter: hue-rotate(6deg) brightness(1.03); }
+            100% { filter: hue-rotate(0deg) brightness(1); }
+        }
+
+        header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(0,0,0,0.75); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease;
+        }
+
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 80px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .logo-interactive-trigger {
+            font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: .05em; color: #fff;
+            display: flex; align-items: center; gap: 12px; text-decoration: none; background: none; border: none; cursor: pointer; padding: 4px 0;
+        }
+        .logo-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.25); transition: background 0.2s ease; }
+        .nav-right { display: flex; align-items: center; gap: 32px; }
+
+        .desktop-nav { display: none; gap: 24px; }
+        @media (min-width: 768px) { .desktop-nav { display: flex; } }
+        .desktop-nav a { font-size: 0.9rem; color: rgba(255,255,255,0.7); transition: color 0.2s; font-weight: 500; text-transform: uppercase; }
+        .desktop-nav a:hover { color: #fff; }
+
+        .nav-social { display: flex; align-items: center; gap: 16px; }
+        .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
+        .nav-social a:hover { opacity: 1; }
+
+        #burger-overlay {
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(0,0,0,0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        #burger-overlay.open { display: flex; opacity: 1; }
+        #burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 32px; }
+        #burger-overlay a.menu-link {
+            font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 5vw, 3.5rem);
+            color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
+        }
+        #burger-overlay a.menu-link:hover { color: #fff; }
+
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 6px; padding: 12px 26px;
+            background: #fff; color: #000; font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 500;
+            border: 1px solid #fff; border-radius: 6px; cursor: pointer; text-decoration: none;
+            transition: background .2s, color .2s, transform .15s; white-space: nowrap;
+        }
+        .btn-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 6px; padding: 12px 26px;
+            background: transparent; color: #fff; font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 400;
+            border: 1px solid rgba(255,255,255,0.35); border-radius: 6px; cursor: pointer; text-decoration: none;
+            transition: border-color .2s, background .2s, transform .15s; white-space: nowrap;
+        }
+        .btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+
+        .btn-dark {
+            display: inline-flex; align-items: center; gap: 6px; padding: 11px 24px;
+            background: transparent; color: #fff; font-size: .875rem; font-weight: 400;
+            border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; cursor: pointer; text-decoration: none;
+            transition: border-color .2s, background .2s; white-space: nowrap;
+        }
+        .btn-dark:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
+
+        .content-card { display: flex; flex-direction: column; gap: 16px; }
+        .content-card-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; position: relative; }
+        .grad-noise::after {
+            content: ''; position: absolute; inset: 0; opacity: .14;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 150px; mix-blend-mode: overlay;
+        }
+
+        .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+        @media (max-width: 767px) { .feature-row { grid-template-columns: 1fr; gap: 24px; } .feature-row-reverse .feature-img { order: -1; } }
+        .feature-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; }
+        .feature-text { display: flex; flex-direction: column; gap: 14px; }
+
+        .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+        @media (max-width: 767px) { .three-col { grid-template-columns: 1fr; gap: 36px; } }
+
+        .checker {
+            background-color: #1c1c1c;
+            background-image: linear-gradient(45deg, #252525 25%, transparent 25%), linear-gradient(-45deg, #252525 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #252525 75%), linear-gradient(-45deg, transparent 75%, #252525 75%);
+            background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: float linear infinite; opacity: 0; }
+        @keyframes float { 0% { transform: translateY(100vh) translateX(0); opacity: 0; } 10% { opacity: .6; } 90% { opacity: .3; } 100% { transform: translateY(-10vh) translateX(40px); opacity: 0; } }
+
+        .text-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 36px; }
+        @media (max-width: 767px) { .text-row { grid-template-columns: 1fr; gap: 24px; } }
+        .text-block h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; letter-spacing: .05em; color: #fff; margin-bottom: 8px; }
+        .text-block p { font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+        .logo-strip { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 40px; }
+        .logo-item { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.4); font-size: .85rem; font-weight: 500; }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
+        footer { border-top: 1px solid rgba(255,255,255,0.1); background: #000; }
+        .footer-inner { max-width: 1280px; margin: 0 auto; padding: 48px 24px 40px; }
+        .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1.2fr 1fr; gap: 48px; }
+        @media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 36px; } }
+        @media (max-width: 600px) { .footer-grid { grid-template-columns: 1fr; gap: 28px; } }
+        .footer-col h4 { font-size: .75rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .footer-col ul li a { font-size: .9rem; color: rgba(255,255,255,0.65); text-decoration: none; transition: color .2s; }
+        .footer-col ul li a:hover { color: #fff; }
+        .footer-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .05em; color: #fff; margin-bottom: 8px; display: block; }
+        .footer-tagline { font-size: .875rem; color: rgba(255,255,255,0.45); line-height: 1.5; margin-bottom: 18px; }
+        .footer-socials { display: flex; gap: 14px; }
+        .footer-socials a { color: rgba(255,255,255,0.5); font-size: 1.25rem; transition: color .2s; }
+        .footer-socials a:hover { color: #fff; }
+    </style>
+</head>
+
+<body>
+
+<div id="cookie-banner" style="z-index:99999" class="hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-4 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <p class="text-sm text-gray-400 leading-relaxed flex-1">
+            Používáme cookies ke zlepšení vašeho zážitku a analýze návštěvnosti.
+        </p>
+        <div class="flex items-center gap-3 flex-shrink-0">
+            <button id="cookie-reject" class="px-4 py-2 text-sm font-medium text-gray-500 hover:text-white border border-white/20 hover:border-white/40 rounded-lg transition-colors">Odmítnout</button>
+            <button id="cookie-settings-btn" class="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white border border-white/30 hover:border-white/50 rounded-lg transition-colors">Nastavení</button>
+            <button id="cookie-accept" class="px-4 py-2 text-sm font-medium text-white bg-white/15 hover:bg-white/25 border border-white/20 rounded-lg transition-colors backdrop-blur-sm">Přijmout vše</button>
+        </div>
+    </div>
+</div>
+
+<div id="cookie-modal" style="z-index:100000" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg p-6">
+        <h2 class="text-lg font-semibold text-white mb-5">Nastavení cookies</h2>
+        <div class="space-y-3 mb-6">
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Nezbytné cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Nutné pro fungování webu.</p>
+                </div>
+                <span class="text-xs text-emerald-400 font-medium">Vždy aktivní</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Analytické cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Pomáhají nám pochopit návštěvnost.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-analytics" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-black after:rounded-full after:w-4 after:h-4 after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Marketingové cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Cílená reklama a personalizace.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-marketing" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-black after:rounded-full after:w-4 after:h-4 after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button id="cookie-save-settings" class="flex-1 py-2 text-sm font-medium text-black bg-white hover:bg-gray-100 rounded-lg transition-colors">Uložit nastavení</button>
+            <button id="cookie-modal-close" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white border border-white/20 rounded-lg transition-colors">Zavřít</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="nav-inner">
+        <div class="flex items-center">
+            <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
+            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
+            <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
+                <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
+                <span id="line-2" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease;"></span>
+            </button>
+        </div>
+
+        <div class="nav-right">
+
+            <nav class="nav-social">
+                <a href="#" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
+                <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<div id="burger-overlay">
+    <nav>
+        <a href="index.html#about" class="menu-link">O NÁS</a>
+        <a href="kariera.html" class="menu-link">KARIÉRA</a>
+        <a href="kontakt.html" class="menu-link">KONTAKT</a>
+        <a href="blog.html" class="menu-link">BLOG</a>
+        <a href="reviews.html" class="menu-link">HODNOCENÍ</a>
+
+        <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
+    </nav>
+</div>
+
+<main class="relative z-20 bg-black pt-20">
+    <section class="py-16 px-6 max-w-4xl mx-auto text-center">
+        <h1 class="font-bebas text-white leading-none tracking-wide mb-4" style="font-size: clamp(2.5rem, 6vw, 4.5rem);">
+            CO O NÁS ŘÍKAJÍ KLIENTI
+        </h1>
+        <p class="text-gray-300 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+            Vaše spokojenost je naší prioritou. Přečtěte si, jak naši klienti hodnotí spolupráci s Wenix, a podělte se o svou zkušenost.
+        </p>
+    </section>
+
+    <section class="py-16 px-6 max-w-4xl mx-auto">
+        <h2 class="font-bebas text-white text-3xl mb-8 text-center">Zanechte nám hodnocení</h2>
+        <div class="bg-[#0f0f0f] border border-white/10 rounded-xl p-8 shadow-lg">
+            <form action="#" method="POST" class="space-y-6">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-300 mb-2">Vaše jméno</label>
+                    <input type="text" id="name" name="name" required
+                           class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Váš e-mail</label>
+                    <input type="email" id="email" name="email" required
+                           class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Hodnocení (hvězdičky)</label>
+                    <div class="flex items-center gap-1">
+                        <input type="radio" id="star5" name="rating" value="5" class="hidden peer">
+                        <label for="star5" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="5 hvězdiček">&#9733;</label>
+                        <input type="radio" id="star4" name="rating" value="4" class="hidden peer">
+                        <label for="star4" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="4 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star3" name="rating" value="3" class="hidden peer">
+                        <label for="star3" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="3 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star2" name="rating" value="2" class="hidden peer">
+                        <label for="star2" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="2 hvězdičky">&#9733;</label>
+                        <input type="radio" id="star1" name="rating" value="1" class="hidden peer">
+                        <label for="star1" class="text-gray-500 peer-hover:text-yellow-400 peer-checked:text-yellow-400 cursor-pointer text-3xl transition-colors" aria-label="1 hvězdička">&#9733;</label>
+                    </div>
+                </div>
+                <div>
+                    <label for="comment" class="block text-sm font-medium text-gray-300 mb-2">Váš komentář</label>
+                    <textarea id="comment" name="comment" rows="5" required
+                              class="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-400"></textarea>
+                </div>
+                <button type="submit" class="btn-primary w-full justify-center">Odeslat hodnocení</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="py-16 px-6 max-w-4xl mx-auto">
+        <h2 class="font-bebas text-white text-3xl mb-8 text-center">Poslední hodnocení</h2>
+        <div class="space-y-8">
+            <div class="bg-[#0f0f0f] border border-white/10 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center mb-3">
+                    <div class="flex text-yellow-400 text-xl mr-3" role="img" aria-label="Hodnocení 5 hvězdiček">
+                        &#9733;&#9733;&#9733;&#9733;&#9733;
+                    </div>
+                    <p class="text-gray-300 font-medium">Jan Novák</p>
+                    <span class="text-gray-500 text-sm ml-auto">15. května 2024</span>
+                </div>
+                <p class="text-gray-400 leading-relaxed">
+                    "Wenix nám vytvořil úžasný statický web, který je bleskově rychlý a vypadá naprosto profesionálně. Komunikace byla skvělá a výsledek předčil naše očekávání. Doporučujeme!"
+                </p>
+            </div>
+            <div class="bg-[#0f0f0f] border border-white/10 rounded-xl p-6 shadow-lg">
+                <div class="flex items-center mb-3">
+                    <div class="flex text-yellow-400 text-xl mr-3" role="img" aria-label="Hodnocení 4 hvězdičky">
+                        &#9733;&#9733;&#9733;&#9733;<span class="text-gray-600">&#9733;</span>
+                    </div>
+                    <p class="text-gray-300 font-medium">Eva Svobodová</p>
+                    <span class="text-gray-500 text-sm ml-auto">10. května 2024</span>
+                </div>
+                <p class="text-gray-400 leading-relaxed">
+                    "Spolupráce na UX/UI designu byla velmi efektivní. Wenix nám pomohl zjednodušit uživatelskou cestu a zlepšit konverze. Drobné zpoždění v dodání, ale celkově spokojenost."
+                </p>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <span class="footer-logo">WENIX</span>
+                <p class="footer-tagline">Váš partner pro moderní weby a čistý design.</p>
+                <div class="footer-socials">
+                    <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                    <a href="#" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Služby</h4>
+                <ul>
+                    <li><a href="index.html#services">Statické weby</a></li>
+                    <li><a href="services-ui-ux.html">Grafický design a úpravy</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>O nás</h4>
+                <ul>
+                    <li><a href="index.html#about">O nás</a></li>
+                    <li><a href="kariera.html">Kariéra</a></li>
+                    <li><a href="reviews.html">Hodnocení</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Systém</h4>
+                <ul>
+                    <li><a href="kontakt.html">Kontakt</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                    <li><a href="cookies.html">Cookies</a></li>
+                    <li><a href="blog.html">Blog</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+            <span style="font-size: .8rem; color: rgba(255,255,255,0.3);">&copy; 2026 Wenix. Všechna práva vyhrazena.</span>
+        </div>
+    </div>
+</footer>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
+
+    // JS pro Cookies
+    (function() {
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+        }
+
+        const banner = document.getElementById('cookie-banner');
+        const modal  = document.getElementById('cookie-modal');
+
+        // Pokud nenajdeme cookie wda_cookie_consent, zobrazíme lištu
+        if (banner && !document.cookie.split('; ').find(c => c.startsWith('wda_cookie_consent='))) {
+            banner.classList.remove('hidden');
+        }
+
+        document.getElementById('cookie-accept')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+            banner.remove();
+        });
+
+        document.getElementById('cookie-reject')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary', 365);
+            banner.remove();
+        });
+
+        document.getElementById('cookie-settings-btn')?.addEventListener('click', () => {
+            modal?.classList.remove('hidden');
+        });
+
+        document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+            modal?.classList.add('hidden');
+        });
+
+        document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+            const parts = ['necessary'];
+            if (document.getElementById('toggle-analytics')?.checked) parts.push('analytics');
+            if (document.getElementById('toggle-marketing')?.checked) parts.push('marketing');
+            setCookie('wda_cookie_consent', parts.join('_'), 365);
+            modal?.classList.add('hidden');
+            banner?.remove();
+        });
+
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+    })();
+
+    // JS pro Burger menu
+    const trigger = document.getElementById('burger-trigger');
+    const overlay = document.getElementById('burger-overlay');
+    const line1   = document.getElementById('line-1');
+    const line2   = document.getElementById('line-2');
+
+    trigger.addEventListener('click', () => {
+        const isOpen = overlay.classList.contains('open');
+
+        if (isOpen) {
+            overlay.classList.remove('open');
+            line1.style.transform = '';
+            line1.style.width = '14px';
+            line2.style.transform = '';
+            document.body.style.overflow = '';
+        } else {
+            overlay.classList.add('open');
+            line1.style.width = '14px';
+            line1.style.transform = 'translateY(3px) rotate(45deg)';
+            line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+
+    overlay.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            overlay.classList.remove('open');
+            line1.style.transform = '';
+            line1.style.width = '14px';
+            line2.style.transform = '';
+            document.body.style.overflow = '';
+        });
+    });
+
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', () => {
+        header.style.background = window.scrollY > 8 ? 'rgba(0,0,0,0.94)' : 'rgba(0,0,0,0.75)';
+    }, { passive: true });
+
+    (function initParticles() {
+        const container = document.getElementById('particles');
+        if (!container) return;
+        const colors = ['rgba(20,150,140,0.4)', 'rgba(60,100,160,0.4)', 'rgba(80,130,80,0.2)'];
+        for (let i = 0; i < 22; i++) {
+            const p = document.createElement('div');
+            const size = Math.random() * 3 + 1;
+            p.className = 'particle';
+            p.style.cssText = [
+                `width:${size}px`, `height:${size}px`, `left:${Math.random() * 100}%`,
+                `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+                `animation-duration:${Math.random() * 14 + 8}s`,
+                `animation-delay:${Math.random() * 10}s`
+            ].join(';');
+            container.appendChild(p);
+        }
+    })();
+
+    function showHomeToast(message, type = 'success') {
+        const existing = document.getElementById('home-toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        const bg = type === 'success' ? 'bg-white text-black' : 'bg-red-600 text-white';
+        toast.id = 'home-toast';
+        toast.className = `fixed bottom-6 right-6 z-[99999] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-sm font-medium transition-all duration-300 opacity-0 translate-y-2 ${bg}`;
+        toast.innerHTML = type === 'success'
+            ? `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>${message}`
+            : `<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>${message}`;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.remove('opacity-0', 'translate-y-2'), 10);
+        setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 4000);
+    }
+
+    function copyEmailToClipboard(e) {
+        if(e) e.preventDefault();
+        navigator.clipboard.writeText('auersvald@wenix.cz').then(() => {
+            showHomeToast('E-mail auersvald@wenix.cz byl zkopírován do schránky.');
+        }).catch(() => {
+            showHomeToast('Nepodařilo se zkopírovat e-mail.', 'error');
+        });
+    }
+</script>
+</body>
+</html>

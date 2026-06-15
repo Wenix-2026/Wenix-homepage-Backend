@@ -424,14 +424,14 @@
         </p>
 
         <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;" data-aos="fade-up" data-aos-delay="120">
-            <a href="mailto:info@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary">Chci konzultaci</a>
+            <a href="kontakt.html" class="btn-primary">Chci konzultaci</a>
             <a href="#about" class="btn-secondary">O nás</a>
         </div>
     </div>
 
-    <div class="relative z-20 w-full max-w-7xl mx-auto px-6 mt-auto" style="margin-top: 19rem;">
-        <div class="checker" style="width: 100%; height: 480px; border-radius: 12px 12px 0 0; opacity: .4;"></div>
-    </div>
+<!--    <div class="relative z-20 w-full max-w-7xl mx-auto px-6 mt-auto" style="margin-top: 19rem;">-->
+<!--        <div class="checker" style="width: 100%; height: 480px; border-radius: 12px 12px 0 0; opacity: .4;"></div>-->
+<!--    </div>-->
 </section>
 
 <div class="relative z-20 bg-black shadow-[0_-40px_80px_rgba(0,0,0,0.95)]">
@@ -456,7 +456,7 @@
                             Vyvíjíme webové stránky přímo v kódu. Bez použití těžkopádných redakčních systémů dosahujeme dokonalé rychlosti a stability na jakémkoliv zařízení.
                         </p>
                         <div>
-                            <a href="mailto:auersvald@wenix.cz" onclick="copyEmailToClipboard(event)" class="btn-primary" style="margin-top: 4px;">Poptat řešení</a>
+                            <a href="kontakt.html"  class="btn-primary" style="margin-top: 4px;">Poptat řešení</a>
                         </div>
                     </div>
                     <div class="feature-img grad-noise" style="position: relative; min-height: 280px; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(20,160,150,0.8) 0%, rgba(40,100,150,0.5) 50%, rgba(0,0,0,0) 100%);">
@@ -473,9 +473,9 @@
                         <p style="font-size: .9rem; color: rgba(255,255,255,0.5); line-height: 1.7;">
                             Navrhneme moderní vzhled pro váš nový projekt nebo kompletně předěláme ten stávající. Soustředíme se na to, aby se návštěvníci na webu snadno orientovali.
                         </p>
-                        <div>
-                            <a href="services-ui-ux.html" class="btn-dark" style="margin-top: 4px;">Zobrazit detaily</a>
-                        </div>
+<!--                        <div>-->
+<!--                            <a href="services-ui-ux.html" class="btn-dark" style="margin-top: 4px;">Zobrazit detaily</a>-->
+<!--                        </div>-->
                     </div>
                 </div>
             </div>
@@ -749,9 +749,21 @@
                 </div>
 
                 <div class="content-card">
-                    <div class="content-card-img grad-noise" style="min-height: 230px; background: #e85d04;">
-                        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.15) 0%, transparent 70%);"></div>
+                    <!-- Přidáno flex, centrování a tmavé pozadí, které simuluje pozadí terminálu -->
+                    <div class="content-card-img grad-noise relative overflow-hidden flex items-center justify-center bg-[#121214]" style="min-height: 230px;">
+
+                        <!-- Obrázek má teď object-contain (neřeže se) a p-4 pro vnitřní odsazení od krajů -->
+                        <img
+                                src="images/cli.webp"
+                                alt="Správa a podpora"
+                                loading="lazy"
+                                class="absolute inset-0 w-full h-full object-contain p-5 z-0"
+                        />
+
+                        <!-- Přechodový závoj jemně ztmavený na okrajích, aby to celé sedlo do dark modu karty -->
+                        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%);" class="z-10 pointer-events-none"></div>
                     </div>
+
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">SPRÁVA A PODPORA</h3>
                         <p style="font-size: .875rem; color: rgba(255,255,255,0.5); line-height: 1.6;">Nasazení na doménu, zajištění hostingu a případné další rozšiřování obsahu v budoucnu.</p>
