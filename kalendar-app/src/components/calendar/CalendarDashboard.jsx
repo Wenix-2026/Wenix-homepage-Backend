@@ -12,10 +12,6 @@ import { useProfiles }        from '../../hooks/useProfiles'
 export function CalendarDashboard() {
     const cal = useCalendar()
     const { events, createEvent, updateEvent, deleteEvent } = useEvents(cal.year, cal.month)
-
-    // Zdroj pravdy pro VŠECHNY registrované členy týmu (i ty bez jediné
-    // přiřazené události) — bez tohohle by dropdown v EventModalu zobrazoval
-    // jen lidi, kteří se náhodou objevili v allEvents.
     const { profiles: allProfiles } = useProfiles()
 
     const [createModal, setCreateModal] = useState({ open: false, date: null })
@@ -31,9 +27,10 @@ export function CalendarDashboard() {
 
     function openDetail(event) { setDetailModal({ open: true, event }) }
 
-    async function handleSave(payload) {
-        if (payload.id) {
-            await updateEvent(payload.id, payload)
+    // Přizpůsobeno pro starší EventModal, který vrací (payload, id)
+    async function handleSave(payload, id) {
+        if (id) {
+            await updateEvent(id, payload)
             setEditModal({ open: false, event: null })
         } else {
             await createEvent(payload)
@@ -73,23 +70,19 @@ export function CalendarDashboard() {
             </main>
 
             <EventModal
-                isOpen={createModal.open}
+                open={createModal.open}
                 onClose={() => setCreateModal({ open: false, date: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
-                selectedDate={createModal.date}
-                allEvents={events}
-                allProfiles={allProfiles}
+                initialDate={createModal.date}
             />
 
             <EventModal
-                isOpen={editModal.open}
+                open={editModal.open}
                 onClose={() => setEditModal({ open: false, event: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
-                initialData={editModal.event}
-                allEvents={events}
-                allProfiles={allProfiles}
+                event={editModal.event}
             />
 
             <EventDetailModal
