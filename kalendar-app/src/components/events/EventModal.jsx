@@ -3,13 +3,14 @@ import { X, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
 
 /**
- * allProfiles: [{ id, full_name, email, avatar_url }] — z useProfiles()
- * initialData.event_assignees: [{ profiles: { id, full_name, email, ... } }] — ze Supabase JOINu
+ * allEvents: pole událostí ze Supabase (výstup useEvents().events)
+ *   Tvar jedné události: { ..., event_assignees: [{ profile_id, profiles: { id, full_name, email, avatar_url } }] }
  *
- * Members se v UI zobrazují jako e-maily (string[]), ale interně se vždy
- * mapují na profile.id, protože DB ukládá vztah přes event_assignees (M:N).
+ * initialData (při editaci) má STEJNÝ tvar jako prvek z allEvents, protože
+ * je to přímo položka z events array — proto initialData.event_assignees
+ * a "dbMembers" extrakce z allEvents používají identickou logiku.
  */
-export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allProfiles = [] }) {
+export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isAllDay, setIsAllDay] = useState(false)
@@ -25,10 +26,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [tagInput, setTagInput] = useState('')
   const membersRef = useRef(null)
 
-  // ── Pomocná mapa email <-> id, vždy odvozená z allProfiles ──
-  const profileById    = Object.fromEntries(allProfiles.map(p => [p.id, p]))
-  const profileByEmail = Object.fromEntries(allProfiles.map(p => [p.email, p]))
-
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '')
@@ -39,14 +36,13 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
       setIsAllDay(isAllDayCheck || false)
 
-      // ── NEPRŮSTŘELNÁ extrakce přiřazených členů ──
-      // Supabase JOIN tvar: event_assignees: [{ profiles: { id, email, ... } }]
-      // Fallback pro starší/jiný tvar dat, kdyby modal dostal něco jiného.
+      // ── NEPRŮSTŘELNÁ extrakce přiřazených členů z relační tabulky ──
+      // Supabase JOIN tvar: event_assignees: [{ profile_id, profiles: { id, email, ... } }]
       let safeMemberIds = []
       const assignees = initialData?.event_assignees
       if (Array.isArray(assignees)) {
         safeMemberIds = assignees
-            .map((a) => a?.profiles?.id || a?.profile_id || a?.id)
+            .map((a) => a?.profile_id || a?.profiles?.id)
             .filter(Boolean)
       }
       setMemberIds(safeMemberIds)
@@ -94,8 +90,31 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
   if (!isOpen) return null
 
-  // Seznam profilů k zobrazení v dropdownu — přímo z DB, žádné parsování undefined řetězců
-  const AVAILABLE_PROFILES = allProfiles
+  // ── NEPRŮSTŘELNÁ extrakce unikátních profilů ze VŠECH událostí ──
+  // allEvents[].event_assignees je pole { profile_id, profiles: {...} }.
+  // Sbíráme rovnou objekty profiles (ne stringy), abychom v dropdownu
+  // mohli zobrazit jméno i e-mail a interně použít profile.id.
+  const profileMap = new Map()
+  allEvents.forEach((ev) => {
+    const assignees = ev?.event_assignees
+    if (!Array.isArray(assignees)) return
+    assignees.forEach((a) => {
+      const profile = a?.profiles
+      if (profile?.id && !profileMap.has(profile.id)) {
+        profileMap.set(profile.id, profile)
+      }
+    })
+  })
+  // Doplníme i tvůrce události (profiles: created_by) — užitečné, pokud
+  // ještě nemá žádnou přiřazenou událost jako assignee.
+  allEvents.forEach((ev) => {
+    const creator = ev?.profiles
+    if (creator?.id && !profileMap.has(creator.id)) {
+      profileMap.set(creator.id, creator)
+    }
+  })
+
+  const AVAILABLE_PROFILES = Array.from(profileMap.values())
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -111,8 +130,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
 
     // DŮLEŽITÉ: "members" se NEPOSÍLÁ — tabulka events tento sloupec nemá.
-    // Místo toho jde assigneeIds (profile.id[]), které hook useEvents
-    // zapíše do vazební tabulky event_assignees.
+    // assigneeIds (profile.id[]) zapíše hook useEvents do event_assignees.
     const eventData = {
       title,
       description,
@@ -144,7 +162,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }
 
-  const selectedProfiles = memberIds.map(id => profileById[id]).filter(Boolean)
+  const selectedProfiles = memberIds
+      .map(id => AVAILABLE_PROFILES.find(p => p.id === id))
+      .filter(Boolean)
+
   const filteredProfiles = AVAILABLE_PROFILES.filter(p =>
       (p.email || '').toLowerCase().includes(memberInput.toLowerCase()) ||
       (p.full_name || '').toLowerCase().includes(memberInput.toLowerCase())
@@ -268,7 +289,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                     />
                     <div className="max-h-48 overflow-y-auto custom-scrollbar">
                       {filteredProfiles.length === 0 && (
-                          <div className="px-4 py-3 text-sm text-white/30">Žádní členové k zobrazení</div>
+                          <div className="px-4 py-3 text-sm text-white/30">
+                            {AVAILABLE_PROFILES.length === 0
+                                ? 'Zatím žádní členové (vytvoř první událost s přiřazením, nebo počkej na registraci kolegů)'
+                                : 'Žádná shoda'}
+                          </div>
                       )}
                       {filteredProfiles.map(profile => (
                           <div

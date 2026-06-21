@@ -20,13 +20,15 @@ export function useEvents(year, month) {
       const from = new Date(safeYear, safeMonth, 1).toISOString()
       const to   = new Date(safeYear, safeMonth + 1, 1).toISOString()
 
-      // POZOR: Supabase vrací klíč "error", ne "fetchError" — předtím se chyby tiše ztrácely
+      // Supabase JOIN: event_assignees je pole objektů { profiles: {...} }
+      // protože event_assignees má FK na profiles a Supabase to automaticky zanoří.
       const { data, error: fetchError } = await supabase
           .from('events')
           .select(`
           *,
           profiles:created_by ( id, full_name, email, avatar_url ),
           event_assignees (
+            profile_id,
             profiles ( id, full_name, email, avatar_url )
           )
         `)
@@ -80,12 +82,29 @@ export function useEvents(year, month) {
 
     if (evErr) throw new Error(evErr.message)
 
-    // Přepis assignees — smazat staré, vložit nové
+    // ── Přepis assignees: NEJDŘÍV smazat staré, AŽ POTOM vložit nové ──
+    // DŮLEŽITÉ: obě operace musí svoji chybu zkontrolovat. Pokud DELETE
+    // tiše selže (např. RLS), následný INSERT narazí na duplicitní
+    // (event_id, profile_id) primární klíč a Supabase vrátí 409 Conflict.
     if (assigneeIds !== undefined) {
-      await supabase.from('event_assignees').delete().eq('event_id', id)
+      const { error: delErr } = await supabase
+          .from('event_assignees')
+          .delete()
+          .eq('event_id', id)
+
+      if (delErr) throw new Error(`Smazání starých assignees selhalo: ${delErr.message}`)
+
       if (assigneeIds.length > 0) {
         const rows = assigneeIds.map((profile_id) => ({ event_id: id, profile_id }))
-        await supabase.from('event_assignees').insert(rows)
+
+        // upsert s ignoreDuplicates jako pojistka navíc — i kdyby DELETE
+        // z nějakého důvodu nestihlo doběhnout (race condition), INSERT
+        // nespadne na 409, ale duplicitu jen přeskočí.
+        const { error: asErr } = await supabase
+            .from('event_assignees')
+            .upsert(rows, { onConflict: 'event_id,profile_id', ignoreDuplicates: true })
+
+        if (asErr) throw new Error(`Vložení nových assignees selhalo: ${asErr.message}`)
       }
     }
 
