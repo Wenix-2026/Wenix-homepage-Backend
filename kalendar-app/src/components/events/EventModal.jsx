@@ -23,34 +23,53 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const membersRef = useRef(null)
 
   // Naplnění dat při otevření
+  // Naplnění dat při otevření
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '')
       setDescription(initialData?.description || '')
       setIsAllDay(initialData?.is_all_day || false)
       setMeetLink(initialData?.meet_link || '')
-
-      // Zajištění, že members a tags jsou vždy pole, i když z databáze přijde null
-      setMembers(initialData?.members ? (Array.isArray(initialData.members) ? initialData.members : [initialData.members]) : [])
-      setTags(initialData?.tags ? (Array.isArray(initialData.tags) ? initialData.tags : [initialData.tags]) : [])
       setReminder(initialData?.reminder || '1 den před')
 
-      // Formátování data pro inputy
-      if (initialData?.start_time) {
-        setStartStr(format(new Date(initialData.start_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
-      } else {
-        const d = selectedDate ? new Date(selectedDate) : new Date()
-        setStartStr(format(d, "yyyy-MM-dd'T'09:00"))
+      // OPRAVA: Neprůstřelné formátování členů (pokud jsou ze staré databáze jako objekty)
+      let safeMembers = []
+      if (initialData?.members) {
+        const rawMembers = Array.isArray(initialData.members) ? initialData.members : [initialData.members]
+        // Pokud je to objekt (má např. vlastnost name), vytáhneme jen text, jinak to necháme jako text
+        safeMembers = rawMembers.map(m => typeof m === 'object' && m !== null ? (m.name || m.title || String(m)) : String(m))
       }
+      setMembers(safeMembers)
 
-      if (initialData?.end_time) {
-        setEndStr(format(new Date(initialData.end_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
-      } else {
-        const d = selectedDate ? new Date(selectedDate) : new Date()
-        setEndStr(format(d, "yyyy-MM-dd'T'10:00"))
+      // OPRAVA: Neprůstřelné formátování tagů
+      let safeTags = []
+      if (initialData?.tags) {
+        const rawTags = Array.isArray(initialData.tags) ? initialData.tags : [initialData.tags]
+        safeTags = rawTags.map(t => typeof t === 'object' && t !== null ? (t.name || t.title || String(t)) : String(t))
+      }
+      setTags(safeTags)
+
+      // Formátování data pro inputy (s ochranou proti poškozenému datumu v databázi)
+      try {
+        if (initialData?.start_time) {
+          setStartStr(format(new Date(initialData.start_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
+        } else {
+          const d = selectedDate ? new Date(selectedDate) : new Date()
+          setStartStr(format(d, "yyyy-MM-dd'T'09:00"))
+        }
+
+        if (initialData?.end_time) {
+          setEndStr(format(new Date(initialData.end_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
+        } else {
+          const d = selectedDate ? new Date(selectedDate) : new Date()
+          setEndStr(format(d, "yyyy-MM-dd'T'10:00"))
+        }
+      } catch (error) {
+        console.error("Chyba při parsování data:", error)
       }
     }
   }, [isOpen, initialData, selectedDate])
+
 
   // Zavření dropdownu při kliknutí jinam
   useEffect(() => {
