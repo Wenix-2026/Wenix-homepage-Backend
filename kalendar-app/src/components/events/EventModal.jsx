@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, ChevronDown, Search, Megaphone } from 'lucide-react'
+import { X, ChevronDown, Search, Megaphone, Mail } from 'lucide-react'
 import { format } from 'date-fns'
 
 const AVATAR_COLORS = [
@@ -45,6 +45,18 @@ function AllOptionAvatar({ size = 'sm' }) {
   )
 }
 
+// Avatar pro ručně napsaný e-mail mimo profiles — obálka místo iniciály,
+// protože u takového kontaktu neznáme jméno ani fotku.
+function ExtraEmailAvatar({ size = 'sm' }) {
+  const dims = size === 'sm' ? 'w-4 h-4' : 'w-7 h-7'
+  const iconSize = size === 'sm' ? 8 : 14
+  return (
+      <div className={`${dims} bg-blue/30 rounded-full flex items-center justify-center shrink-0 ring-1 ring-blue/40`}>
+        <Mail size={iconSize} className="text-blue" strokeWidth={2.5} />
+      </div>
+  )
+}
+
 /**
  * allEvents:    pole událostí ze Supabase (výstup useEvents().events)
  * allProfiles:  VŠICHNI registrovaní uživatelé (výstup useProfiles().profiles)
@@ -63,6 +75,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [meetLink, setMeetLink] = useState('')
   const [memberIds, setMemberIds] = useState([])      // profile.id[]
   const [notifyAll, setNotifyAll] = useState(false)   // true = "all" zvolena namísto konkrétních lidí
+  const [extraEmails, setExtraEmails] = useState([])  // string[] — ručně napsané e-maily mimo profiles
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
@@ -95,6 +108,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
         }
       }
       setMemberIds(safeMemberIds)
+
+      const safeExtraEmails = Array.isArray(initialData?.extra_emails)
+          ? initialData.extra_emails.filter((e) => typeof e === 'string' && e.trim() !== '')
+          : []
+      setExtraEmails(safeExtraEmails)
 
       let safeTags = []
       if (initialData?.tags) {
@@ -187,8 +205,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       reminder_minutes: reminderToMinutes(reminder),
       notify_all: notifyAll,
       // Pokud je zvolena hromadná notifikace, žádní jednotliví assignees
-      // se neukládají — notify_all sloupec je jediný zdroj pravdy.
+      // ani ručně napsané e-maily se neukládají — notify_all je jediný
+      // zdroj pravdy a nemá smysl ho kombinovat s konkrétním seznamem.
       assigneeIds: notifyAll ? [] : memberIds,
+      extra_emails: notifyAll ? [] : extraEmails,
     }
 
     if (initialData?.id) {
@@ -198,14 +218,18 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     onSave(eventData)
   }
 
-  // Výběr "all" je vzájemně vylučující s konkrétními lidmi — vybrání jednoho
-  // vždy vyprázdní druhý, aby v DB nikdy nešlo notify_all=true SOUČASNĚ
-  // s naplněným event_assignees (nejednoznačná sémantika "komu poslat e-mail").
+  // Výběr "all" je vzájemně vylučující s konkrétními lidmi i ručně psanými
+  // e-maily — vybrání "all" vždy vyprázdní obojí, aby v DB nikdy nešlo
+  // notify_all=true SOUČASNĚ s naplněným event_assignees/extra_emails
+  // (nejednoznačná sémantika "komu poslat e-mail").
   const toggleMember = (profileId) => {
     if (profileId === ALL_OPTION.id) {
       setNotifyAll((prev) => {
         const next = !prev
-        if (next) setMemberIds([])
+        if (next) {
+          setMemberIds([])
+          setExtraEmails([])
+        }
         return next
       })
       return
@@ -213,6 +237,42 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
     setNotifyAll(false)
     setMemberIds(prev => prev.includes(profileId) ? prev.filter(id => id !== profileId) : [...prev, profileId])
+  }
+
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+  function addExtraEmail(rawValue) {
+    const value = rawValue.trim().toLowerCase()
+    if (!value) return false
+    if (!EMAIL_REGEX.test(value)) return false
+
+    // Pokud zadaný e-mail patří existujícímu profilu, raději ho přidáme
+    // jako skutečného člena (memberIds) — vyhneme se duplicitě stejného
+    // člověka jednou v event_assignees a jednou v extra_emails.
+    const matchingProfile = AVAILABLE_PROFILES.find((p) => (p.email || '').toLowerCase() === value)
+    if (matchingProfile) {
+      setNotifyAll(false)
+      setMemberIds((prev) => prev.includes(matchingProfile.id) ? prev : [...prev, matchingProfile.id])
+      return true
+    }
+
+    if (extraEmails.includes(value)) return false
+
+    setNotifyAll(false)
+    setExtraEmails((prev) => [...prev, value])
+    return true
+  }
+
+  function removeExtraEmail(email) {
+    setExtraEmails((prev) => prev.filter((e) => e !== email))
+  }
+
+  const handleMemberInputKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      const added = addExtraEmail(memberInput)
+      if (added) setMemberInput('')
+    }
   }
 
   const handleTagKeyDown = (e) => {
@@ -225,9 +285,19 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }
 
+  const extraEmailProfiles = extraEmails.map((email) => ({
+    id: `extra:${email}`,
+    full_name: null,
+    email,
+    isExtraEmail: true,
+  }))
+
   const selectedProfiles = notifyAll
       ? [ALL_OPTION]
-      : memberIds.map(id => AVAILABLE_PROFILES.find(p => p.id === id)).filter(Boolean)
+      : [
+        ...memberIds.map(id => AVAILABLE_PROFILES.find(p => p.id === id)).filter(Boolean),
+        ...extraEmailProfiles,
+      ]
 
   // Filtrace zároveň podle jména i e-mailu (case-insensitive, diakritika
   // se neřeší — pro plné fulltextové vyhledávání by šlo doplnit normalizaci).
@@ -335,19 +405,34 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                   className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 min-h-[42px] cursor-pointer flex items-center flex-wrap gap-2 transition-colors hover:border-white/20"
               >
                 {selectedProfiles.length === 0 && <span className="text-white/40 text-sm">Vyber členy týmu...</span>}
-                {selectedProfiles.map(profile => (
-                    <div key={profile.id} className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border ${
-                        profile.isAllOption
-                            ? 'bg-teal/15 border-teal/30 text-teal'
-                            : 'bg-white/10 border-white/5 text-white'
-                    }`}>
-                      {profile.isAllOption ? <AllOptionAvatar size="sm" /> : <MemberAvatar profile={profile} size="sm" />}
-                      {profile.full_name || profile.email}
-                      <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(profile.id); }} className="hover:text-red-400 ml-1">
-                        <X size={12} />
-                      </button>
-                    </div>
-                ))}
+                {selectedProfiles.map(profile => {
+                  const pillCls = profile.isAllOption
+                      ? 'bg-teal/15 border-teal/30 text-teal'
+                      : profile.isExtraEmail
+                          ? 'bg-blue/15 border-blue/30 text-blue'
+                          : 'bg-white/10 border-white/5 text-white'
+                  return (
+                      <div key={profile.id} className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border ${pillCls}`}>
+                        {profile.isAllOption
+                            ? <AllOptionAvatar size="sm" />
+                            : profile.isExtraEmail
+                                ? <ExtraEmailAvatar size="sm" />
+                                : <MemberAvatar profile={profile} size="sm" />}
+                        {profile.full_name || profile.email}
+                        <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (profile.isExtraEmail) removeExtraEmail(profile.email)
+                              else toggleMember(profile.id)
+                            }}
+                            className="hover:text-red-400 ml-1"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                  )
+                })}
                 <ChevronDown size={16} className={`text-white/40 ml-auto transition-transform duration-200 ${isMembersOpen ? 'rotate-180' : ''}`} />
               </div>
 
@@ -365,18 +450,26 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                         type="text"
                         value={memberInput}
                         onChange={(e) => setMemberInput(e.target.value)}
-                        placeholder="Vyhledat jméno nebo e-mail..."
+                        onKeyDown={handleMemberInputKeyDown}
+                        placeholder="Vyhledat nebo napsat e-mail a stisknout Enter..."
                         className="w-full bg-transparent text-white pl-9 pr-4 py-3 text-sm focus:outline-none placeholder:text-white/30"
                         onClick={(e) => e.stopPropagation()}
                     />
                   </div>
+                  {memberInput.trim() !== '' && filteredProfiles.length === 0 && (
+                      <div className="px-4 pt-2 pb-1 -mt-1">
+                      <span className={`text-xs ${EMAIL_REGEX.test(memberInput.trim().toLowerCase()) ? 'text-teal/80' : 'text-white/30'}`}>
+                        {EMAIL_REGEX.test(memberInput.trim().toLowerCase())
+                            ? 'Stiskni Enter pro přidání tohoto e-mailu'
+                            : 'Napiš platný e-mail a stiskni Enter, nebo vyber ze seznamu'}
+                      </span>
+                      </div>
+                  )}
 
                   <div className="max-h-56 overflow-y-auto custom-scrollbar py-1">
-                    {filteredProfiles.length === 0 && (
+                    {filteredProfiles.length === 0 && memberInput.trim() === '' && (
                         <div className="px-4 py-4 text-sm text-white/30 text-center">
-                          {AVAILABLE_PROFILES.length === 0
-                              ? 'Zatím žádní registrovaní členové'
-                              : `Žádná shoda pro „${memberInput}“`}
+                          Zatím žádní registrovaní členové
                         </div>
                     )}
                     {filteredProfiles.map((profile) => {
