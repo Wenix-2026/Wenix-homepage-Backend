@@ -2,14 +2,21 @@ import { useState, useEffect, useRef } from 'react'
 import { X, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
 
-export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
+/**
+ * allProfiles: [{ id, full_name, email, avatar_url }] — z useProfiles()
+ * initialData.event_assignees: [{ profiles: { id, full_name, email, ... } }] — ze Supabase JOINu
+ *
+ * Members se v UI zobrazují jako e-maily (string[]), ale interně se vždy
+ * mapují na profile.id, protože DB ukládá vztah přes event_assignees (M:N).
+ */
+export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allProfiles = [] }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isAllDay, setIsAllDay] = useState(false)
   const [startStr, setStartStr] = useState('')
   const [endStr, setEndStr] = useState('')
   const [meetLink, setMeetLink] = useState('')
-  const [members, setMembers] = useState([])
+  const [memberIds, setMemberIds] = useState([])      // profile.id[]
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
@@ -18,24 +25,31 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [tagInput, setTagInput] = useState('')
   const membersRef = useRef(null)
 
+  // ── Pomocná mapa email <-> id, vždy odvozená z allProfiles ──
+  const profileById    = Object.fromEntries(allProfiles.map(p => [p.id, p]))
+  const profileByEmail = Object.fromEntries(allProfiles.map(p => [p.email, p]))
+
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '')
       setDescription(initialData?.description || '')
-      setMeetLink(initialData?.meet_link || '')
+      setMeetLink(initialData?.location_link || initialData?.meet_link || '')
       setReminder(initialData?.reminder || '1 den před')
 
       const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
       setIsAllDay(isAllDayCheck || false)
 
-      let safeMembers = []
-      if (initialData?.members && initialData.members !== 'undefined') {
-        const rawMembers = Array.isArray(initialData.members) ? initialData.members : [initialData.members]
-        safeMembers = rawMembers
-            .map(m => typeof m === 'object' && m !== null ? (m.name || m.title || String(m)) : String(m))
-            .filter(m => m !== 'undefined' && m !== 'null' && m.trim() !== '')
+      // ── NEPRŮSTŘELNÁ extrakce přiřazených členů ──
+      // Supabase JOIN tvar: event_assignees: [{ profiles: { id, email, ... } }]
+      // Fallback pro starší/jiný tvar dat, kdyby modal dostal něco jiného.
+      let safeMemberIds = []
+      const assignees = initialData?.event_assignees
+      if (Array.isArray(assignees)) {
+        safeMemberIds = assignees
+            .map((a) => a?.profiles?.id || a?.profile_id || a?.id)
+            .filter(Boolean)
       }
-      setMembers(safeMembers)
+      setMemberIds(safeMemberIds)
 
       let safeTags = []
       if (initialData?.tags) {
@@ -80,17 +94,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
   if (!isOpen) return null
 
-  // Extrakce z DB a tvrdý filtr na nesmysly
-  const dbMembers = [...new Set(allEvents.flatMap(e => {
-    if (!e || !e.members) return []
-    const mArray = Array.isArray(e.members) ? e.members : [e.members]
-    return mArray.map(m => {
-      if (!m || m === 'undefined' || m === 'null') return null
-      return typeof m === 'object' ? (m.name || m.title || String(m)) : String(m)
-    })
-  }))].filter(m => m && m !== 'all@wenix.cz' && m !== 'undefined' && m.trim() !== '')
-
-  const AVAILABLE_MEMBERS = ['all@wenix.cz', ...dbMembers]
+  // Seznam profilů k zobrazení v dropdownu — přímo z DB, žádné parsování undefined řetězců
+  const AVAILABLE_PROFILES = allProfiles
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -105,15 +110,17 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       endIso = `${endStr}:00`
     }
 
-    // Odesíláme čistá data, meet_link a is_all_day úmyslně chybí
+    // DŮLEŽITÉ: "members" se NEPOSÍLÁ — tabulka events tento sloupec nemá.
+    // Místo toho jde assigneeIds (profile.id[]), které hook useEvents
+    // zapíše do vazební tabulky event_assignees.
     const eventData = {
       title,
       description,
       start_time: startIso,
       end_time: endIso,
-      members,
-      tags,
-      reminder
+      location_link: meetLink || null,
+      reminder_minutes: reminderToMinutes(reminder),
+      assigneeIds: memberIds,
     }
 
     if (initialData?.id) {
@@ -123,19 +130,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     onSave(eventData)
   }
 
-  const toggleMember = (member) => {
-    setMembers(prev => prev.includes(member) ? prev.filter(m => m !== member) : [...prev, member])
-  }
-
-  const handleMemberKeyDown = (e) => {
-    if (e.key === 'Enter' && memberInput.trim() !== '') {
-      e.preventDefault()
-      const newMember = memberInput.trim()
-      if (!members.includes(newMember)) {
-        setMembers([...members, newMember])
-      }
-      setMemberInput('')
-    }
+  const toggleMember = (profileId) => {
+    setMemberIds(prev => prev.includes(profileId) ? prev.filter(id => id !== profileId) : [...prev, profileId])
   }
 
   const handleTagKeyDown = (e) => {
@@ -147,6 +143,12 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setTagInput('')
     }
   }
+
+  const selectedProfiles = memberIds.map(id => profileById[id]).filter(Boolean)
+  const filteredProfiles = AVAILABLE_PROFILES.filter(p =>
+      (p.email || '').toLowerCase().includes(memberInput.toLowerCase()) ||
+      (p.full_name || '').toLowerCase().includes(memberInput.toLowerCase())
+  )
 
   return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -223,7 +225,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Odkaz na schůzku (neukládá se do DB)</label>
+              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Odkaz na schůzku</label>
               <input
                   type="url"
                   value={meetLink}
@@ -239,14 +241,14 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                   onClick={() => setIsMembersOpen(!isMembersOpen)}
                   className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 min-h-[42px] cursor-pointer flex items-center flex-wrap gap-2 transition-colors hover:border-white/20"
               >
-                {members.length === 0 && <span className="text-white/40 text-sm">Vyber nebo přidej členy...</span>}
-                {members.map(member => (
-                    <div key={member} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
+                {selectedProfiles.length === 0 && <span className="text-white/40 text-sm">Vyber členy týmu...</span>}
+                {selectedProfiles.map(profile => (
+                    <div key={profile.id} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
                       <div className="w-4 h-4 bg-teal rounded-full text-[9px] flex items-center justify-center font-bold text-white uppercase">
-                        {member.charAt(0)}
+                        {(profile.full_name || profile.email).charAt(0)}
                       </div>
-                      {member}
-                      <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(member); }} className="hover:text-red-400 ml-1">
+                      {profile.full_name || profile.email}
+                      <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(profile.id); }} className="hover:text-red-400 ml-1">
                         <X size={12} />
                       </button>
                     </div>
@@ -260,20 +262,23 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                         type="text"
                         value={memberInput}
                         onChange={(e) => setMemberInput(e.target.value)}
-                        onKeyDown={handleMemberKeyDown}
-                        placeholder="Vyhledej nebo přidej nového (Enter)..."
+                        placeholder="Vyhledat člena týmu..."
                         className="w-full bg-transparent border-b border-white/10 text-white px-4 py-3 text-sm focus:outline-none"
                         onClick={(e) => e.stopPropagation()}
                     />
                     <div className="max-h-48 overflow-y-auto custom-scrollbar">
-                      {AVAILABLE_MEMBERS.filter(m => m.toLowerCase().includes(memberInput.toLowerCase())).map(member => (
+                      {filteredProfiles.length === 0 && (
+                          <div className="px-4 py-3 text-sm text-white/30">Žádní členové k zobrazení</div>
+                      )}
+                      {filteredProfiles.map(profile => (
                           <div
-                              key={member}
-                              onClick={() => toggleMember(member)}
+                              key={profile.id}
+                              onClick={() => toggleMember(profile.id)}
                               className="px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 cursor-pointer flex items-center gap-2"
                           >
-                            <input type="checkbox" checked={members.includes(member)} readOnly className="accent-teal" />
-                            <span className={member === 'all@wenix.cz' ? 'font-bold text-teal-400' : ''}>{member}</span>
+                            <input type="checkbox" checked={memberIds.includes(profile.id)} readOnly className="accent-teal" />
+                            <span>{profile.full_name || profile.email}</span>
+                            <span className="text-white/30 text-xs ml-auto">{profile.email}</span>
                           </div>
                       ))}
                     </div>
@@ -351,4 +356,15 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
         </div>
       </div>
   )
+}
+
+// Pomocná funkce — text reminder -> minuty pro DB sloupec reminder_minutes
+function reminderToMinutes(label) {
+  const map = {
+    '15 minut před': 15,
+    '1 hodina před': 60,
+    '1 den před': 1440,
+    'Žádné': 0,
+  }
+  return map[label] ?? 15
 }

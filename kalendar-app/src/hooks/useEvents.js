@@ -11,8 +11,8 @@ export function useEvents(year, month) {
     setError(null)
 
     // NEPRŮSTŘELNÁ POJISTKA: Pokud aplikace nepředá správný rok a měsíc, použijeme aktuální
-    const current = new Date()
-    const safeYear = (typeof year === 'number' && !isNaN(year)) ? year : current.getFullYear()
+    const current  = new Date()
+    const safeYear  = (typeof year === 'number' && !isNaN(year)) ? year : current.getFullYear()
     const safeMonth = (typeof month === 'number' && !isNaN(month)) ? month : current.getMonth()
 
     try {
@@ -20,7 +20,8 @@ export function useEvents(year, month) {
       const from = new Date(safeYear, safeMonth, 1).toISOString()
       const to   = new Date(safeYear, safeMonth + 1, 1).toISOString()
 
-      const { data, fetchError } = await supabase
+      // POZOR: Supabase vrací klíč "error", ne "fetchError" — předtím se chyby tiše ztrácely
+      const { data, error: fetchError } = await supabase
           .from('events')
           .select(`
           *,
@@ -44,10 +45,13 @@ export function useEvents(year, month) {
 
   useEffect(() => { fetchEvents() }, [fetchEvents])
 
+  /**
+   * payload musí obsahovat assigneeIds: string[] (profile.id, ne e-mail!)
+   * Vše ostatní (title, description, start_time, ...) jde přímo do tabulky events.
+   */
   async function createEvent(payload) {
     const { assigneeIds = [], ...eventData } = payload
 
-    // 1. Vytvoř event
     const { data: event, error: evErr } = await supabase
         .from('events')
         .insert(eventData)
@@ -56,7 +60,6 @@ export function useEvents(year, month) {
 
     if (evErr) throw new Error(evErr.message)
 
-    // 2. Přiřaď assignees
     if (assigneeIds.length > 0) {
       const rows = assigneeIds.map((profile_id) => ({ event_id: event.id, profile_id }))
       const { error: asErr } = await supabase.from('event_assignees').insert(rows)
