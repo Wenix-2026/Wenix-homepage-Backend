@@ -99,7 +99,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setTitle(initialData?.title || '')
       setDescription(initialData?.description || '')
       setMeetLink(initialData?.location_link || initialData?.meet_link || '')
-      setReminder(initialData?.reminder || '1 den před')
+      setReminder(minutesToReminder(initialData?.reminder_minutes))
 
       const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
       setIsAllDay(isAllDayCheck || false)
@@ -617,4 +617,12 @@ function reminderToMinutes(label) {
     'Žádné': 0,
   }
   return map[label] ?? 15
+}
+
+function minutesToReminder(minutes) {
+  if (minutes === 15)   return '15 minut před'
+  if (minutes === 60)   return '1 hodina před'
+  if (minutes === 1440) return '1 den před'
+  if (minutes === 0)    return 'Žádné'
+  return '1 den před'
 }

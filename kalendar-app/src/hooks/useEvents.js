@@ -86,7 +86,9 @@ export function useEvents(year, month) {
   }
 
   async function updateEvent(id, payload) {
-    const { assigneeIds, ...eventData } = payload
+    const { assigneeIds, id, ...eventData } = payload
+
+
 
     const { error: evErr } = await supabase
         .from('events')
