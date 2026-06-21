@@ -69,21 +69,24 @@ export function CalendarDashboard() {
             </main>
 
             {/* OPRAVA: Přejmenováno open na isOpen a initialDate na selectedDate */}
+            {/* Vytvářecí modal */}
             <EventModal
                 isOpen={createModal.open}
                 onClose={() => setCreateModal({ open: false, date: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
                 selectedDate={createModal.date}
+                allEvents={events}
             />
 
-            {/* OPRAVA: Přejmenováno open na isOpen a event na initialData */}
+            {/* Upravovací modal */}
             <EventModal
                 isOpen={editModal.open}
                 onClose={() => setEditModal({ open: false, event: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
                 initialData={editModal.event}
+                allEvents={events}
             />
 
             {/* Detail modal */}

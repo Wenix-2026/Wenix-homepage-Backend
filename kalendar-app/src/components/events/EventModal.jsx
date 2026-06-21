@@ -1,11 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
-import { X, ChevronDown } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X } from 'lucide-react'
 import { format } from 'date-fns'
 
-// Předpřipravený seznam členů - 'all@wenix.cz' je teď hned na prvním místě
-const AVAILABLE_MEMBERS = ['all@wenix.cz', 'auersvald', 'martinek', 'vilem', 'david', 'martin']
-
-export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null }) {
+export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
   // Stavy formuláře
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -13,16 +10,14 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [startStr, setStartStr] = useState('')
   const [endStr, setEndStr] = useState('')
   const [meetLink, setMeetLink] = useState('')
-  const [members, setMembers] = useState([]) // Zde držíme pole textů
+  const [members, setMembers] = useState([])
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
-  // UI stavy pro našeptávače a tagy
-  const [isMembersOpen, setIsMembersOpen] = useState(false)
+  // UI stavy
   const [tagInput, setTagInput] = useState('')
-  const membersRef = useRef(null)
+  const [memberInput, setMemberInput] = useState('')
 
-  // Naplnění dat při otevření
   // Naplnění dat při otevření
   useEffect(() => {
     if (isOpen) {
@@ -32,16 +27,15 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setMeetLink(initialData?.meet_link || '')
       setReminder(initialData?.reminder || '1 den před')
 
-      // OPRAVA: Neprůstřelné formátování členů (pokud jsou ze staré databáze jako objekty)
+      // Bezpečné formátování členů
       let safeMembers = []
       if (initialData?.members) {
         const rawMembers = Array.isArray(initialData.members) ? initialData.members : [initialData.members]
-        // Pokud je to objekt (má např. vlastnost name), vytáhneme jen text, jinak to necháme jako text
         safeMembers = rawMembers.map(m => typeof m === 'object' && m !== null ? (m.name || m.title || String(m)) : String(m))
       }
       setMembers(safeMembers)
 
-      // OPRAVA: Neprůstřelné formátování tagů
+      // Bezpečné formátování tagů
       let safeTags = []
       if (initialData?.tags) {
         const rawTags = Array.isArray(initialData.tags) ? initialData.tags : [initialData.tags]
@@ -49,17 +43,19 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       }
       setTags(safeTags)
 
-      // Formátování data pro inputy (s ochranou proti poškozenému datumu v databázi)
+      // Formátování data
       try {
         if (initialData?.start_time) {
-          setStartStr(format(new Date(initialData.start_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
+          const d = new Date(initialData.start_time)
+          setStartStr(isNaN(d.getTime()) ? format(new Date(), "yyyy-MM-dd'T'09:00") : format(d, "yyyy-MM-dd'T'HH:mm"))
         } else {
           const d = selectedDate ? new Date(selectedDate) : new Date()
           setStartStr(format(d, "yyyy-MM-dd'T'09:00"))
         }
 
         if (initialData?.end_time) {
-          setEndStr(format(new Date(initialData.end_time), initialData.is_all_day ? 'yyyy-MM-dd' : "yyyy-MM-dd'T'HH:mm"))
+          const d = new Date(initialData.end_time)
+          setEndStr(isNaN(d.getTime()) ? format(new Date(), "yyyy-MM-dd'T'10:00") : format(d, "yyyy-MM-dd'T'HH:mm"))
         } else {
           const d = selectedDate ? new Date(selectedDate) : new Date()
           setEndStr(format(d, "yyyy-MM-dd'T'10:00"))
@@ -70,28 +66,23 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }, [isOpen, initialData, selectedDate])
 
-
-  // Zavření dropdownu při kliknutí jinam
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (membersRef.current && !membersRef.current.contains(event.target)) {
-        setIsMembersOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
   if (!isOpen) return null
+
+  // Extrakce unikátních členů z databáze pro našeptávač
+  const dbMembers = [...new Set(allEvents.flatMap(e => {
+    const mArray = Array.isArray(e.members) ? e.members : [e.members]
+    return mArray.map(m => typeof m === 'object' && m !== null ? (m.name || String(m)) : String(m))
+  }))].filter(Boolean).filter(m => m !== 'all@wenix.cz')
+
+  // Návrhy = pevně all@wenix.cz + lidé z databáze (kromě těch, co už jsou vybraní)
+  const suggestions = ['all@wenix.cz', ...dbMembers].filter(m => !members.includes(m))
 
   const handleSubmit = (e) => {
     e.preventDefault()
 
     let startIso, endIso
 
-    // Logika pro celodenní akce vs přesný čas
     if (isAllDay) {
-      // Input date vrací jen 'yyyy-mm-dd', natvrdo přidáme časy
       startIso = `${startStr.split('T')[0]}T00:01:00`
       endIso = `${endStr.split('T')[0]}T23:59:59`
     } else {
@@ -99,33 +90,41 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       endIso = `${endStr}:00`
     }
 
-    // Čistý objekt pro Supabase - members a tags jsou zaručeně čistá pole stringů
+    // Čistý objekt bez zbytků z initialData (zabraňuje chybě s event_assignees)
     const eventData = {
-      ...initialData,
       title,
       description,
       is_all_day: isAllDay,
       start_time: startIso,
       end_time: endIso,
       meet_link: meetLink,
-      members: members,
-      tags: tags,
+      members,
+      tags,
       reminder
+    }
+
+    if (initialData?.id) {
+      eventData.id = initialData.id
     }
 
     onSave(eventData)
   }
 
-  // Práce se členy (přidání / odebrání)
   const toggleMember = (member) => {
-    setMembers(prev =>
-        prev.includes(member)
-            ? prev.filter(m => m !== member)
-            : [...prev, member]
-    )
+    setMembers(prev => prev.includes(member) ? prev.filter(m => m !== member) : [...prev, member])
   }
 
-  // Práce s tagy (přidání přes Enter)
+  const handleMemberKeyDown = (e) => {
+    if (e.key === 'Enter' && memberInput.trim() !== '') {
+      e.preventDefault()
+      const newMember = memberInput.trim()
+      if (!members.includes(newMember)) {
+        setMembers([...members, newMember])
+      }
+      setMemberInput('')
+    }
+  }
+
   const handleTagKeyDown = (e) => {
     if (e.key === 'Enter' && tagInput.trim() !== '') {
       e.preventDefault()
@@ -134,10 +133,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       }
       setTagInput('')
     }
-  }
-
-  const removeTag = (tagToRemove) => {
-    setTags(tags.filter(t => t !== tagToRemove))
   }
 
   return (
@@ -154,10 +149,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             </button>
           </div>
 
-          {/* Formulář - scrolluje, pokud je moc dlouhý */}
+          {/* Formulář */}
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto custom-scrollbar p-5 gap-5">
 
-            {/* Název */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Název události</label>
               <input
@@ -170,7 +164,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* Popis */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Popis</label>
               <textarea
@@ -182,7 +175,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* Přepínač celodenní akce */}
             <div className="flex items-center justify-between bg-[#161618] border border-white/10 rounded-lg p-3">
               <span className="text-sm font-semibold text-white/80 font-body">Celodenní akce</span>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -196,15 +188,14 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               </label>
             </div>
 
-            {/* Časy */}
             <div className="flex gap-4">
               <div className="flex-col gap-1.5 flex flex-1">
                 <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Začátek</label>
                 <input
                     type={isAllDay ? "date" : "datetime-local"}
                     required
-                    value={startStr}
-                    onChange={(e) => setStartStr(e.target.value)}
+                    value={isAllDay ? startStr.split('T')[0] : startStr}
+                    onChange={(e) => setStartStr(isAllDay ? `${e.target.value}T09:00` : e.target.value)}
                     className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal transition-colors text-sm dark:[color-scheme:dark]"
                 />
               </div>
@@ -213,14 +204,13 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                 <input
                     type={isAllDay ? "date" : "datetime-local"}
                     required
-                    value={endStr}
-                    onChange={(e) => setEndStr(e.target.value)}
+                    value={isAllDay ? endStr.split('T')[0] : endStr}
+                    onChange={(e) => setEndStr(isAllDay ? `${e.target.value}T10:00` : e.target.value)}
                     className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal transition-colors text-sm dark:[color-scheme:dark]"
                 />
               </div>
             </div>
 
-            {/* Odkaz */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Odkaz na schůzku</label>
               <input
@@ -232,40 +222,40 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* Přiřazení členové - Custom Multi-select */}
-            <div className="flex flex-col gap-1.5 relative" ref={membersRef}>
+            {/* Přiřazení členové (Vzhled jako štítky) */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Přiřazení členové</label>
-              <div
-                  onClick={() => setIsMembersOpen(!isMembersOpen)}
-                  className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 min-h-[42px] cursor-pointer flex items-center flex-wrap gap-2 transition-colors hover:border-white/20"
-              >
-                {members.length === 0 && <span className="text-white/40 text-sm">Vyber členy...</span>}
+              <div className="w-full bg-[#161618] border border-white/10 rounded-lg px-3 py-2 focus-within:border-teal transition-colors flex flex-wrap gap-2 items-center min-h-[42px]">
                 {members.map(member => (
                     <div key={member} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
-                      <div className="w-4 h-4 bg-teal rounded-full text-[9px] flex items-center justify-center font-bold text-white uppercase">
-                        {member.charAt(0)}
-                      </div>
                       {member}
-                      <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(member); }} className="hover:text-red-400 ml-1">
+                      <button type="button" onClick={() => toggleMember(member)} className="hover:text-red-400 ml-1">
                         <X size={12} />
                       </button>
                     </div>
                 ))}
-                <ChevronDown size={16} className="text-white/40 ml-auto" />
+                <input
+                    type="text"
+                    value={memberInput}
+                    onChange={(e) => setMemberInput(e.target.value)}
+                    onKeyDown={handleMemberKeyDown}
+                    placeholder={members.length === 0 ? "Napiš člena a stiskni Enter..." : ""}
+                    className="bg-transparent border-none text-white text-sm focus:outline-none flex-1 min-w-[120px]"
+                />
               </div>
 
-              {/* Dropdown se členy */}
-              {isMembersOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#1c1c1f] border border-white/10 rounded-lg shadow-xl overflow-hidden z-20">
-                    {AVAILABLE_MEMBERS.map(member => (
-                        <div
-                            key={member}
-                            onClick={() => toggleMember(member)}
-                            className="px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 cursor-pointer flex items-center gap-2"
+              {/* Rychlé návrhy z databáze */}
+              {suggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {suggestions.map(sug => (
+                        <button
+                            type="button"
+                            key={sug}
+                            onClick={() => toggleMember(sug)}
+                            className={`text-[10px] px-2 py-1 rounded transition-colors ${sug === 'all@wenix.cz' ? 'bg-teal/20 text-teal hover:bg-teal/30 border border-teal/30' : 'bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white'}`}
                         >
-                          <input type="checkbox" checked={members.includes(member)} readOnly className="accent-teal" />
-                          <span className={member === 'all@wenix.cz' ? 'font-bold text-teal-400' : ''}>{member}</span>
-                        </div>
+                          + {sug}
+                        </button>
                     ))}
                   </div>
               )}
@@ -278,7 +268,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                 {tags.map(tag => (
                     <div key={tag} className="bg-white/5 text-white/80 text-xs px-2.5 py-1 rounded-md flex items-center gap-1 border border-white/10">
                       {tag}
-                      <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-400">
+                      <button type="button" onClick={() => setTags(tags.filter(t => t !== tag))} className="hover:text-red-400">
                         <X size={12} />
                       </button>
                     </div>
@@ -294,7 +284,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               </div>
             </div>
 
-            {/* Upozornění */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Upozornění</label>
               <select
@@ -309,11 +298,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               </select>
             </div>
 
-            {/* Odsazení před tlačítky */}
             <div className="pt-2"></div>
           </form>
 
-          {/* Patička s tlačítky */}
+          {/* Patička */}
           <div className="flex items-center justify-between p-5 border-t border-white/10 bg-[#0f0f11] shrink-0">
             {initialData ? (
                 <button
