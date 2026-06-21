@@ -82,10 +82,20 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [isMembersOpen, setIsMembersOpen] = useState(false)
   const [memberInput, setMemberInput] = useState('')
   const [tagInput, setTagInput] = useState('')
+  const [saveError, setSaveError] = useState(null)
+  const [isSaving, setIsSaving] = useState(false)
   const membersRef = useRef(null)
 
+  // DŮLEŽITÉ: dependency array sleduje jen isOpen a initialData?.id, ne celý
+  // initialData objekt. Po každém uložení se zavolá fetchEvents() a Supabase
+  // vrátí NOVÝ objekt se stejným obsahem, ale jinou referencí v paměti —
+  // kdyby tu byla celá initialData, useEffect by se spustil znovu a přepsal
+  // rozeditovaný start_time/end_time zpátky na starou hodnotu z DB.
+  // Sledování pouze .id zajistí, že se formulář znovu naplní jen při otevření
+  // modalu nebo přepnutí na editaci JINÉ události, ne při refetchi té samé.
   useEffect(() => {
     if (isOpen) {
+      setSaveError(null)
       setTitle(initialData?.title || '')
       setDescription(initialData?.description || '')
       setMeetLink(initialData?.location_link || initialData?.meet_link || '')
@@ -143,7 +153,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
         console.error("Chyba při parsování data:", error)
       }
     }
-  }, [isOpen, initialData, selectedDate])
+  }, [isOpen, initialData?.id])
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -183,8 +193,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const AVAILABLE_PROFILES = Array.from(profileMap.values())
       .sort((a, b) => (a.full_name || a.email || '').localeCompare(b.full_name || b.email || ''))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setSaveError(null)
 
     let startIso, endIso
 
@@ -215,7 +226,14 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       eventData.id = initialData.id
     }
 
-    onSave(eventData)
+    setIsSaving(true)
+    try {
+      await onSave(eventData)
+    } catch (err) {
+      setSaveError(err?.message || 'Uložení se nezdařilo. Zkus to znovu.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Výběr "all" je vzájemně vylučující s konkrétními lidmi i ručně psanými
@@ -550,6 +568,12 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             <div className="pt-2"></div>
           </form>
 
+          {saveError && (
+              <div className="px-5 py-3 bg-red-500/10 border-t border-red-500/20 text-sm text-red-400">
+                {saveError}
+              </div>
+          )}
+
           <div className="flex items-center justify-between p-5 border-t border-white/10 bg-[#0f0f11] shrink-0">
             {initialData ? (
                 <button
@@ -571,9 +595,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               </button>
               <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 rounded-lg bg-white text-black hover:bg-white/90 text-sm font-semibold transition-colors"
+                  disabled={isSaving}
+                  className="px-4 py-2 rounded-lg bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold transition-colors"
               >
-                {initialData ? 'Uložit změny' : 'Vytvořit událost'}
+                {isSaving ? 'Ukládám...' : (initialData ? 'Uložit změny' : 'Vytvořit událost')}
               </button>
             </div>
           </div>
