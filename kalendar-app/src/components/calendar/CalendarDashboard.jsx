@@ -28,7 +28,9 @@ export function CalendarDashboard() {
             return
         }
         setDetailModal({ open: false, event: null })
-        setEditModal({ open: true, event: eventToEdit })
+        setTimeout(() => {
+            setEditModal({ open: true, event: eventToEdit })
+        }, 0)
     }
 
     function openDetail(event) {
