@@ -50,9 +50,22 @@ export function useEvents(year, month) {
   /**
    * payload musí obsahovat assigneeIds: string[] (profile.id, ne e-mail!)
    * Vše ostatní (title, description, start_time, ...) jde přímo do tabulky events.
+   *
+   * created_by se NEČEKÁ od volajícího — doplňuje se tady automaticky podle
+   * aktuálně přihlášeného uživatele. supabase.auth.getUser() je přímý dotaz
+   * na auth server (ne jen lokální React state), takže funguje spolehlivě
+   * i kdyby AuthContext ještě nestihl profil/session dotáhnout.
    */
   async function createEvent(payload) {
     const { assigneeIds = [], ...eventData } = payload
+
+    if (!eventData.created_by) {
+      const { data: userData, error: userErr } = await supabase.auth.getUser()
+      if (userErr || !userData?.user) {
+        throw new Error('Nejsi přihlášen — událost nelze uložit bez identity autora.')
+      }
+      eventData.created_by = userData.user.id
+    }
 
     const { data: event, error: evErr } = await supabase
         .from('events')
