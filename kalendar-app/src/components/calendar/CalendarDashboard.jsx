@@ -18,16 +18,23 @@ export function CalendarDashboard() {
     const [editModal,   setEditModal]   = useState({ open: false, event: null })
     const [detailModal, setDetailModal] = useState({ open: false, event: null })
 
-    function openCreate(date = null)  { setCreateModal({ open: true, date }) }
-
-    function openEdit(event) {
-        setDetailModal({ open: false, event: null })
-        setEditModal({ open: true, event })
+    function openCreate(date = null)  {
+        setCreateModal({ open: true, date })
     }
 
-    function openDetail(event) { setDetailModal({ open: true, event }) }
+    function openEdit(eventToEdit) {
+        if (!eventToEdit) {
+            console.error("openEdit dostalo prázdný event!")
+            return
+        }
+        setDetailModal({ open: false, event: null })
+        setEditModal({ open: true, event: eventToEdit })
+    }
 
-    // Přizpůsobeno pro starší EventModal, který vrací (payload, id)
+    function openDetail(event) {
+        setDetailModal({ open: true, event })
+    }
+
     async function handleSave(payload, id) {
         if (id) {
             await updateEvent(id, payload)

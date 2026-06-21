@@ -16,9 +16,11 @@ const REMINDER_OPTIONS = [
   { value: 1440, label: '1 den před' },
 ]
 
+// Ochrana před pádem: Pokud přijde nesmyslné datum, vrátí se prázdný řetězec
 function toLocalInput(isoOrDate) {
   if (!isoOrDate) return ''
   const d = new Date(isoOrDate)
+  if (isNaN(d.getTime())) return ''
   return format(d, "yyyy-MM-dd'T'HH:mm")
 }
 
@@ -31,7 +33,6 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
 
   const isEdit = Boolean(event)
 
-  // Vytvoříme defaultní bezpečný čas, ať to nikdy nespadne
   const now = new Date()
   const defaultStart = initialDate ? new Date(initialDate).setHours(9, 0) : now
   const defaultEnd = initialDate ? new Date(initialDate).setHours(10, 0) : new Date(now.getTime() + 60 * 60000)
@@ -51,7 +52,6 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
   const [loading, setLoading] = useState(false)
   const [saveError, setSaveError] = useState(null)
 
-  // Naplnit form při otevření modalu
   useEffect(() => {
     if (event) {
       setForm({
@@ -60,17 +60,17 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
         start_time:       toLocalInput(event.start_time),
         end_time:         toLocalInput(event.end_time),
         location_link:    event.location_link || '',
-        reminder_minutes: event.reminder_minutes !== undefined && event.reminder_minutes !== null ? event.reminder_minutes : 15,
+        reminder_minutes: event.reminder_minutes !== undefined && event.reminder_minutes !== null ? Number(event.reminder_minutes) : 15,
         assigneeIds:      event.event_assignees?.map((ea) => ea.profiles?.id).filter(Boolean) || [],
       })
-      setTags(event.tags || []) // Pokud má tagy, načteme je
+      setTags(event.tags || [])
     } else {
       setForm({
         ...blank,
         start_time: format(defaultStart, "yyyy-MM-dd'T'HH:mm"),
         end_time:   format(defaultEnd, "yyyy-MM-dd'T'HH:mm"),
       })
-      setTags([]) // Prázdný kalendář = prázdné tagy
+      setTags([])
     }
     setTagInput('')
     setErrors({})
@@ -84,58 +84,51 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
 
   function validate() {
     const e = {}
-    if (!form.title.trim())  e.title      = 'Název je povinný'
+    if (!form.title?.trim()) e.title      = 'Název je povinný'
     if (!form.start_time)    e.start_time = 'Vyber začátek'
     if (!form.end_time)      e.end_time   = 'Vyber konec'
-    if (form.start_time && form.end_time && form.end_time <= form.start_time)
+    if (form.start_time && form.end_time && form.end_time <= form.start_time) {
       e.end_time = 'Konec musí být po začátku'
+    }
     return e
   }
 
   async function handleSubmit(e) {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length) { setErrors(errs); return }
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      console.warn("Ukládání zablokováno validací:", errs)
+      return
+    }
 
     setLoading(true)
     setSaveError(null)
     try {
-      // Neprůstřelné parsování data
-      const parseDateSafe = (dateString) => {
-        if (!dateString) return new Date();
-        if (dateString.includes('.')) {
-          const [datePart, timePart] = dateString.split(' ');
-          const [d, m, y] = datePart.split('.');
-          const [h, min] = timePart ? timePart.split(':') : ['00', '00'];
-          return new Date(y, m - 1, d, h, min);
-        }
-        return new Date(dateString);
-      };
+      const startD = new Date(form.start_time)
+      const endD = new Date(form.end_time)
 
-      const safeStartTime = parseDateSafe(form.start_time);
-      const safeEndTime = parseDateSafe(form.end_time);
-
-      // Pojistka, ať to nehodí červený error uživateli
-      if (isNaN(safeStartTime.getTime()) || isNaN(safeEndTime.getTime())) {
-        throw new Error('Nepodařilo se přečíst datum. Zkontroluj, zda je správně zadané.');
+      if (isNaN(startD.getTime()) || isNaN(endD.getTime())) {
+        throw new Error('Neplatný formát data.')
       }
 
       const payload = {
         title:            form.title.trim(),
         description:      form.description.trim() || null,
-        start_time:       safeStartTime.toISOString(),
-        end_time:         safeEndTime.toISOString(),
+        start_time:       startD.toISOString(),
+        end_time:         endD.toISOString(),
         location_link:    form.location_link.trim() || null,
-        // DŮLEŽITÉ: Striktní převod na číslo
         reminder_minutes: Number(form.reminder_minutes),
         created_by:       session?.user?.id,
-        assigneeIds:      form.assigneeIds,
-        tags:             tags,
+        assigneeIds:      form.assigneeIds || [],
+        tags:             tags || [],
       }
 
+      console.log("Odesílám payload:", payload)
       await onSave(payload, event?.id)
       onClose()
     } catch (err) {
+      console.error("Chyba při ukládání:", err)
       setSaveError(err.message)
     } finally {
       setLoading(false)
@@ -222,13 +215,12 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
           <div className="relative">
             <MultiSelect
                 label="Přiřazení členové"
-                options={profiles}
+                options={profiles || []}
                 value={form.assigneeIds}
                 onChange={(ids) => set('assigneeIds', ids)}
             />
           </div>
 
-          {/* Sekce pro tagy */}
           <div className="flex flex-col gap-2">
             <label className="text-xs font-body font-medium text-black/50 dark:text-white/50 uppercase tracking-widest">
               Štítky (Tagy)
@@ -253,7 +245,6 @@ export function EventModal({ open, onClose, onSave, onDelete, initialDate, event
             />
           </div>
 
-          {/* Upozornění - Vylepšené barvy pro Light/Dark */}
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-black/50 dark:text-white/50 uppercase tracking-widest font-body">
               Upozornění
