@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
 
 export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
@@ -14,18 +14,23 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
-  // UI stavy
-  const [tagInput, setTagInput] = useState('')
+  // UI stavy pro našeptávače a tagy
+  const [isMembersOpen, setIsMembersOpen] = useState(false)
   const [memberInput, setMemberInput] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const membersRef = useRef(null)
 
   // Naplnění dat při otevření
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '')
       setDescription(initialData?.description || '')
-      setIsAllDay(initialData?.is_all_day || false)
       setMeetLink(initialData?.meet_link || '')
       setReminder(initialData?.reminder || '1 den před')
+
+      // Odvození celodenní akce, jelikož se to neukládá přímo do sloupce v DB
+      const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
+      setIsAllDay(isAllDayCheck || false)
 
       // Bezpečné formátování členů
       let safeMembers = []
@@ -43,7 +48,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       }
       setTags(safeTags)
 
-      // Formátování data
+      // Formátování data pro inputy
       try {
         if (initialData?.start_time) {
           const d = new Date(initialData.start_time)
@@ -66,16 +71,26 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }, [isOpen, initialData, selectedDate])
 
+  // Zavření dropdownu při kliknutí jinam
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (membersRef.current && !membersRef.current.contains(event.target)) {
+        setIsMembersOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   if (!isOpen) return null
 
-  // Extrakce unikátních členů z databáze pro našeptávač
+  // Extrakce unikátních členů z databáze
   const dbMembers = [...new Set(allEvents.flatMap(e => {
     const mArray = Array.isArray(e.members) ? e.members : [e.members]
     return mArray.map(m => typeof m === 'object' && m !== null ? (m.name || String(m)) : String(m))
   }))].filter(Boolean).filter(m => m !== 'all@wenix.cz')
 
-  // Návrhy = pevně all@wenix.cz + lidé z databáze (kromě těch, co už jsou vybraní)
-  const suggestions = ['all@wenix.cz', ...dbMembers].filter(m => !members.includes(m))
+  const AVAILABLE_MEMBERS = ['all@wenix.cz', ...dbMembers]
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -90,11 +105,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       endIso = `${endStr}:00`
     }
 
-    // Čistý objekt bez zbytků z initialData (zabraňuje chybě s event_assignees)
+    // Odstraněno "is_all_day", protože sloupec v databázi neexistuje
     const eventData = {
       title,
       description,
-      is_all_day: isAllDay,
       start_time: startIso,
       end_time: endIso,
       meet_link: meetLink,
@@ -121,7 +135,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       if (!members.includes(newMember)) {
         setMembers([...members, newMember])
       }
-      setMemberInput('')
+      setMemberInput('') // Vyčistíme pole po odeslání
     }
   }
 
@@ -222,41 +236,52 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* Přiřazení členové (Vzhled jako štítky) */}
-            <div className="flex flex-col gap-1.5">
+            {/* Přiřazení členové - Custom Multi-select Dropdown */}
+            <div className="flex flex-col gap-1.5 relative" ref={membersRef}>
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Přiřazení členové</label>
-              <div className="w-full bg-[#161618] border border-white/10 rounded-lg px-3 py-2 focus-within:border-teal transition-colors flex flex-wrap gap-2 items-center min-h-[42px]">
+              <div
+                  onClick={() => setIsMembersOpen(!isMembersOpen)}
+                  className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 min-h-[42px] cursor-pointer flex items-center flex-wrap gap-2 transition-colors hover:border-white/20"
+              >
+                {members.length === 0 && <span className="text-white/40 text-sm">Vyber členy...</span>}
                 {members.map(member => (
                     <div key={member} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
+                      <div className="w-4 h-4 bg-teal rounded-full text-[9px] flex items-center justify-center font-bold text-white uppercase">
+                        {member.charAt(0)}
+                      </div>
                       {member}
-                      <button type="button" onClick={() => toggleMember(member)} className="hover:text-red-400 ml-1">
+                      <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(member); }} className="hover:text-red-400 ml-1">
                         <X size={12} />
                       </button>
                     </div>
                 ))}
-                <input
-                    type="text"
-                    value={memberInput}
-                    onChange={(e) => setMemberInput(e.target.value)}
-                    onKeyDown={handleMemberKeyDown}
-                    placeholder={members.length === 0 ? "Napiš člena a stiskni Enter..." : ""}
-                    className="bg-transparent border-none text-white text-sm focus:outline-none flex-1 min-w-[120px]"
-                />
+                <ChevronDown size={16} className="text-white/40 ml-auto" />
               </div>
 
-              {/* Rychlé návrhy z databáze */}
-              {suggestions.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-1">
-                    {suggestions.map(sug => (
-                        <button
-                            type="button"
-                            key={sug}
-                            onClick={() => toggleMember(sug)}
-                            className={`text-[10px] px-2 py-1 rounded transition-colors ${sug === 'all@wenix.cz' ? 'bg-teal/20 text-teal hover:bg-teal/30 border border-teal/30' : 'bg-white/5 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white'}`}
-                        >
-                          + {sug}
-                        </button>
-                    ))}
+              {/* Dropdown se členy + vyhledávání */}
+              {isMembersOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#1c1c1f] border border-white/10 rounded-lg shadow-xl overflow-hidden z-20 flex flex-col">
+                    <input
+                        type="text"
+                        value={memberInput}
+                        onChange={(e) => setMemberInput(e.target.value)}
+                        onKeyDown={handleMemberKeyDown}
+                        placeholder="Vyhledej nebo přidej nového (Enter)..."
+                        className="w-full bg-transparent border-b border-white/10 text-white px-4 py-2 text-sm focus:outline-none"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                      {AVAILABLE_MEMBERS.filter(m => m.toLowerCase().includes(memberInput.toLowerCase())).map(member => (
+                          <div
+                              key={member}
+                              onClick={() => toggleMember(member)}
+                              className="px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 cursor-pointer flex items-center gap-2"
+                          >
+                            <input type="checkbox" checked={members.includes(member)} readOnly className="accent-teal" />
+                            <span className={member === 'all@wenix.cz' ? 'font-bold text-teal-400' : ''}>{member}</span>
+                          </div>
+                      ))}
+                    </div>
                   </div>
               )}
             </div>
