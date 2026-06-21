@@ -203,8 +203,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       startIso = `${startStr.split('T')[0]}T00:01:00`
       endIso = `${endStr.split('T')[0]}T23:59:59`
     } else {
-      startIso = `${startStr}:00`
-      endIso = `${endStr}:00`
+      startIso = new Date(startStr).toISOString()
+      endIso = new Date(endStr).toISOString()
     }
 
     const eventData = {
