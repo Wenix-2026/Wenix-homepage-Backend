@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, ChevronDown, Search } from 'lucide-react'
+import { X, ChevronDown, Search, Megaphone } from 'lucide-react'
 import { format } from 'date-fns'
 
 const AVATAR_COLORS = [
@@ -25,6 +25,26 @@ function MemberAvatar({ profile, size = 'sm' }) {
   )
 }
 
+// Virtuální položka pro hromadné přiřazení — NENÍ to skutečný profil z DB
+// (žádné profile.id), proto se nikdy neukládá do event_assignees. Místo
+// toho nastavuje boolean sloupec events.notify_all (viz handleSubmit).
+const ALL_OPTION = {
+  id: '__all__',
+  full_name: 'all',
+  email: 'all@wenix.cz',
+  isAllOption: true,
+}
+
+function AllOptionAvatar({ size = 'sm' }) {
+  const dims = size === 'sm' ? 'w-4 h-4' : 'w-7 h-7'
+  const iconSize = size === 'sm' ? 8 : 14
+  return (
+      <div className={`${dims} bg-gradient-to-br from-teal to-blue rounded-full flex items-center justify-center shrink-0 ring-1 ring-white/20`}>
+        <Megaphone size={iconSize} className="text-white" strokeWidth={2.5} />
+      </div>
+  )
+}
+
 /**
  * allEvents:    pole událostí ze Supabase (výstup useEvents().events)
  * allProfiles:  VŠICHNI registrovaní uživatelé (výstup useProfiles().profiles)
@@ -42,6 +62,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [endStr, setEndStr] = useState('')
   const [meetLink, setMeetLink] = useState('')
   const [memberIds, setMemberIds] = useState([])      // profile.id[]
+  const [notifyAll, setNotifyAll] = useState(false)   // true = "all" zvolena namísto konkrétních lidí
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
@@ -61,12 +82,17 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setIsAllDay(isAllDayCheck || false)
 
       // ── NEPRŮSTŘELNÁ extrakce přiřazených členů z relační tabulky ──
+      const isNotifyAll = Boolean(initialData?.notify_all)
+      setNotifyAll(isNotifyAll)
+
       let safeMemberIds = []
-      const assignees = initialData?.event_assignees
-      if (Array.isArray(assignees)) {
-        safeMemberIds = assignees
-            .map((a) => a?.profile_id || a?.profiles?.id)
-            .filter(Boolean)
+      if (!isNotifyAll) {
+        const assignees = initialData?.event_assignees
+        if (Array.isArray(assignees)) {
+          safeMemberIds = assignees
+              .map((a) => a?.profile_id || a?.profiles?.id)
+              .filter(Boolean)
+        }
       }
       setMemberIds(safeMemberIds)
 
@@ -159,7 +185,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       end_time: endIso,
       location_link: meetLink || null,
       reminder_minutes: reminderToMinutes(reminder),
-      assigneeIds: memberIds,
+      notify_all: notifyAll,
+      // Pokud je zvolena hromadná notifikace, žádní jednotliví assignees
+      // se neukládají — notify_all sloupec je jediný zdroj pravdy.
+      assigneeIds: notifyAll ? [] : memberIds,
     }
 
     if (initialData?.id) {
@@ -169,7 +198,20 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     onSave(eventData)
   }
 
+  // Výběr "all" je vzájemně vylučující s konkrétními lidmi — vybrání jednoho
+  // vždy vyprázdní druhý, aby v DB nikdy nešlo notify_all=true SOUČASNĚ
+  // s naplněným event_assignees (nejednoznačná sémantika "komu poslat e-mail").
   const toggleMember = (profileId) => {
+    if (profileId === ALL_OPTION.id) {
+      setNotifyAll((prev) => {
+        const next = !prev
+        if (next) setMemberIds([])
+        return next
+      })
+      return
+    }
+
+    setNotifyAll(false)
     setMemberIds(prev => prev.includes(profileId) ? prev.filter(id => id !== profileId) : [...prev, profileId])
   }
 
@@ -183,19 +225,22 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }
 
-  const selectedProfiles = memberIds
-      .map(id => AVAILABLE_PROFILES.find(p => p.id === id))
-      .filter(Boolean)
+  const selectedProfiles = notifyAll
+      ? [ALL_OPTION]
+      : memberIds.map(id => AVAILABLE_PROFILES.find(p => p.id === id)).filter(Boolean)
 
   // Filtrace zároveň podle jména i e-mailu (case-insensitive, diakritika
   // se neřeší — pro plné fulltextové vyhledávání by šlo doplnit normalizaci).
   const q = memberInput.trim().toLowerCase()
+  const matchesQuery = (p) =>
+      (p.full_name || '').toLowerCase().includes(q) ||
+      (p.email || '').toLowerCase().includes(q)
+
+  // "all" je napevno přibitá jako první položka seznamu a zobrazuje se
+  // i v rámci aktivního filtrování (požadavek: "vždy dostupná").
   const filteredProfiles = q === ''
-      ? AVAILABLE_PROFILES
-      : AVAILABLE_PROFILES.filter(p =>
-          (p.full_name || '').toLowerCase().includes(q) ||
-          (p.email || '').toLowerCase().includes(q)
-      )
+      ? [ALL_OPTION, ...AVAILABLE_PROFILES]
+      : (matchesQuery(ALL_OPTION) ? [ALL_OPTION] : []).concat(AVAILABLE_PROFILES.filter(matchesQuery))
 
   return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -291,8 +336,12 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               >
                 {selectedProfiles.length === 0 && <span className="text-white/40 text-sm">Vyber členy týmu...</span>}
                 {selectedProfiles.map(profile => (
-                    <div key={profile.id} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
-                      <MemberAvatar profile={profile} size="sm" />
+                    <div key={profile.id} className={`text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border ${
+                        profile.isAllOption
+                            ? 'bg-teal/15 border-teal/30 text-teal'
+                            : 'bg-white/10 border-white/5 text-white'
+                    }`}>
+                      {profile.isAllOption ? <AllOptionAvatar size="sm" /> : <MemberAvatar profile={profile} size="sm" />}
                       {profile.full_name || profile.email}
                       <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(profile.id); }} className="hover:text-red-400 ml-1">
                         <X size={12} />
@@ -330,31 +379,38 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                               : `Žádná shoda pro „${memberInput}“`}
                         </div>
                     )}
-                    {filteredProfiles.map(profile => {
-                      const isSelected = memberIds.includes(profile.id)
+                    {filteredProfiles.map((profile) => {
+                      const isAllRow  = profile.isAllOption
+                      const isSelected = isAllRow ? notifyAll : memberIds.includes(profile.id)
+                      const showDivider = isAllRow && filteredProfiles.length > 1
+
                       return (
-                          <button
-                              key={profile.id}
-                              type="button"
-                              onClick={() => toggleMember(profile.id)}
-                              className={`w-full px-3 py-2.5 mx-1 rounded-lg text-sm flex items-center gap-3 transition-colors text-left
-                              ${isSelected ? 'bg-teal/10 hover:bg-teal/15' : 'hover:bg-white/[0.06]'}`}
-                              style={{ width: 'calc(100% - 8px)' }}
-                          >
-                            <MemberAvatar profile={profile} size="md" />
-                            <div className="flex flex-col min-w-0 flex-1">
-                            <span className="text-white/90 font-medium truncate">
-                              {profile.full_name || '—'}
-                            </span>
-                              {profile.email && (
-                                  <span className="text-white/40 text-xs truncate">{profile.email}</span>
-                              )}
-                            </div>
-                            <div className={`w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors
-                            ${isSelected ? 'bg-teal border-teal' : 'border-white/20'}`}>
-                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black/80" />}
-                            </div>
-                          </button>
+                          <div key={profile.id}>
+                            <button
+                                type="button"
+                                onClick={() => toggleMember(profile.id)}
+                                className={`w-full px-3 py-2.5 mx-1 rounded-lg text-sm flex items-center gap-3 transition-colors text-left
+                                ${isAllRow
+                                    ? (isSelected ? 'bg-teal/15 hover:bg-teal/20' : 'hover:bg-teal/10')
+                                    : (isSelected ? 'bg-teal/10 hover:bg-teal/15' : 'hover:bg-white/[0.06]')}`}
+                                style={{ width: 'calc(100% - 8px)' }}
+                            >
+                              {isAllRow ? <AllOptionAvatar size="md" /> : <MemberAvatar profile={profile} size="md" />}
+                              <div className="flex flex-col min-w-0 flex-1">
+                              <span className={`font-medium truncate ${isAllRow ? 'text-teal' : 'text-white/90'}`}>
+                                {isAllRow ? 'Všichni (hromadné upozornění)' : (profile.full_name || '—')}
+                              </span>
+                                {profile.email && (
+                                    <span className={`text-xs truncate ${isAllRow ? 'text-teal/60' : 'text-white/40'}`}>{profile.email}</span>
+                                )}
+                              </div>
+                              <div className={`w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors
+                              ${isSelected ? 'bg-teal border-teal' : 'border-white/20'}`}>
+                                {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black/80" />}
+                              </div>
+                            </button>
+                            {showDivider && <div className="h-px bg-white/8 my-1 mx-3" />}
+                          </div>
                       )
                     })}
                   </div>
