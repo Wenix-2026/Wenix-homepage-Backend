@@ -12,36 +12,28 @@ import { useProfiles }        from '../../hooks/useProfiles'
 export function CalendarDashboard() {
     const cal = useCalendar()
     const { events, createEvent, updateEvent, deleteEvent } = useEvents(cal.year, cal.month)
+
+    // Zdroj pravdy pro VŠECHNY registrované členy týmu (i ty bez jediné
+    // přiřazené události) — bez tohohle by dropdown v EventModalu zobrazoval
+    // jen lidi, kteří se náhodou objevili v allEvents.
     const { profiles: allProfiles } = useProfiles()
 
     const [createModal, setCreateModal] = useState({ open: false, date: null })
     const [editModal,   setEditModal]   = useState({ open: false, event: null })
     const [detailModal, setDetailModal] = useState({ open: false, event: null })
 
-    function openCreate(date = null)  {
-        setCreateModal({ open: true, date })
-    }
+    function openCreate(date = null)  { setCreateModal({ open: true, date }) }
 
-    function openEdit(eventToEdit) {
-        console.log('[openEdit] zavolán s:', eventToEdit)
-        if (!eventToEdit) {
-            console.error("openEdit dostalo prázdný event!")
-            return
-        }
+    function openEdit(event) {
         setDetailModal({ open: false, event: null })
-        setTimeout(() => {
-            console.log('[openEdit] setTimeout - otvírám edit modal')
-            setEditModal({ open: true, event: eventToEdit })
-        }, 0)
+        setEditModal({ open: true, event })
     }
 
-    function openDetail(event) {
-        setDetailModal({ open: true, event })
-    }
+    function openDetail(event) { setDetailModal({ open: true, event }) }
 
-    async function handleSave(payload, id) {
-        if (id) {
-            await updateEvent(id, payload)
+    async function handleSave(payload) {
+        if (payload.id) {
+            await updateEvent(payload.id, payload)
             setEditModal({ open: false, event: null })
         } else {
             await createEvent(payload)
@@ -81,19 +73,23 @@ export function CalendarDashboard() {
             </main>
 
             <EventModal
-                open={createModal.open}
+                isOpen={createModal.open}
                 onClose={() => setCreateModal({ open: false, date: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
-                initialDate={createModal.date}
+                selectedDate={createModal.date}
+                allEvents={events}
+                allProfiles={allProfiles}
             />
 
             <EventModal
-                open={editModal.open}
+                isOpen={editModal.open}
                 onClose={() => setEditModal({ open: false, event: null })}
                 onSave={handleSave}
                 onDelete={deleteEvent}
-                event={editModal.event}
+                initialData={editModal.event}
+                allEvents={events}
+                allProfiles={allProfiles}
             />
 
             <EventDetailModal
