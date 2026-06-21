@@ -23,12 +23,14 @@ export function CalendarDashboard() {
     }
 
     function openEdit(eventToEdit) {
+        console.log('[openEdit] zavolán s:', eventToEdit)
         if (!eventToEdit) {
             console.error("openEdit dostalo prázdný event!")
             return
         }
         setDetailModal({ open: false, event: null })
         setTimeout(() => {
+            console.log('[openEdit] setTimeout - otvírám edit modal')
             setEditModal({ open: true, event: eventToEdit })
         }, 0)
     }

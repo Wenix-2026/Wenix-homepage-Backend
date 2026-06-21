@@ -13,6 +13,7 @@ export function EventDetailModal({ open, onClose, event, onEdit }) {
   if (!event) return null
 
   const isOwner  = session?.user?.id === event.created_by
+  console.log('[DetailModal] session.user.id:', session?.user?.id, '| event.created_by:', event.created_by, '| isOwner:', isOwner)
   const start    = new Date(event.start_time)
   const end      = new Date(event.end_time)
   const assignees = event.event_assignees?.map((ea) => ea.profiles) || []
