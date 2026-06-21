@@ -1,16 +1,40 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, ChevronDown } from 'lucide-react'
+import { X, ChevronDown, Search } from 'lucide-react'
 import { format } from 'date-fns'
 
+const AVATAR_COLORS = [
+  'bg-teal',      'bg-blue',      'bg-purple-500', 'bg-pink-500',
+  'bg-orange-500','bg-emerald-500','bg-cyan-500',  'bg-rose-500',
+]
+
+// Deterministická barva podle id — stejný člověk = stejná barva pokaždé.
+function avatarColor(id) {
+  if (!id) return AVATAR_COLORS[0]
+  let hash = 0
+  for (let i = 0; i < id.length; i++) hash = (hash * 31 + id.charCodeAt(i)) >>> 0
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]
+}
+
+function MemberAvatar({ profile, size = 'sm' }) {
+  const initial = (profile.full_name || profile.email || '?').charAt(0).toUpperCase()
+  const dims = size === 'sm' ? 'w-4 h-4 text-[9px]' : 'w-7 h-7 text-xs'
+  return (
+      <div className={`${dims} ${avatarColor(profile.id)} rounded-full flex items-center justify-center font-bold text-white uppercase shrink-0 ring-1 ring-white/10`}>
+        {initial}
+      </div>
+  )
+}
+
 /**
- * allEvents: pole událostí ze Supabase (výstup useEvents().events)
- *   Tvar jedné události: { ..., event_assignees: [{ profile_id, profiles: { id, full_name, email, avatar_url } }] }
+ * allEvents:    pole událostí ze Supabase (výstup useEvents().events)
+ * allProfiles:  VŠICHNI registrovaní uživatelé (výstup useProfiles().profiles)
+ *               — zdroj pravdy pro dropdown, protože allEvents ukáže jen
+ *               lidi, kteří už mají nějakou událost.
  *
- * initialData (při editaci) má STEJNÝ tvar jako prvek z allEvents, protože
- * je to přímo položka z events array — proto initialData.event_assignees
- * a "dbMembers" extrakce z allEvents používají identickou logiku.
+ * initialData (při editaci) má STEJNÝ tvar jako prvek z allEvents:
+ *   { ..., event_assignees: [{ profile_id, profiles: { id, full_name, email, avatar_url } }] }
  */
-export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
+export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [], allProfiles = [] }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isAllDay, setIsAllDay] = useState(false)
@@ -37,7 +61,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setIsAllDay(isAllDayCheck || false)
 
       // ── NEPRŮSTŘELNÁ extrakce přiřazených členů z relační tabulky ──
-      // Supabase JOIN tvar: event_assignees: [{ profile_id, profiles: { id, email, ... } }]
       let safeMemberIds = []
       const assignees = initialData?.event_assignees
       if (Array.isArray(assignees)) {
@@ -90,31 +113,31 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
   if (!isOpen) return null
 
-  // ── NEPRŮSTŘELNÁ extrakce unikátních profilů ze VŠECH událostí ──
-  // allEvents[].event_assignees je pole { profile_id, profiles: {...} }.
-  // Sbíráme rovnou objekty profiles (ne stringy), abychom v dropdownu
-  // mohli zobrazit jméno i e-mail a interně použít profile.id.
+  // ── Sjednocení VŠECH dostupných profilů ──
+  // 1. allProfiles = kompletní tabulka profiles (primární zdroj — obsahuje
+  //    úplně každého registrovaného uživatele, i bez jediné události).
+  // 2. allEvents[].event_assignees / allEvents[].profiles = doplňkový zdroj
+  //    pro fallback, kdyby allProfiles ještě nedoletělo (loading stav).
   const profileMap = new Map()
+
+  allProfiles.forEach((p) => {
+    if (p?.id) profileMap.set(p.id, p)
+  })
+
   allEvents.forEach((ev) => {
     const assignees = ev?.event_assignees
-    if (!Array.isArray(assignees)) return
-    assignees.forEach((a) => {
-      const profile = a?.profiles
-      if (profile?.id && !profileMap.has(profile.id)) {
-        profileMap.set(profile.id, profile)
-      }
-    })
-  })
-  // Doplníme i tvůrce události (profiles: created_by) — užitečné, pokud
-  // ještě nemá žádnou přiřazenou událost jako assignee.
-  allEvents.forEach((ev) => {
-    const creator = ev?.profiles
-    if (creator?.id && !profileMap.has(creator.id)) {
-      profileMap.set(creator.id, creator)
+    if (Array.isArray(assignees)) {
+      assignees.forEach((a) => {
+        const profile = a?.profiles
+        if (profile?.id && !profileMap.has(profile.id)) profileMap.set(profile.id, profile)
+      })
     }
+    const creator = ev?.profiles
+    if (creator?.id && !profileMap.has(creator.id)) profileMap.set(creator.id, creator)
   })
 
   const AVAILABLE_PROFILES = Array.from(profileMap.values())
+      .sort((a, b) => (a.full_name || a.email || '').localeCompare(b.full_name || b.email || ''))
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -129,8 +152,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       endIso = `${endStr}:00`
     }
 
-    // DŮLEŽITÉ: "members" se NEPOSÍLÁ — tabulka events tento sloupec nemá.
-    // assigneeIds (profile.id[]) zapíše hook useEvents do event_assignees.
     const eventData = {
       title,
       description,
@@ -166,10 +187,15 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       .map(id => AVAILABLE_PROFILES.find(p => p.id === id))
       .filter(Boolean)
 
-  const filteredProfiles = AVAILABLE_PROFILES.filter(p =>
-      (p.email || '').toLowerCase().includes(memberInput.toLowerCase()) ||
-      (p.full_name || '').toLowerCase().includes(memberInput.toLowerCase())
-  )
+  // Filtrace zároveň podle jména i e-mailu (case-insensitive, diakritika
+  // se neřeší — pro plné fulltextové vyhledávání by šlo doplnit normalizaci).
+  const q = memberInput.trim().toLowerCase()
+  const filteredProfiles = q === ''
+      ? AVAILABLE_PROFILES
+      : AVAILABLE_PROFILES.filter(p =>
+          (p.full_name || '').toLowerCase().includes(q) ||
+          (p.email || '').toLowerCase().includes(q)
+      )
 
   return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -256,6 +282,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
+            {/* ── Přiřazení členové — prémiový dropdown ── */}
             <div className="flex flex-col gap-1.5 relative" ref={membersRef}>
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Přiřazení členové</label>
               <div
@@ -265,50 +292,74 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                 {selectedProfiles.length === 0 && <span className="text-white/40 text-sm">Vyber členy týmu...</span>}
                 {selectedProfiles.map(profile => (
                     <div key={profile.id} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
-                      <div className="w-4 h-4 bg-teal rounded-full text-[9px] flex items-center justify-center font-bold text-white uppercase">
-                        {(profile.full_name || profile.email).charAt(0)}
-                      </div>
+                      <MemberAvatar profile={profile} size="sm" />
                       {profile.full_name || profile.email}
                       <button type="button" onClick={(e) => { e.stopPropagation(); toggleMember(profile.id); }} className="hover:text-red-400 ml-1">
                         <X size={12} />
                       </button>
                     </div>
                 ))}
-                <ChevronDown size={16} className="text-white/40 ml-auto" />
+                <ChevronDown size={16} className={`text-white/40 ml-auto transition-transform duration-200 ${isMembersOpen ? 'rotate-180' : ''}`} />
               </div>
 
-              {isMembersOpen && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#1c1c1f] border border-white/10 rounded-lg shadow-xl overflow-hidden z-20 flex flex-col">
+              {/* Dropdown panel — fade + slide nahoru při otevření */}
+              <div
+                  className={`absolute top-full left-0 right-0 mt-2 origin-top transition-all duration-150 ease-out z-20
+                  ${isMembersOpen
+                      ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto'
+                      : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'}`}
+              >
+                <div className="bg-[#16161a] border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col">
+                  <div className="relative border-b border-white/10">
+                    <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/30" />
                     <input
                         type="text"
                         value={memberInput}
                         onChange={(e) => setMemberInput(e.target.value)}
-                        placeholder="Vyhledat člena týmu..."
-                        className="w-full bg-transparent border-b border-white/10 text-white px-4 py-3 text-sm focus:outline-none"
+                        placeholder="Vyhledat jméno nebo e-mail..."
+                        className="w-full bg-transparent text-white pl-9 pr-4 py-3 text-sm focus:outline-none placeholder:text-white/30"
                         onClick={(e) => e.stopPropagation()}
                     />
-                    <div className="max-h-48 overflow-y-auto custom-scrollbar">
-                      {filteredProfiles.length === 0 && (
-                          <div className="px-4 py-3 text-sm text-white/30">
-                            {AVAILABLE_PROFILES.length === 0
-                                ? 'Zatím žádní členové (vytvoř první událost s přiřazením, nebo počkej na registraci kolegů)'
-                                : 'Žádná shoda'}
-                          </div>
-                      )}
-                      {filteredProfiles.map(profile => (
-                          <div
-                              key={profile.id}
-                              onClick={() => toggleMember(profile.id)}
-                              className="px-4 py-2.5 text-sm text-white/80 hover:bg-white/5 cursor-pointer flex items-center gap-2"
-                          >
-                            <input type="checkbox" checked={memberIds.includes(profile.id)} readOnly className="accent-teal" />
-                            <span>{profile.full_name || profile.email}</span>
-                            <span className="text-white/30 text-xs ml-auto">{profile.email}</span>
-                          </div>
-                      ))}
-                    </div>
                   </div>
-              )}
+
+                  <div className="max-h-56 overflow-y-auto custom-scrollbar py-1">
+                    {filteredProfiles.length === 0 && (
+                        <div className="px-4 py-4 text-sm text-white/30 text-center">
+                          {AVAILABLE_PROFILES.length === 0
+                              ? 'Zatím žádní registrovaní členové'
+                              : `Žádná shoda pro „${memberInput}“`}
+                        </div>
+                    )}
+                    {filteredProfiles.map(profile => {
+                      const isSelected = memberIds.includes(profile.id)
+                      return (
+                          <button
+                              key={profile.id}
+                              type="button"
+                              onClick={() => toggleMember(profile.id)}
+                              className={`w-full px-3 py-2.5 mx-1 rounded-lg text-sm flex items-center gap-3 transition-colors text-left
+                              ${isSelected ? 'bg-teal/10 hover:bg-teal/15' : 'hover:bg-white/[0.06]'}`}
+                              style={{ width: 'calc(100% - 8px)' }}
+                          >
+                            <MemberAvatar profile={profile} size="md" />
+                            <div className="flex flex-col min-w-0 flex-1">
+                            <span className="text-white/90 font-medium truncate">
+                              {profile.full_name || '—'}
+                            </span>
+                              {profile.email && (
+                                  <span className="text-white/40 text-xs truncate">{profile.email}</span>
+                              )}
+                            </div>
+                            <div className={`w-4 h-4 rounded-full border shrink-0 flex items-center justify-center transition-colors
+                            ${isSelected ? 'bg-teal border-teal' : 'border-white/20'}`}>
+                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-black/80" />}
+                            </div>
+                          </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">

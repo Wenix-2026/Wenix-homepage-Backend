@@ -7,10 +7,16 @@ import { EventModal }         from '../events/EventModal'
 import { EventDetailModal }   from '../events/EventDetailModal'
 import { useCalendar }        from '../../hooks/useCalendar'
 import { useEvents }          from '../../hooks/useEvents'
+import { useProfiles }        from '../../hooks/useProfiles'
 
 export function CalendarDashboard() {
     const cal = useCalendar()
     const { events, createEvent, updateEvent, deleteEvent } = useEvents(cal.year, cal.month)
+
+    // Zdroj pravdy pro VŠECHNY registrované členy týmu (i ty bez jediné
+    // přiřazené události) — bez tohohle by dropdown v EventModalu zobrazoval
+    // jen lidi, kteří se náhodou objevili v allEvents.
+    const { profiles: allProfiles } = useProfiles()
 
     const [createModal, setCreateModal] = useState({ open: false, date: null })
     const [editModal,   setEditModal]   = useState({ open: false, event: null })
@@ -73,6 +79,7 @@ export function CalendarDashboard() {
                 onDelete={deleteEvent}
                 selectedDate={createModal.date}
                 allEvents={events}
+                allProfiles={allProfiles}
             />
 
             <EventModal
@@ -82,6 +89,7 @@ export function CalendarDashboard() {
                 onDelete={deleteEvent}
                 initialData={editModal.event}
                 allEvents={events}
+                allProfiles={allProfiles}
             />
 
             <EventDetailModal
