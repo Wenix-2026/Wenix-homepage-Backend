@@ -21,7 +21,6 @@ export function useEvents(year, month) {
       const to   = new Date(safeYear, safeMonth + 1, 1).toISOString()
 
       // Supabase JOIN: event_assignees je pole objektů { profiles: {...} }
-      // protože event_assignees má FK na profiles a Supabase to automaticky zanoří.
       const { data, error: fetchError } = await supabase
           .from('events')
           .select(`
@@ -49,12 +48,8 @@ export function useEvents(year, month) {
 
   /**
    * payload musí obsahovat assigneeIds: string[] (profile.id, ne e-mail!)
-   * Vše ostatní (title, description, start_time, ...) jde přímo do tabulky events.
-   *
-   * created_by se NEČEKÁ od volajícího — doplňuje se tady automaticky podle
-   * aktuálně přihlášeného uživatele. supabase.auth.getUser() je přímý dotaz
-   * na auth server (ne jen lokální React state), takže funguje spolehlivě
-   * i kdyby AuthContext ještě nestihl profil/session dotáhnout.
+   * created_by se doplňuje automaticky podle aktuálně přihlášeného uživatele,
+   * pokud chybí — supabase.auth.getUser() je přímý dotaz na auth server.
    */
   async function createEvent(payload) {
     const { assigneeIds = [], ...eventData } = payload
@@ -86,7 +81,13 @@ export function useEvents(year, month) {
   }
 
   async function updateEvent(id, payload) {
-    const { assigneeIds, ...eventData } = payload
+    // POZOR: nikdy nedestructurovat proměnnou se stejným jménem jako parametr
+    // funkce (id). payload.id i tak existuje (EventModal ho posílá), ale
+    // přejmenováním na _ignoredPayloadId se vyhneme stínování parametru id —
+    // .eq('id', id) tak vždy spolehlivě používá parametr funkce, ne náhodu.
+    // created_by se navíc z update vyřazuje úmyslně — autor události se
+    // editací nemá nikdy přepsat.
+    const { assigneeIds, id: _ignoredPayloadId, created_by, ...eventData } = payload
 
     const { error: evErr } = await supabase
         .from('events')
@@ -96,9 +97,6 @@ export function useEvents(year, month) {
     if (evErr) throw new Error(evErr.message)
 
     // ── Přepis assignees: NEJDŘÍV smazat staré, AŽ POTOM vložit nové ──
-    // DŮLEŽITÉ: obě operace musí svoji chybu zkontrolovat. Pokud DELETE
-    // tiše selže (např. RLS), následný INSERT narazí na duplicitní
-    // (event_id, profile_id) primární klíč a Supabase vrátí 409 Conflict.
     if (assigneeIds !== undefined) {
       const { error: delErr } = await supabase
           .from('event_assignees')
@@ -110,9 +108,6 @@ export function useEvents(year, month) {
       if (assigneeIds.length > 0) {
         const rows = assigneeIds.map((profile_id) => ({ event_id: id, profile_id }))
 
-        // upsert s ignoreDuplicates jako pojistka navíc — i kdyby DELETE
-        // z nějakého důvodu nestihlo doběhnout (race condition), INSERT
-        // nespadne na 409, ale duplicitu jen přeskočí.
         const { error: asErr } = await supabase
             .from('event_assignees')
             .upsert(rows, { onConflict: 'event_id,profile_id', ignoreDuplicates: true })
