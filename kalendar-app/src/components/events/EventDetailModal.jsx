@@ -93,7 +93,7 @@ export function EventDetailModal({ open, onClose, event, onEdit }) {
         {/* Edit button (jen pro vlastníka) */}
         {isOwner && (
           <div className="flex justify-end pt-1">
-            <Button variant="secondary" size="sm" onClick={() => { onClose(); onEdit(event) }}>
+            <Button variant="secondary" size="sm" onClick={() => onEdit(event)}>
               <Pencil size={12} />
               Upravit
             </Button>
