@@ -10,21 +10,23 @@ export function useEvents(year, month) {
     setLoading(true)
     setError(null)
 
-    const current  = new Date()
-    const safeYear  = (typeof year === 'number' && !isNaN(year)) ? year : current.getFullYear()
+    // NEPRŮSTŘELNÁ POJISTKA: Pokud aplikace nepředá správný rok a měsíc, použijeme aktuální
+    const current = new Date()
+    const safeYear = (typeof year === 'number' && !isNaN(year)) ? year : current.getFullYear()
     const safeMonth = (typeof month === 'number' && !isNaN(month)) ? month : current.getMonth()
 
     try {
+      // Rozsah: první den měsíce – první den následujícího měsíce
       const from = new Date(safeYear, safeMonth, 1).toISOString()
       const to   = new Date(safeYear, safeMonth + 1, 1).toISOString()
 
+      // Oprava: supabase vrací destructured error jako error: fetchError
       const { data, error: fetchError } = await supabase
           .from('events')
           .select(`
           *,
           profiles:created_by ( id, full_name, email, avatar_url ),
           event_assignees (
-            profile_id,
             profiles ( id, full_name, email, avatar_url )
           )
         `)
@@ -46,14 +48,7 @@ export function useEvents(year, month) {
   async function createEvent(payload) {
     const { assigneeIds = [], ...eventData } = payload
 
-    if (!eventData.created_by) {
-      const { data: userData, error: userErr } = await supabase.auth.getUser()
-      if (userErr || !userData?.user) {
-        throw new Error('Nejsi přihlášen — událost nelze uložit bez identity autora.')
-      }
-      eventData.created_by = userData.user.id
-    }
-
+    // 1. Vytvoř event
     const { data: event, error: evErr } = await supabase
         .from('events')
         .insert(eventData)
@@ -62,6 +57,7 @@ export function useEvents(year, month) {
 
     if (evErr) throw new Error(evErr.message)
 
+    // 2. Přiřaď assignees
     if (assigneeIds.length > 0) {
       const rows = assigneeIds.map((profile_id) => ({ event_id: event.id, profile_id }))
       const { error: asErr } = await supabase.from('event_assignees').insert(rows)
@@ -72,32 +68,23 @@ export function useEvents(year, month) {
     return event
   }
 
-  async function updateEvent(eventId, payload) {
-    const { assigneeIds, id, ...eventData } = payload
+  async function updateEvent(id, payload) {
+    // Odfiltrujeme 'created_by' a 'assigneeIds' aby se neodesílaly do UPDATE
+    const { assigneeIds, created_by, ...eventData } = payload
 
     const { error: evErr } = await supabase
         .from('events')
         .update(eventData)
-        .eq('id', eventId)
+        .eq('id', id)
 
     if (evErr) throw new Error(evErr.message)
 
+    // Přepis assignees — smazat staré, vložit nové
     if (assigneeIds !== undefined) {
-      const { error: delErr } = await supabase
-          .from('event_assignees')
-          .delete()
-          .eq('event_id', eventId)
-
-      if (delErr) throw new Error(`Smazání starých assignees selhalo: ${delErr.message}`)
-
+      await supabase.from('event_assignees').delete().eq('event_id', id)
       if (assigneeIds.length > 0) {
-        const rows = assigneeIds.map((profile_id) => ({ event_id: eventId, profile_id }))
-
-        const { error: asErr } = await supabase
-            .from('event_assignees')
-            .upsert(rows, { onConflict: 'event_id,profile_id', ignoreDuplicates: true })
-
-        if (asErr) throw new Error(`Vložení nových assignees selhalo: ${asErr.message}`)
+        const rows = assigneeIds.map((profile_id) => ({ event_id: id, profile_id }))
+        await supabase.from('event_assignees').insert(rows)
       }
     }
 
