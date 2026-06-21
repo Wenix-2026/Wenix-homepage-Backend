@@ -3,7 +3,6 @@ import { X, ChevronDown } from 'lucide-react'
 import { format } from 'date-fns'
 
 export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [] }) {
-  // Stavy formuláře
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [isAllDay, setIsAllDay] = useState(false)
@@ -14,13 +13,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
-  // UI stavy pro našeptávače a tagy
   const [isMembersOpen, setIsMembersOpen] = useState(false)
   const [memberInput, setMemberInput] = useState('')
   const [tagInput, setTagInput] = useState('')
   const membersRef = useRef(null)
 
-  // Naplnění dat při otevření
   useEffect(() => {
     if (isOpen) {
       setTitle(initialData?.title || '')
@@ -28,27 +25,27 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       setMeetLink(initialData?.meet_link || '')
       setReminder(initialData?.reminder || '1 den před')
 
-      // Odvození celodenní akce, jelikož se to neukládá přímo do sloupce v DB
       const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
       setIsAllDay(isAllDayCheck || false)
 
-      // Bezpečné formátování členů
       let safeMembers = []
-      if (initialData?.members) {
+      if (initialData?.members && initialData.members !== 'undefined') {
         const rawMembers = Array.isArray(initialData.members) ? initialData.members : [initialData.members]
-        safeMembers = rawMembers.map(m => typeof m === 'object' && m !== null ? (m.name || m.title || String(m)) : String(m))
+        safeMembers = rawMembers
+            .map(m => typeof m === 'object' && m !== null ? (m.name || m.title || String(m)) : String(m))
+            .filter(m => m !== 'undefined' && m !== 'null' && m.trim() !== '')
       }
       setMembers(safeMembers)
 
-      // Bezpečné formátování tagů
       let safeTags = []
       if (initialData?.tags) {
         const rawTags = Array.isArray(initialData.tags) ? initialData.tags : [initialData.tags]
-        safeTags = rawTags.map(t => typeof t === 'object' && t !== null ? (t.name || t.title || String(t)) : String(t))
+        safeTags = rawTags
+            .map(t => typeof t === 'object' && t !== null ? (t.name || t.title || String(t)) : String(t))
+            .filter(t => t !== 'undefined' && t !== 'null' && t.trim() !== '')
       }
       setTags(safeTags)
 
-      // Formátování data pro inputy
       try {
         if (initialData?.start_time) {
           const d = new Date(initialData.start_time)
@@ -71,7 +68,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }, [isOpen, initialData, selectedDate])
 
-  // Zavření dropdownu při kliknutí jinam
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (membersRef.current && !membersRef.current.contains(event.target)) {
@@ -84,11 +80,15 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
   if (!isOpen) return null
 
-  // Extrakce unikátních členů z databáze
+  // Extrakce z DB a tvrdý filtr na nesmysly
   const dbMembers = [...new Set(allEvents.flatMap(e => {
+    if (!e || !e.members) return []
     const mArray = Array.isArray(e.members) ? e.members : [e.members]
-    return mArray.map(m => typeof m === 'object' && m !== null ? (m.name || String(m)) : String(m))
-  }))].filter(Boolean).filter(m => m !== 'all@wenix.cz')
+    return mArray.map(m => {
+      if (!m || m === 'undefined' || m === 'null') return null
+      return typeof m === 'object' ? (m.name || m.title || String(m)) : String(m)
+    })
+  }))].filter(m => m && m !== 'all@wenix.cz' && m !== 'undefined' && m.trim() !== '')
 
   const AVAILABLE_MEMBERS = ['all@wenix.cz', ...dbMembers]
 
@@ -105,13 +105,12 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       endIso = `${endStr}:00`
     }
 
-    // Odstraněno "is_all_day", protože sloupec v databázi neexistuje
+    // Odesíláme čistá data, meet_link a is_all_day úmyslně chybí
     const eventData = {
       title,
       description,
       start_time: startIso,
       end_time: endIso,
-      meet_link: meetLink,
       members,
       tags,
       reminder
@@ -135,7 +134,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       if (!members.includes(newMember)) {
         setMembers([...members, newMember])
       }
-      setMemberInput('') // Vyčistíme pole po odeslání
+      setMemberInput('')
     }
   }
 
@@ -153,7 +152,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
         <div className="w-full max-w-lg rounded-2xl bg-[#0f0f11] border border-white/10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
-          {/* Hlavička */}
           <div className="flex items-center justify-between p-5 border-b border-white/10 shrink-0">
             <h2 className="text-base font-bold text-white uppercase tracking-widest font-body">
               {initialData ? 'Upravit událost' : 'Nová událost'}
@@ -163,7 +161,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             </button>
           </div>
 
-          {/* Formulář */}
           <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-y-auto custom-scrollbar p-5 gap-5">
 
             <div className="flex flex-col gap-1.5">
@@ -226,7 +223,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Odkaz na schůzku</label>
+              <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Odkaz na schůzku (neukládá se do DB)</label>
               <input
                   type="url"
                   value={meetLink}
@@ -236,14 +233,13 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* Přiřazení členové - Custom Multi-select Dropdown */}
             <div className="flex flex-col gap-1.5 relative" ref={membersRef}>
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Přiřazení členové</label>
               <div
                   onClick={() => setIsMembersOpen(!isMembersOpen)}
                   className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 min-h-[42px] cursor-pointer flex items-center flex-wrap gap-2 transition-colors hover:border-white/20"
               >
-                {members.length === 0 && <span className="text-white/40 text-sm">Vyber členy...</span>}
+                {members.length === 0 && <span className="text-white/40 text-sm">Vyber nebo přidej členy...</span>}
                 {members.map(member => (
                     <div key={member} className="bg-white/10 text-white text-xs px-2.5 py-1 rounded-md flex items-center gap-1.5 border border-white/5">
                       <div className="w-4 h-4 bg-teal rounded-full text-[9px] flex items-center justify-center font-bold text-white uppercase">
@@ -258,7 +254,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                 <ChevronDown size={16} className="text-white/40 ml-auto" />
               </div>
 
-              {/* Dropdown se členy + vyhledávání */}
               {isMembersOpen && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-[#1c1c1f] border border-white/10 rounded-lg shadow-xl overflow-hidden z-20 flex flex-col">
                     <input
@@ -267,7 +262,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                         onChange={(e) => setMemberInput(e.target.value)}
                         onKeyDown={handleMemberKeyDown}
                         placeholder="Vyhledej nebo přidej nového (Enter)..."
-                        className="w-full bg-transparent border-b border-white/10 text-white px-4 py-2 text-sm focus:outline-none"
+                        className="w-full bg-transparent border-b border-white/10 text-white px-4 py-3 text-sm focus:outline-none"
                         onClick={(e) => e.stopPropagation()}
                     />
                     <div className="max-h-48 overflow-y-auto custom-scrollbar">
@@ -286,7 +281,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               )}
             </div>
 
-            {/* Štítky (Tagy) */}
             <div className="flex flex-col gap-1.5">
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Štítky (Tagy)</label>
               <div className="w-full bg-[#161618] border border-white/10 rounded-lg px-3 py-2 focus-within:border-teal transition-colors flex flex-wrap gap-2 items-center min-h-[42px]">
@@ -326,7 +320,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             <div className="pt-2"></div>
           </form>
 
-          {/* Patička */}
           <div className="flex items-center justify-between p-5 border-t border-white/10 bg-[#0f0f11] shrink-0">
             {initialData ? (
                 <button

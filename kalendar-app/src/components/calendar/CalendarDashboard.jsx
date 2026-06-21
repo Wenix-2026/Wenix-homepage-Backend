@@ -18,7 +18,6 @@ export function CalendarDashboard() {
 
     function openCreate(date = null)  { setCreateModal({ open: true, date }) }
 
-    // OPRAVA: Při otevření úprav se musí detail události zavřít
     function openEdit(event) {
         setDetailModal({ open: false, event: null })
         setEditModal({ open: true, event })
@@ -26,14 +25,13 @@ export function CalendarDashboard() {
 
     function openDetail(event) { setDetailModal({ open: true, event }) }
 
-    // OPRAVA: Modal posílá jen jeden parametr (payload), takže si ID musíme vytáhnout z něj
     async function handleSave(payload) {
         if (payload.id) {
             await updateEvent(payload.id, payload)
-            setEditModal({ open: false, event: null }) // Zavřít modal po úpravě
+            setEditModal({ open: false, event: null })
         } else {
             await createEvent(payload)
-            setCreateModal({ open: false, date: null }) // Zavřít modal po vytvoření
+            setCreateModal({ open: false, date: null })
         }
     }
 
@@ -68,8 +66,6 @@ export function CalendarDashboard() {
                 )}
             </main>
 
-            {/* OPRAVA: Přejmenováno open na isOpen a initialDate na selectedDate */}
-            {/* Vytvářecí modal */}
             <EventModal
                 isOpen={createModal.open}
                 onClose={() => setCreateModal({ open: false, date: null })}
@@ -79,7 +75,6 @@ export function CalendarDashboard() {
                 allEvents={events}
             />
 
-            {/* Upravovací modal */}
             <EventModal
                 isOpen={editModal.open}
                 onClose={() => setEditModal({ open: false, event: null })}
@@ -89,7 +84,6 @@ export function CalendarDashboard() {
                 allEvents={events}
             />
 
-            {/* Detail modal */}
             <EventDetailModal
                 open={detailModal.open}
                 onClose={() => setDetailModal({ open: false, event: null })}
