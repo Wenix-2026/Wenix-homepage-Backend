@@ -7,7 +7,6 @@ const AVATAR_COLORS = [
   'bg-orange-500','bg-emerald-500','bg-cyan-500',  'bg-rose-500',
 ]
 
-// Deterministická barva podle id — stejný člověk = stejná barva pokaždé.
 function avatarColor(id) {
   if (!id) return AVATAR_COLORS[0]
   let hash = 0
@@ -25,9 +24,6 @@ function MemberAvatar({ profile, size = 'sm' }) {
   )
 }
 
-// Virtuální položka pro hromadné přiřazení — NENÍ to skutečný profil z DB
-// (žádné profile.id), proto se nikdy neukládá do event_assignees. Místo
-// toho nastavuje boolean sloupec events.notify_all (viz handleSubmit).
 const ALL_OPTION = {
   id: '__all__',
   full_name: 'all',
@@ -45,8 +41,6 @@ function AllOptionAvatar({ size = 'sm' }) {
   )
 }
 
-// Avatar pro ručně napsaný e-mail mimo profiles — obálka místo iniciály,
-// protože u takového kontaktu neznáme jméno ani fotku.
 function ExtraEmailAvatar({ size = 'sm' }) {
   const dims = size === 'sm' ? 'w-4 h-4' : 'w-7 h-7'
   const iconSize = size === 'sm' ? 8 : 14
@@ -57,15 +51,6 @@ function ExtraEmailAvatar({ size = 'sm' }) {
   )
 }
 
-/**
- * allEvents:    pole událostí ze Supabase (výstup useEvents().events)
- * allProfiles:  VŠICHNI registrovaní uživatelé (výstup useProfiles().profiles)
- *               — zdroj pravdy pro dropdown, protože allEvents ukáže jen
- *               lidi, kteří už mají nějakou událost.
- *
- * initialData (při editaci) má STEJNÝ tvar jako prvek z allEvents:
- *   { ..., event_assignees: [{ profile_id, profiles: { id, full_name, email, avatar_url } }] }
- */
 export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [], allProfiles = [] }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -73,9 +58,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [startStr, setStartStr] = useState('')
   const [endStr, setEndStr] = useState('')
   const [meetLink, setMeetLink] = useState('')
-  const [memberIds, setMemberIds] = useState([])      // profile.id[]
-  const [notifyAll, setNotifyAll] = useState(false)   // true = "all" zvolena namísto konkrétních lidí
-  const [extraEmails, setExtraEmails] = useState([])  // string[] — ručně napsané e-maily mimo profiles
+  const [memberIds, setMemberIds] = useState([])
+  const [notifyAll, setNotifyAll] = useState(false)
+  const [extraEmails, setExtraEmails] = useState([])
   const [tags, setTags] = useState([])
   const [reminder, setReminder] = useState('1 den před')
 
@@ -86,13 +71,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   const [isSaving, setIsSaving] = useState(false)
   const membersRef = useRef(null)
 
-  // DŮLEŽITÉ: dependency array sleduje jen isOpen a initialData?.id, ne celý
-  // initialData objekt. Po každém uložení se zavolá fetchEvents() a Supabase
-  // vrátí NOVÝ objekt se stejným obsahem, ale jinou referencí v paměti —
-  // kdyby tu byla celá initialData, useEffect by se spustil znovu a přepsal
-  // rozeditovaný start_time/end_time zpátky na starou hodnotu z DB.
-  // Sledování pouze .id zajistí, že se formulář znovu naplní jen při otevření
-  // modalu nebo přepnutí na editaci JINÉ události, ne při refetchi té samé.
   useEffect(() => {
     if (isOpen) {
       setSaveError(null)
@@ -104,7 +82,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
       setIsAllDay(isAllDayCheck || false)
 
-      // ── NEPRŮSTŘELNÁ extrakce přiřazených členů z relační tabulky ──
       const isNotifyAll = Boolean(initialData?.notify_all)
       setNotifyAll(isNotifyAll)
 
@@ -167,11 +144,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
   if (!isOpen) return null
 
-  // ── Sjednocení VŠECH dostupných profilů ──
-  // 1. allProfiles = kompletní tabulka profiles (primární zdroj — obsahuje
-  //    úplně každého registrovaného uživatele, i bez jediné události).
-  // 2. allEvents[].event_assignees / allEvents[].profiles = doplňkový zdroj
-  //    pro fallback, kdyby allProfiles ještě nedoletělo (loading stav).
   const profileMap = new Map()
 
   allProfiles.forEach((p) => {
@@ -200,8 +172,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     let startIso, endIso
 
     if (isAllDay) {
-      startIso = `${startStr.split('T')[0]}T00:01:00`
-      endIso = `${endStr.split('T')[0]}T23:59:59`
+      startIso = `${startStr.split('T')[0]}T00:01:00Z`
+      endIso = `${endStr.split('T')[0]}T23:59:59Z`
     } else {
       startIso = new Date(startStr).toISOString()
       endIso = new Date(endStr).toISOString()
@@ -215,11 +187,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
       location_link: meetLink || null,
       reminder_minutes: reminderToMinutes(reminder),
       notify_all: notifyAll,
-      // Pokud je zvolena hromadná notifikace, žádní jednotliví assignees
-      // ani ručně napsané e-maily se neukládají — notify_all je jediný
-      // zdroj pravdy a nemá smysl ho kombinovat s konkrétním seznamem.
       assigneeIds: notifyAll ? [] : memberIds,
       extra_emails: notifyAll ? [] : extraEmails,
+      tags,
     }
 
     if (initialData?.id) {
@@ -236,10 +206,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     }
   }
 
-  // Výběr "all" je vzájemně vylučující s konkrétními lidmi i ručně psanými
-  // e-maily — vybrání "all" vždy vyprázdní obojí, aby v DB nikdy nešlo
-  // notify_all=true SOUČASNĚ s naplněným event_assignees/extra_emails
-  // (nejednoznačná sémantika "komu poslat e-mail").
   const toggleMember = (profileId) => {
     if (profileId === ALL_OPTION.id) {
       setNotifyAll((prev) => {
@@ -264,9 +230,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     if (!value) return false
     if (!EMAIL_REGEX.test(value)) return false
 
-    // Pokud zadaný e-mail patří existujícímu profilu, raději ho přidáme
-    // jako skutečného člena (memberIds) — vyhneme se duplicitě stejného
-    // člověka jednou v event_assignees a jednou v extra_emails.
     const matchingProfile = AVAILABLE_PROFILES.find((p) => (p.email || '').toLowerCase() === value)
     if (matchingProfile) {
       setNotifyAll(false)
@@ -317,15 +280,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
         ...extraEmailProfiles,
       ]
 
-  // Filtrace zároveň podle jména i e-mailu (case-insensitive, diakritika
-  // se neřeší — pro plné fulltextové vyhledávání by šlo doplnit normalizaci).
   const q = memberInput.trim().toLowerCase()
   const matchesQuery = (p) =>
       (p.full_name || '').toLowerCase().includes(q) ||
       (p.email || '').toLowerCase().includes(q)
 
-  // "all" je napevno přibitá jako první položka seznamu a zobrazuje se
-  // i v rámci aktivního filtrování (požadavek: "vždy dostupná").
   const filteredProfiles = q === ''
       ? [ALL_OPTION, ...AVAILABLE_PROFILES]
       : (matchesQuery(ALL_OPTION) ? [ALL_OPTION] : []).concat(AVAILABLE_PROFILES.filter(matchesQuery))
@@ -415,7 +374,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
               />
             </div>
 
-            {/* ── Přiřazení členové — prémiový dropdown ── */}
             <div className="flex flex-col gap-1.5 relative" ref={membersRef}>
               <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Přiřazení členové</label>
               <div
@@ -454,7 +412,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                 <ChevronDown size={16} className={`text-white/40 ml-auto transition-transform duration-200 ${isMembersOpen ? 'rotate-180' : ''}`} />
               </div>
 
-              {/* Dropdown panel — fade + slide nahoru při otevření */}
               <div
                   className={`absolute top-full left-0 right-0 mt-2 origin-top transition-all duration-150 ease-out z-20
                   ${isMembersOpen
@@ -608,7 +565,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
   )
 }
 
-// Pomocná funkce — text reminder -> minuty pro DB sloupec reminder_minutes
 function reminderToMinutes(label) {
   const map = {
     '15 minut před': 15,
