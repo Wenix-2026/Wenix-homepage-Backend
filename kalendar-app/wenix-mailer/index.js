@@ -3,27 +3,21 @@ import { Resend } from 'resend';
 import cron from 'node-cron';
 import 'dotenv/config';
 
-// 1. Inicializace připojení k databázi a maileru
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 console.log("Wenix Mailer spuštěn. Čekám na události...");
 
-// 2. Nastavení plánovače (Cron). "* * * * *" znamená "Spusť se každou minutu"
 cron.schedule('* * * * *', async () => {
     const now = new Date();
-
-    // Odřízneme vteřiny a milisekundy, abychom mohli přesně porovnávat čas
     now.setSeconds(0, 0);
 
-    // Omezíme hledání jen na události v následujících 24 hodinách, ať neprohledáváme zbytečně celou databázi
     const maxFuture = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
 
     try {
-        // 3. Vytáhneme ze Supabase všechny události - PŘIDALI JSME description a location_link
         const { data: events, error } = await supabase
             .from('events')
-            .select('title, description, start_time, location_link, reminder_minutes, event_assignees(profiles(email))')
+            .select('title, description, start_time, location_link, reminder_minutes, tags, event_assignees(profiles(email))')
             .gt('reminder_minutes', 0)
             .gt('start_time', now.toISOString())
             .lte('start_time', maxFuture);
@@ -33,65 +27,105 @@ cron.schedule('* * * * *', async () => {
             return;
         }
 
-        // 4. Projdeme každou nalezenou událost
         for (const event of events) {
             const startTime = new Date(event.start_time);
-
-            // Vypočítáme čas, kdy se má upozornění poslat
             const reminderTime = new Date(startTime.getTime() - event.reminder_minutes * 60000);
             reminderTime.setSeconds(0, 0);
 
-            // Je PRÁVĚ TEĎ ta správná minuta pro odeslání?
             if (reminderTime.getTime() === now.getTime()) {
-
-                // Vytáhneme čistý seznam e-mailů ze zanořené struktury databáze
                 const emails = event.event_assignees
                     .map(ea => ea.profiles?.email)
                     .filter(email => email);
 
                 if (emails.length > 0) {
 
-                    // Příprava HTML bloků (vykreslí se, jen když v databázi reálně něco je)
                     const descriptionHtml = event.description
-                        ? `<p style="margin: 0 0 16px 0; color: #52525b; font-size: 14px; line-height: 1.6;">${event.description}</p>`
+                        ? `<p style="margin: 0 0 20px 0; color: #a1a1aa; font-size: 14px; line-height: 1.6; font-weight: 400;">${event.description}</p>`
                         : '';
 
-                    const linkHtml = event.location_link
-                        ? `<a href="${event.location_link}" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 14px; margin-top: 8px;">Připojit se ke schůzce</a>`
-                        : '';
+                    let tagsHtml = '';
+                    if (event.tags && Array.isArray(event.tags) && event.tags.length > 0) {
+                        const tagsList = event.tags
+                            .map(tag => `<span style="display: inline-block; background-color: #27272a; color: #e4e4e7; border: 1px solid #3f3f46; font-size: 11px; padding: 4px 8px; border-radius: 6px; margin-right: 6px; margin-bottom: 6px; font-weight: 500;">#${tag}</span>`)
+                            .join('');
+                        tagsHtml = `<div style="margin-top: 16px; margin-bottom: 8px;">${tagsList}</div>`;
+                    }
 
-                    // 5. Odeslání e-mailu s profi designem
-                    const { data, error: mailError } = await resend.emails.send({
-                        from: 'Wenix Kalendář <notifikace@wenix.cz>', // Až bude doména ověřená, nech tohle
-                        to: emails, // V pískovišti to dočasně nahraď svým mailem
-                        subject: `⏰ Blíží se: ${event.title}`,
+                    let actionButtonsHtml = '';
+                    if (event.location_link && event.location_link.trim() !== '') {
+                        actionButtonsHtml += `
+                            <a href="${event.location_link}" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; padding: 11px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; margin-right: 12px; margin-bottom: 10px; letter-spacing: 0.5px; border: 1px solid #14b8a6;">
+                                Připojit se k hovoru
+                            </a>
+                        `;
+                    }
+                    actionButtonsHtml += `
+                        <a href="https://kalendar.wenix.cz" style="display: inline-block; background-color: #1c1c1f; color: #e4e4e7; text-decoration: none; padding: 11px 20px; border-radius: 10px; font-weight: 600; font-size: 13px; margin-bottom: 10px; border: 1px solid #2d2d30; letter-spacing: 0.5px;">
+                            Otevřít kalendář
+                        </a>
+                    `;
+
+                    // OPRAVA ČASU: Natvrdo vynutíme české časové pásmo, i když kontejner běží v UTC
+                    const formattedTime = startTime.toLocaleTimeString('cs-CZ', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: 'Europe/Prague'
+                    });
+                    const formattedDate = startTime.toLocaleDateString('cs-CZ', {
+                        day: 'numeric',
+                        month: 'short',
+                        timeZone: 'Europe/Prague'
+                    });
+
+                    const result = await resend.emails.send({
+                        from: 'Wenix Kalendář <notifikace@wenix.cz>',
+                        to: emails,
+                        subject: `⚡ Wenix: ${event.title} (${formattedTime})`,
                         html: `
-              <div style="font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: #f4f4f5; padding: 40px 20px;">
-                <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #09090b; padding: 50px 20px; color: #f4f4f5;">
+                <div style="max-width: 540px; margin: 0 auto; background-color: #121214; border-radius: 16px; overflow: hidden; border: 1px solid #202023; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
                   
-                  <div style="background-color: #131313; padding: 32px 24px; text-align: center;">
-                    <h1 style="color: #ffffff; margin: 0; font-size: 24px; letter-spacing: 2px; text-transform: uppercase;">Wenix Kalendář</h1>
+                  <div style="padding: 32px 32px 24px 32px; border-bottom: 1px solid #1c1c1f;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td>
+                          <span style="font-size: 11px; font-weight: 700; color: #0d9488; text-transform: uppercase; letter-spacing: 2.5px; display: block; margin-bottom: 4px;">Nadcházející agenda</span>
+                          <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.5px;">${event.title}</h1>
+                        </td>
+                      </tr>
+                    </table>
                   </div>
 
-                  <div style="padding: 40px 32px;">
-                    <h2 style="margin: 0 0 16px 0; color: #18181b; font-size: 22px;">Blíží se tvá událost!</h2>
-                    <p style="margin: 0 0 32px 0; color: #3f3f46; font-size: 16px; line-height: 1.5;">
-                      Ahoj,<br>za malou chvíli začíná tvá naplánovaná událost. Zde máš všechny potřebné detaily po ruce:
-                    </p>
+                  <div style="padding: 32px;">
+                    
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #18181b; border: 1px solid #27272a; border-radius: 12px; margin-bottom: 24px;">
+                      <tr>
+                        <td style="padding: 16px 20px;">
+                          <span style="font-size: 12px; color: #71717a; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 2px;">Čas startu</span>
+                          <span style="font-size: 18px; font-weight: 700; color: #ffffff; display: block;">
+                            <span style="color: #0d9488;">●</span> ${formattedTime} <span style="font-size: 14px; color: #a1a1aa; font-weight: 400; margin-left: 6px;">(${formattedDate})</span>
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
 
-                    <div style="background-color: #f0fdfa; border-left: 4px solid #0d9488; padding: 24px; border-radius: 0 12px 12px 0; margin-bottom: 32px;">
-                      <h3 style="margin: 0 0 8px 0; color: #131313; font-size: 18px;">${event.title}</h3>
-                      <p style="margin: 0 0 16px 0; color: #0f766e; font-weight: 600; font-size: 15px;">
-                        ⏰ Dnes v ${startTime.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                      ${descriptionHtml}
-                      ${linkHtml}
+                    ${descriptionHtml}
+                    ${tagsHtml}
+                    
+                    <div style="margin-top: 28px; padding-top: 12px;">
+                      ${actionButtonsHtml}
                     </div>
 
-                    <div style="border-top: 1px solid #e4e4e7; padding-top: 24px;">
-                      <p style="margin: 0; color: #71717a; font-size: 14px; line-height: 1.5;">
-                        Přejeme úspěšný den,<br><strong>Tým Wenix</strong>
-                      </p>
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #1c1c1f;">
+                      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td>
+                            <p style="margin: 0; color: #52525b; font-size: 12px; line-height: 1.5; font-weight: 500;">
+                              Tuto notifikaci odeslal systém Wenix na základě nastavení připomínačů.
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
                     </div>
 
                   </div>
@@ -100,10 +134,10 @@ cron.schedule('* * * * *', async () => {
             `
                     });
 
-                    if (mailError) {
-                        console.error(`Nepodařilo se odeslat mail pro ${event.title}:`, mailError);
+                    if (result.error) {
+                        console.error(`Nepodařilo se odeslat mail pro ${event.title}:`, result.error);
                     } else {
-                        console.log(`[${now.toLocaleTimeString('cs-CZ')}] Úspěšně odesláno upozornění na událost: ${event.title}`);
+                        console.log(`[${now.toLocaleTimeString('cs-CZ')}] Úspěšně odesláno nové upozornění na událost: ${event.title}`);
                     }
                 }
             }
