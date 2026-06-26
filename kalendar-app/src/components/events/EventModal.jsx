@@ -135,6 +135,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     const [tagInput, setTagInput] = useState('')
     const [saveError, setSaveError] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
     const membersRef = useRef(null)
 
     // DŮLEŽITÉ: dependency array sleduje jen isOpen a initialData?.id, ne celý
@@ -281,6 +282,23 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             setSaveError(err?.message || 'Uložení se nezdařilo. Zkus to znovu.')
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    // Bez confirm() — smaže rovnou. Po úspěšném smazání v DB se modal zavře;
+    // refresh dashboardu řeší onDelete (useEvents.deleteEvent), který sám
+    // aktualizuje lokální state events po smazání.
+    const handleDelete = async () => {
+        if (!initialData?.id || !onDelete) return
+        setSaveError(null)
+        setIsDeleting(true)
+        try {
+            await onDelete(initialData.id)
+            onClose()
+        } catch (err) {
+            setSaveError(err?.message || 'Smazání se nezdařilo. Zkus to znovu.')
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -613,10 +631,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                     {initialData ? (
                         <button
                             type="button"
-                            onClick={() => onDelete && onDelete(initialData.id)}
-                            className="px-4 py-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 text-sm font-medium transition-colors"
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="px-4 py-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
                         >
-                            Smazat
+                            {isDeleting ? 'Mažu...' : 'Smazat'}
                         </button>
                     ) : <div></div>}
 
