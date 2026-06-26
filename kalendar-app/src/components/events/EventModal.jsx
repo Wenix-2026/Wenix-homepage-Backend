@@ -128,7 +128,8 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     const [notifyAll, setNotifyAll] = useState(false)   // true = "all" zvolena namísto konkrétních lidí
     const [extraEmails, setExtraEmails] = useState([])  // string[] — ručně napsané e-maily mimo profiles
     const [tags, setTags] = useState([])
-    const [reminder, setReminder] = useState('1 den před')
+    const [reminderMinutes, setReminderMinutes] = useState(1440)  // číslo minut přímo, žádné textové mapování
+    const [isCustomReminder, setIsCustomReminder] = useState(false)
 
     const [isMembersOpen, setIsMembersOpen] = useState(false)
     const [memberInput, setMemberInput] = useState('')
@@ -150,9 +151,14 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             setDescription(initialData?.description || '')
             setMeetLink(initialData?.location_link || initialData?.meet_link || '')
 
-            // reminder_minutes je sloupec v DB (integer). initialData.reminder
-            // NEEXISTUJE — proto se dřív vždy resetovalo na výchozí "1 den před".
-            setReminder(minutesToReminder(initialData?.reminder_minutes))
+            // reminder_minutes je sloupec v DB (integer) — ukládá se a čte přímo,
+            // žádná textová mapovací vrstva. Pokud hodnota neodpovídá žádné
+            // předvolbě (15/60/1440/0), select se přepne na "Vlastní" a zobrazí
+            // number input s přesnou hodnotou.
+            const dbReminder = initialData?.reminder_minutes ?? 1440
+            const presets = [0, 15, 60, 1440]
+            setReminderMinutes(dbReminder)
+            setIsCustomReminder(!presets.includes(dbReminder))
 
             const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
             setIsAllDay(isAllDayCheck || false)
@@ -264,7 +270,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             start_time: startIso,
             end_time: endIso,
             location_link: meetLink || null,
-            reminder_minutes: reminderToMinutes(reminder),
+            reminder_minutes: reminderMinutes,
             notify_all: notifyAll,
             assigneeIds: notifyAll ? [] : memberIds,
             extra_emails: notifyAll ? [] : extraEmails,
@@ -288,8 +294,12 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     // Bez confirm() — smaže rovnou. Po úspěšném smazání v DB se modal zavře;
     // refresh dashboardu řeší onDelete (useEvents.deleteEvent), který sám
     // aktualizuje lokální state events po smazání.
+    // Potvrzovací dialog PŘED smazáním — uživatel musí kliknutí potvrdit,
+    // teprve poté se volá onDelete (DB delete) a zavře se modal.
     const handleDelete = async () => {
         if (!initialData?.id || !onDelete) return
+        if (!window.confirm('Opravdu chceš tuto událost smazat? Tuto akci nelze vrátit.')) return
+
         setSaveError(null)
         setIsDeleting(true)
         try {
@@ -607,15 +617,38 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                     <div className="flex flex-col gap-1.5">
                         <label className="text-[11px] font-bold text-white/50 uppercase tracking-widest">Upozornění</label>
                         <select
-                            value={reminder}
-                            onChange={(e) => setReminder(e.target.value)}
+                            value={isCustomReminder ? 'custom' : reminderMinutes}
+                            onChange={(e) => {
+                                if (e.target.value === 'custom') {
+                                    setIsCustomReminder(true)
+                                } else {
+                                    setIsCustomReminder(false)
+                                    setReminderMinutes(Number(e.target.value))
+                                }
+                            }}
                             className="w-full bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal transition-colors text-sm appearance-none cursor-pointer"
                         >
-                            <option value="15 minut před">15 minut před</option>
-                            <option value="1 hodina před">1 hodina před</option>
-                            <option value="1 den před">1 den před</option>
-                            <option value="Žádné">Žádné</option>
+                            <option value={15}>15 minut před</option>
+                            <option value={60}>1 hodina před</option>
+                            <option value={1440}>1 den před</option>
+                            <option value={0}>Žádné</option>
+                            <option value="custom">Vlastní...</option>
                         </select>
+
+                        {isCustomReminder && (
+                            <div className="flex items-center gap-2 mt-1">
+                                <input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    value={reminderMinutes}
+                                    onChange={(e) => setReminderMinutes(Math.max(0, Number(e.target.value) || 0))}
+                                    placeholder="11"
+                                    className="w-24 bg-[#161618] border border-white/10 text-white rounded-lg px-3 py-2.5 focus:outline-none focus:border-teal transition-colors text-sm"
+                                />
+                                <span className="text-sm text-white/50">minut před</span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-2"></div>
@@ -662,22 +695,5 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     )
 }
 
-// text reminder -> minuty pro DB sloupec reminder_minutes
-function reminderToMinutes(label) {
-    const map = {
-        '15 minut před': 15,
-        '1 hodina před': 60,
-        '1 den před': 1440,
-        'Žádné': 0,
-    }
-    return map[label] ?? 15
-}
-
-// DB sloupec reminder_minutes (integer) -> text pro <select>.
-function minutesToReminder(minutes) {
-    if (minutes === 15)   return '15 minut před'
-    if (minutes === 60)   return '1 hodina před'
-    if (minutes === 1440) return '1 den před'
-    if (minutes === 0)    return 'Žádné'
-    return '1 den před'
-}
+// reminder_minutes se teď ukládá a čte přímo jako číslo — žádná textová
+// mapovací vrstva potřeba.
