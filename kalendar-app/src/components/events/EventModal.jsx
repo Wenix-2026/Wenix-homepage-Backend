@@ -6,7 +6,7 @@ const AVATAR_COLORS = [
     'bg-orange-500','bg-emerald-500','bg-cyan-500',  'bg-rose-500',
 ]
 
-// Deterministická barva podle id — stejný člověk = stejná barva pokaždé.
+// Deterministická barva podle id - stejný člověk = stejná barva pokaždé.
 function avatarColor(id) {
     if (!id) return AVATAR_COLORS[0]
     let hash = 0
@@ -24,9 +24,7 @@ function MemberAvatar({ profile, size = 'sm' }) {
     )
 }
 
-// Virtuální položka pro hromadné přiřazení — NENÍ to skutečný profil z DB
-// (žádné profile.id), proto se nikdy neukládá do event_assignees. Místo
-// toho nastavuje boolean sloupec events.notify_all.
+// Virtuální položka pro hromadné přiřazení - NENÍ to skutečný profil z DB
 const ALL_OPTION = {
     id: '__all__',
     full_name: 'all',
@@ -56,14 +54,8 @@ function ExtraEmailAvatar({ size = 'sm' }) {
 }
 
 // ── Timezone pojistka ──────────────────────────────────────────────
-// Místo spoléhání na to, že systém/prohlížeč má správně nastavenou
-// timezone (Windows na firemních strojích to často mívá špatně, nebo
-// na UTC), vynucujeme explicitně Europe/Prague přes Intl API. Díky
-// tomu je výsledek nezávislý na nastavení OS a 100% deterministický.
 const APP_TIMEZONE = 'Europe/Prague'
 
-// ISO string z DB (UTC) -> "yyyy-MM-ddTHH:mm" pro <input type="datetime-local">,
-// vždy přepočítané do APP_TIMEZONE bez ohledu na systémovou timezone.
 function isoToLocalInput(isoString) {
     if (!isoString) return ''
     const d = new Date(isoString)
@@ -80,20 +72,12 @@ function isoToLocalInput(isoString) {
     return `${get('year')}-${get('month')}-${get('day')}T${get('hour')}:${get('minute')}`
 }
 
-// "yyyy-MM-ddTHH:mm" (zadané v Europe/Prague) -> ISO string v UTC pro Supabase.
-// Datetime-local input nemá žádné timezone info, takže ho musíme explicitně
-// interpretovat jako čas v APP_TIMEZONE a teprve poté převést na UTC —
-// spoléhat na "new Date(localString)" by použilo systémovou timezone prohlížeče,
-// což je přesně ten nedeterministický krok, který způsoboval posun o 2 hodiny.
 function localInputToIso(localStr) {
     if (!localStr) return null
     const [datePart, timePart] = localStr.split('T')
     const [year, month, day] = datePart.split('-').map(Number)
     const [hour, minute] = timePart.split(':').map(Number)
 
-    // Najdeme UTC offset pro APP_TIMEZONE v daný okamžik (řeší letní/zimní čas).
-    // Trik: vytvoříme Date jako kdyby zadaný čas byl UTC, pak zjistíme, jak by
-    // se zobrazil v APP_TIMEZONE, a rozdíl je přesně offset, který odečteme.
     const asIfUtc = new Date(Date.UTC(year, month - 1, day, hour, minute))
     const partsInTz = new Intl.DateTimeFormat('en-US', {
         timeZone: APP_TIMEZONE,
@@ -110,13 +94,6 @@ function localInputToIso(localStr) {
     return new Date(realUtcMs).toISOString()
 }
 
-/**
- * allEvents:    pole událostí ze Supabase (výstup useEvents().events)
- * allProfiles:  VŠICHNI registrovaní uživatelé (výstup useProfiles().profiles)
- *
- * initialData (při editaci) má STEJNÝ tvar jako prvek z allEvents:
- *   { ..., event_assignees: [{ profile_id, profiles: { id, full_name, email, avatar_url } }] }
- */
 export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, initialData = null, allEvents = [], allProfiles = [] }) {
     const [title, setTitle] = useState('')
     const [description, setDescription] = useState('')
@@ -126,22 +103,21 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
     const [meetLink, setMeetLink] = useState('')
     const [memberIds, setMemberIds] = useState([])      // profile.id[]
     const [notifyAll, setNotifyAll] = useState(false)   // true = "all" zvolena namísto konkrétních lidí
-    const [extraEmails, setExtraEmails] = useState([])  // string[] — ručně napsané e-maily mimo profiles
+    const [extraEmails, setExtraEmails] = useState([])  // string[] - ručně napsané e-maily mimo profiles
     const [tags, setTags] = useState([])
-    const [reminder, setReminder] = useState('1 den před')
+
+    // Přidané stavy pro správy připomínek
+    const [reminderMinutes, setReminderMinutes] = useState(1440)
+    const [isCustomReminder, setIsCustomReminder] = useState(false)
 
     const [isMembersOpen, setIsMembersOpen] = useState(false)
     const [memberInput, setMemberInput] = useState('')
     const [tagInput, setTagInput] = useState('')
     const [saveError, setSaveError] = useState(null)
     const [isSaving, setIsSaving] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
     const membersRef = useRef(null)
 
-    // DŮLEŽITÉ: dependency array sleduje jen isOpen a initialData?.id, ne celý
-    // initialData objekt. Po každém uložení se zavolá fetchEvents() a Supabase
-    // vrátí NOVÝ objekt se stejným obsahem, ale jinou referencí v paměti —
-    // kdyby tu byla celá initialData, useEffect by se spustil znovu a přepsal
-    // rozeditovaný start_time/end_time zpátky na starou hodnotu z DB.
     useEffect(() => {
         if (isOpen) {
             setSaveError(null)
@@ -149,9 +125,10 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             setDescription(initialData?.description || '')
             setMeetLink(initialData?.location_link || initialData?.meet_link || '')
 
-            // reminder_minutes je sloupec v DB (integer). initialData.reminder
-            // NEEXISTUJE — proto se dřív vždy resetovalo na výchozí "1 den před".
-            setReminder(minutesToReminder(initialData?.reminder_minutes))
+            // Načtení minut z DB
+            const minutes = typeof initialData?.reminder_minutes === 'number' ? initialData.reminder_minutes : 1440
+            setReminderMinutes(minutes)
+            setIsCustomReminder(![0, 15, 60, 1440].includes(minutes))
 
             const isAllDayCheck = initialData?.is_all_day || (initialData?.start_time?.includes('00:01') && initialData?.end_time?.includes('23:59'))
             setIsAllDay(isAllDayCheck || false)
@@ -184,7 +161,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             }
             setTags(safeTags)
 
-            // ── Časy — vždy přepočítané do Europe/Prague, bez ohledu na systém ──
             if (initialData?.start_time) {
                 setStartStr(isoToLocalInput(initialData.start_time))
             } else {
@@ -215,7 +191,6 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
 
     if (!isOpen) return null
 
-    // ── Sjednocení VŠECH dostupných profilů ──
     const profileMap = new Map()
 
     allProfiles.forEach((p) => {
@@ -244,15 +219,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
         let startIso, endIso
 
         if (isAllDay) {
-            // Celodenní akce — ukládáme jako pevné hodiny v rámci dne, beze
-            // zapojení timezone logiky (00:01 a 23:59 daného kalendářního dne).
             startIso = `${startStr.split('T')[0]}T00:01:00`
             endIso = `${endStr.split('T')[0]}T23:59:59`
         } else {
-            // KLÍČOVÁ OPRAVA: localInputToIso interpretuje startStr/endStr jako
-            // čas v Europe/Prague a teprve poté převádí na UTC. Předtím se
-            // používalo "new Date(startStr).toISOString()", což spoléhalo na
-            // systémovou timezone prohlížeče — proto ten posun o 2 hodiny.
             startIso = localInputToIso(startStr)
             endIso = localInputToIso(endStr)
         }
@@ -263,10 +232,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             start_time: startIso,
             end_time: endIso,
             location_link: meetLink || null,
-            reminder_minutes: reminderToMinutes(reminder),
+            reminder_minutes: Number(reminderMinutes) || 0,
             notify_all: notifyAll,
             assigneeIds: notifyAll ? [] : memberIds,
             extra_emails: notifyAll ? [] : extraEmails,
+            tags
         }
 
         if (initialData?.id) {
@@ -281,6 +251,19 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
             setSaveError(err?.message || 'Uložení se nezdařilo. Zkus to znovu.')
         } finally {
             setIsSaving(false)
+        }
+    }
+
+    const handleDeleteClick = async () => {
+        if (!onDelete || !initialData?.id) return
+        setIsDeleting(true)
+        try {
+            await onDelete(initialData.id)
+            onClose()
+        } catch (err) {
+            setSaveError(err?.message || 'Smazání se nezdařilo.')
+        } finally {
+            setIsDeleting(false)
         }
     }
 
@@ -511,11 +494,11 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                                 </div>
                                 {memberInput.trim() !== '' && filteredProfiles.length === 0 && (
                                     <div className="px-4 pt-2 pb-1 -mt-1">
-                      <span className={`text-xs ${EMAIL_REGEX.test(memberInput.trim().toLowerCase()) ? 'text-teal/80' : 'text-white/30'}`}>
-                        {EMAIL_REGEX.test(memberInput.trim().toLowerCase())
-                            ? 'Stiskni Enter pro přidání tohoto e-mailu'
-                            : 'Napiš platný e-mail a stiskni Enter, nebo vyber ze seznamu'}
-                      </span>
+                                      <span className={`text-xs ${EMAIL_REGEX.test(memberInput.trim().toLowerCase()) ? 'text-teal/80' : 'text-white/30'}`}>
+                                        {EMAIL_REGEX.test(memberInput.trim().toLowerCase())
+                                            ? 'Stiskni Enter pro přidání tohoto e-mailu'
+                                            : 'Napiš platný e-mail a stiskni Enter, nebo vyber ze seznamu'}
+                                      </span>
                                     </div>
                                 )}
 
@@ -543,9 +526,9 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                                                 >
                                                     {isAllRow ? <AllOptionAvatar size="md" /> : <MemberAvatar profile={profile} size="md" />}
                                                     <div className="flex flex-col min-w-0 flex-1">
-                              <span className={`font-medium truncate ${isAllRow ? 'text-teal' : 'text-white/90'}`}>
-                                {isAllRow ? 'Všichni (hromadné upozornění)' : (profile.full_name || '—')}
-                              </span>
+                                                      <span className={`font-medium truncate ${isAllRow ? 'text-teal' : 'text-white/90'}`}>
+                                                        {isAllRow ? 'Všichni (hromadné upozornění)' : (profile.full_name || '—')}
+                                                      </span>
                                                         {profile.email && (
                                                             <span className={`text-xs truncate ${isAllRow ? 'text-teal/60' : 'text-white/40'}`}>{profile.email}</span>
                                                         )}
@@ -636,7 +619,7 @@ export function EventModal({ isOpen, onClose, onSave, onDelete, selectedDate, in
                     {initialData ? (
                         <button
                             type="button"
-                            onClick={handleDelete}
+                            onClick={handleDeleteClick}
                             disabled={isDeleting}
                             className="px-4 py-2 rounded-lg border border-red-500/30 text-red-500 hover:bg-red-500/10 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
                         >
