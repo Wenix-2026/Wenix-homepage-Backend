@@ -29,7 +29,7 @@
         <header class="flex justify-between items-center border-b border-white/10 pb-6">
             <div>
                 <h1 class="text-4xl text-white">SPRÁVA WEBU WENIX</h1>
-                <p class="text-xs text-neutral-400 font-mono">VIZUÁLNÍ SPRÁVCE OBSAHU A POŘADÍ PRVKŮ</p>
+                <p class="text-xs text-neutral-400 font-mono">VIZUÁLNÍ SPRÁVCE OBSAHU A STRÁNEK</p>
             </div>
             <div class="flex items-center gap-4">
                 <span id="toast" class="text-xs text-[#14968C] font-semibold transition-opacity opacity-0">ULOŽENO</span>
@@ -37,22 +37,50 @@
             </div>
         </header>
 
-        <!-- Horní lišta stránek -->
+        <!-- Horní lišta a akční tlačítka -->
         <div class="space-y-6">
             <div class="flex flex-wrap justify-between items-center gap-3">
                 <div class="flex flex-wrap gap-2" id="page-tabs"></div>
-                <button onclick="window.openNewFieldModal()" class="px-3.5 py-2 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition flex items-center gap-1.5">
-                    <i class="bx bx-plus text-sm"></i> Přidat prvek na tuto stránku
-                </button>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="window.openNewPageModal()" class="px-3.5 py-2 bg-white/10 text-white font-semibold text-xs rounded-lg hover:bg-white/20 transition flex items-center gap-1.5 border border-white/10">
+                        <i class="bx bx-file-blank text-sm"></i> Vytvořit novou stránku
+                    </button>
+                    <button onclick="window.openNewFieldModal()" class="px-3.5 py-2 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition flex items-center gap-1.5">
+                        <i class="bx bx-plus text-sm"></i> Přidat prvek na tuto stránku
+                    </button>
+                </div>
             </div>
 
-            <!-- Kontejner prvků v pořadí -->
+            <!-- Seznam prvků stránky -->
             <div id="fields-container" class="space-y-4"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL: PŘIDAT NOVÝ PRVEK -->
+<!-- MODAL 1: VYTVOŘIT NOVOU STRÁNKU -->
+<div id="modal-new-page" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-md w-full space-y-4">
+        <h3 class="text-xl text-white">VYTVOŘIT NOVOU STRÁNKU</h3>
+
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Identifikátor stránky / URL slug (bez mezer a diakritiky):</label>
+            <input id="np-page-slug" placeholder="např. blog, sluzby, reference" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-mono outline-none focus:border-[#14968C]">
+        </div>
+
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Hlavní nadpis nové stránky:</label>
+            <input id="np-page-title" placeholder="např. Naše reference a projekty" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
+        </div>
+
+        <div class="flex gap-2 justify-end pt-2">
+            <button onclick="document.getElementById('modal-new-page').classList.add('hidden')" class="px-3.5 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
+            <button onclick="window.submitNewPage()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vytvořit stránku</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: PŘIDAT NOVÝ PRVEK -->
 <div id="modal-new-field" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl text-white">PŘIDAT PRVEK DO STRÁNKY</h3>
@@ -81,7 +109,7 @@
         </div>
 
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Popisek prvku:</label>
+            <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
             <input id="nf-label" placeholder="např. Hlavní titulek" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
 
@@ -180,7 +208,7 @@
         const filtered = contentItems.filter(i => i.page === activePage);
 
         if (filtered.length === 0) {
-            container.innerHTML = '<div class="bg-[#111] p-8 text-center text-neutral-500 rounded-xl text-sm font-mono">Tato stránka zatím nemá žádné prvky. Klikněte nahoře na "+ Přidat prvek".</div>';
+            container.innerHTML = '<div class="bg-[#111] p-8 text-center text-neutral-500 rounded-xl text-sm font-mono">Tato stránka zatím nemá žádné prvky. Klikněte nahoře na "+ Přidat prvek na tuto stránku".</div>';
             return;
         }
 
@@ -243,7 +271,6 @@
         currentItem.sort_order = targetItem.sort_order || targetIndex;
         targetItem.sort_order = tempOrder;
 
-        // Pokud mají stejný index, rozlišíme je
         if (currentItem.sort_order === targetItem.sort_order) {
             currentItem.sort_order = targetIndex;
             targetItem.sort_order = currentIndex;
@@ -282,6 +309,39 @@
         await loadContent();
     };
 
+    // Nová stránka
+    window.openNewPageModal = () => {
+        document.getElementById('np-page-slug').value = '';
+        document.getElementById('np-page-title').value = '';
+        document.getElementById('modal-new-page').classList.remove('hidden');
+    };
+
+    window.submitNewPage = async () => {
+        const slug = document.getElementById('np-page-slug').value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+        const title = document.getElementById('np-page-title').value.trim();
+
+        if (!slug || !title) return alert('Vyplňte název i URL identifikátor stránky!');
+
+        const key = `${slug}_main_heading`;
+        const { error } = await supabase.from('site_content').insert([{
+            key: key,
+            page: slug,
+            section: 'Hlavička',
+            label: 'Hlavní nadpis stránky',
+            type: 'text',
+            value: title,
+            sort_order: 1
+        }]);
+
+        if (error) return alert('Chyba při vytváření stránky: ' + error.message);
+
+        document.getElementById('modal-new-page').classList.add('hidden');
+        activePage = slug;
+        await loadContent();
+        showToast();
+    };
+
+    // Nové pole
     window.openNewFieldModal = () => {
         document.getElementById('nf-page').value = activePage;
         window.applyFieldPreset('text');
