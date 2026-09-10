@@ -11,6 +11,13 @@
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
         .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
         header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(0,0,0,0.85); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 6px; padding: 12px 26px;
+            background: #fff; color: #000; font-size: .9rem; font-weight: 500;
+            border: 1px solid #fff; border-radius: 6px; cursor: pointer; text-decoration: none;
+            transition: background .2s, color .2s, transform .15s; white-space: nowrap;
+        }
+        .btn-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -22,8 +29,6 @@
 
 <main class="flex-grow pt-32 pb-20 px-6 max-w-4xl mx-auto w-full">
     <div id="page-loading" class="text-center py-20 text-neutral-500 font-mono text-sm">Načítání obsahu...</div>
-
-    <!-- Dynamický proud prvků v pořadí -->
     <div id="elements-stream" class="space-y-8 hidden"></div>
 </main>
 
@@ -38,7 +43,6 @@
         const slug = new URLSearchParams(window.location.search).get('p') || 'test';
         document.getElementById('page-meta-title').innerText = `${slug.toUpperCase()} | Wenix`;
 
-        // Načteme všechny prvky dané stránky seřazené podle sort_order
         const { data, error } = await supabase
             .from('site_content')
             .select('*')
@@ -55,7 +59,18 @@
         }
 
         container.innerHTML = data.map(item => {
-            if (item.type === 'image') {
+            const isBtn = item.type === 'button' || item.key.includes('btn_');
+
+            if (isBtn) {
+                let text = item.value || 'Tlačítko';
+                let link = '#';
+                if ((item.value || '').includes('|')) {
+                    const parts = item.value.split('|');
+                    text = parts[0].trim();
+                    link = parts[1].trim();
+                }
+                return `<div><a href="${link}" class="btn-primary">${text}</a></div>`;
+            } else if (item.type === 'image') {
                 return `<div class="rounded-2xl overflow-hidden border border-white/10 aspect-video max-h-[460px] bg-[#111]">
                     <img src="${item.value}" class="w-full h-full object-cover" alt="${item.label}">
                 </div>`;

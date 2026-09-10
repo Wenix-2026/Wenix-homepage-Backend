@@ -16,7 +16,7 @@
 <div class="max-w-5xl mx-auto">
     <div id="loading" class="text-center py-20 text-neutral-500 text-sm">Načítání systému...</div>
 
-    <!-- Login formulář -->
+    <!-- Login -->
     <div id="login-view" class="hidden max-w-sm mx-auto mt-20 p-6 bg-[#111] border border-white/10 rounded-xl space-y-4">
         <h1 class="text-3xl text-white text-center">WENIX ADMIN</h1>
         <input id="email" type="email" placeholder="E-mail" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-[#14968C]">
@@ -37,7 +37,6 @@
             </div>
         </header>
 
-        <!-- Horní lišta a akční tlačítka -->
         <div class="space-y-6">
             <div class="flex flex-wrap justify-between items-center gap-3">
                 <div class="flex flex-wrap gap-2" id="page-tabs"></div>
@@ -52,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Odkazová lišta pro vybranou stránku -->
             <div id="page-info-bar" class="hidden bg-[#111] border border-teal-500/30 p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-neutral-400 font-mono">Veřejný odkaz:</span>
@@ -60,7 +58,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <button onclick="window.addToNavigation()" class="px-3 py-1.5 bg-white/5 border border-white/15 text-xs text-neutral-200 rounded-lg hover:bg-white/10 transition">
-                        + Přidat odkaz na tuto stránku do Navigace / Menu
+                        + Přidat do Burger menu
                     </button>
                     <a id="page-visit-btn" href="#" target="_blank" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">
                         Otevřít stránku ↗
@@ -68,7 +66,6 @@
                 </div>
             </div>
 
-            <!-- Seznam prvků stránky -->
             <div id="fields-container" class="space-y-4"></div>
         </div>
     </div>
@@ -79,7 +76,7 @@
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-md w-full space-y-4">
         <h3 class="text-xl text-white">VYTVOŘIT NOVOU STRÁNKU</h3>
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Identifikátor stránky / URL slug (např. blog, tym, reference):</label>
+            <label class="text-xs text-neutral-400 font-mono">URL slug (např. blog, tym, reference):</label>
             <input id="np-page-slug" placeholder="novinky" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-mono outline-none focus:border-[#14968C]">
         </div>
         <div>
@@ -104,7 +101,7 @@
                 <option value="textarea">Textový odstavec / Popis</option>
                 <option value="hero">Hero Nadpis s barevným gradientem</option>
                 <option value="image">Obrázek nebo Banner</option>
-                <option value="button">Tlačítko s odkazem</option>
+                <option value="button">Tlačítko s cílovým odkazem (URL)</option>
                 <option value="card">Obsahový blok (Karta)</option>
             </select>
         </div>
@@ -120,20 +117,34 @@
         </div>
         <div>
             <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
-            <input id="nf-label" placeholder="např. Hlavní titulek" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <input id="nf-label" placeholder="např. Hlavní tlačítko" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
         <div>
             <label class="text-xs text-neutral-400 font-mono">Unikátní klíč (data-cms="..."):</label>
-            <input id="nf-key" placeholder="např. test_hero_title" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
+            <input id="nf-key" placeholder="např. test_btn_1" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
         </div>
         <input type="hidden" id="nf-type" value="text">
-        <div>
+
+        <!-- Speciální pole pro tlačítko -->
+        <div id="nf-btn-wrapper" class="hidden space-y-3">
+            <div>
+                <label class="text-xs text-neutral-400 font-mono">Text na tlačítku:</label>
+                <input id="nf-btn-text" placeholder="např. Zjistit více" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200">
+            </div>
+            <div>
+                <label class="text-xs text-neutral-400 font-mono">Cílový odkaz tlačítka (URL nebo kotva #):</label>
+                <input id="nf-btn-link" placeholder="kontakt.html nebo #about" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 font-mono">
+            </div>
+        </div>
+
+        <div id="nf-standard-value-wrapper">
             <label class="text-xs text-neutral-400 font-mono">Obsah prvku:</label>
             <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none"></textarea>
         </div>
+
         <div class="flex gap-2 justify-end pt-2">
             <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3.5 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
-            <button onclick="window.submitNewField()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vložit na konec stránky</button>
+            <button onclick="window.submitNewField()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vložit na stránku</button>
         </div>
     </div>
 </div>
@@ -234,7 +245,17 @@
             return;
         }
 
-        container.innerHTML = filtered.map((f, index) => `
+        container.innerHTML = filtered.map((f, index) => {
+            const isBtn = f.type === 'button' || f.key.includes('btn_');
+            let btnText = f.value || '';
+            let btnLink = '';
+            if (isBtn && (f.value || '').includes('|')) {
+                const parts = f.value.split('|');
+                btnText = parts[0].trim();
+                btnLink = parts[1].trim();
+            }
+
+            return `
         <div class="bg-[#111] border border-white/10 p-5 rounded-xl space-y-3 transition hover:border-white/20">
           <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
             <div class="flex items-center gap-2">
@@ -258,7 +279,18 @@
           </div>
 
           <div>
-            ${f.type === 'textarea' ? `
+            ${isBtn ? `
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[11px] text-neutral-400 font-mono">Text tlačítka:</label>
+                  <input type="text" value="${btnText}" onblur="window.saveButtonField('${f.key}', this.value, document.getElementById('link-${f.key}').value)" id="text-${f.key}" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none mt-1">
+                </div>
+                <div>
+                  <label class="text-[11px] text-neutral-400 font-mono">Odkaz (URL / kotva #):</label>
+                  <input type="text" value="${btnLink}" onblur="window.saveButtonField('${f.key}', document.getElementById('text-${f.key}').value, this.value)" id="link-${f.key}" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-teal-300 font-mono outline-none mt-1" placeholder="kontakt.html nebo https://...">
+                </div>
+              </div>
+            ` : f.type === 'textarea' ? `
               <textarea onblur="window.saveField('${f.key}', this.value)" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 outline-none transition">${f.value || ''}</textarea>
             ` : f.type === 'image' ? `
               <div class="flex items-center gap-4">
@@ -273,10 +305,15 @@
             `}
           </div>
         </div>
-      `).join('');
+      `;
+        }).join('');
     }
 
-    // Přidání odkazu na novou stránku do navigace na webu
+    window.saveButtonField = async (key, text, link) => {
+        const combined = `${text.trim()} | ${link.trim()}`;
+        await window.saveField(key, combined);
+    };
+
     window.addToNavigation = async () => {
         const linkUrl = `clanek.html?p=${activePage}`;
         const linkText = activePage.toUpperCase();
@@ -288,7 +325,7 @@
             { key: navKeyHref, page: 'index', section: 'Navigace', label: `Odkaz v menu URL - ${linkText}`, type: 'text', value: linkUrl, sort_order: 2 }
         ]);
 
-        alert(`Stránka byla přidána do navigace (Text: ${linkText}, Odkaz: ${linkUrl})!`);
+        alert(`Stránka byla přidána do Burger menu (Text: ${linkText}, Odkaz: ${linkUrl})!`);
         await loadContent();
     };
 
@@ -386,38 +423,48 @@
         const labelInput = document.getElementById('nf-label');
         const typeInput = document.getElementById('nf-type');
         const valInput = document.getElementById('nf-value');
+        const btnWrapper = document.getElementById('nf-btn-wrapper');
+        const stdWrapper = document.getElementById('nf-standard-value-wrapper');
         const prefix = `${activePage}_`;
 
-        if (preset === 'text') {
-            typeInput.value = 'text';
-            labelInput.value = 'Nový nadpis / text';
-            keyInput.value = `${prefix}heading_${Date.now().toString().slice(-4)}`;
-            valInput.value = 'Ukázkový text sekce';
-        } else if (preset === 'textarea') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Odstavec textu';
-            keyInput.value = `${prefix}perex_${Date.now().toString().slice(-4)}`;
-            valInput.value = 'Podrobný popis sekce a odstavce...';
-        } else if (preset === 'hero') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Hero nadpis s gradientem';
-            keyInput.value = `${prefix}hero_${Date.now().toString().slice(-4)}`;
-            valInput.value = 'NADPIS NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>';
-        } else if (preset === 'image') {
-            typeInput.value = 'image';
-            labelInput.value = 'Obrázek / Fotka';
-            keyInput.value = `${prefix}img_${Date.now().toString().slice(-4)}`;
-            valInput.value = 'images/web-banner.png';
-        } else if (preset === 'button') {
-            typeInput.value = 'text';
+        if (preset === 'button') {
+            btnWrapper.classList.remove('hidden');
+            stdWrapper.classList.add('hidden');
+            typeInput.value = 'button';
             labelInput.value = 'Tlačítko';
             keyInput.value = `${prefix}btn_${Date.now().toString().slice(-4)}`;
-            valInput.value = 'Zjistit více';
-        } else if (preset === 'card') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Karta / Blok';
-            keyInput.value = `${prefix}card_${Date.now().toString().slice(-4)}`;
-            valInput.value = '<div class="p-6 bg-white/5 border border-white/10 rounded-xl"><h3 class="text-white font-bold text-lg mb-2">Titulek karty</h3><p class="text-gray-400 text-sm">Obsah karty...</p></div>';
+            document.getElementById('nf-btn-text').value = 'Zjistit více';
+            document.getElementById('nf-btn-link').value = 'kontakt.html';
+        } else {
+            btnWrapper.classList.add('hidden');
+            stdWrapper.classList.remove('hidden');
+
+            if (preset === 'text') {
+                typeInput.value = 'text';
+                labelInput.value = 'Nový nadpis / text';
+                keyInput.value = `${prefix}heading_${Date.now().toString().slice(-4)}`;
+                valInput.value = 'Ukázkový text sekce';
+            } else if (preset === 'textarea') {
+                typeInput.value = 'textarea';
+                labelInput.value = 'Odstavec textu';
+                keyInput.value = `${prefix}perex_${Date.now().toString().slice(-4)}`;
+                valInput.value = 'Podrobný popis sekce a odstavce...';
+            } else if (preset === 'hero') {
+                typeInput.value = 'textarea';
+                labelInput.value = 'Hero nadpis s gradientem';
+                keyInput.value = `${prefix}hero_${Date.now().toString().slice(-4)}`;
+                valInput.value = 'NADPIS NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>';
+            } else if (preset === 'image') {
+                typeInput.value = 'image';
+                labelInput.value = 'Obrázek / Fotka';
+                keyInput.value = `${prefix}img_${Date.now().toString().slice(-4)}`;
+                valInput.value = 'images/web-banner.png';
+            } else if (preset === 'card') {
+                typeInput.value = 'textarea';
+                labelInput.value = 'Karta / Blok';
+                keyInput.value = `${prefix}card_${Date.now().toString().slice(-4)}`;
+                valInput.value = '<div class="p-6 bg-white/5 border border-white/10 rounded-xl"><h3 class="text-white font-bold text-lg mb-2">Titulek karty</h3><p class="text-gray-400 text-sm">Obsah karty...</p></div>';
+            }
         }
     };
 
@@ -427,7 +474,15 @@
         const section = document.getElementById('nf-section').value.trim() || 'Obecné';
         const label = document.getElementById('nf-label').value.trim();
         const type = document.getElementById('nf-type').value;
-        const value = document.getElementById('nf-value').value;
+
+        let value = '';
+        if (type === 'button') {
+            const t = document.getElementById('nf-btn-text').value.trim() || 'Tlačítko';
+            const l = document.getElementById('nf-btn-link').value.trim() || '#';
+            value = `${t} | ${l}`;
+        } else {
+            value = document.getElementById('nf-value').value;
+        }
 
         if (!key || !page || !label) return alert('Vyplňte klíč a popisek!');
 
