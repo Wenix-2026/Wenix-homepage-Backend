@@ -105,41 +105,52 @@
                 <option value="card">Obsahový blok (Karta)</option>
             </select>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-                <label class="text-xs text-neutral-400 font-mono">Cílová stránka:</label>
-                <input id="nf-page" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-semibold" readonly>
+                <div class="flex justify-between items-center">
+                    <label class="text-xs text-neutral-400 font-mono">Cílová stránka:</label>
+                    <label class="text-[10px] text-teal-400 cursor-pointer flex items-center gap-1">
+                        <input type="checkbox" id="nf-custom-page-toggle" onchange="window.toggleCustomPageInput(this.checked)">
+                        Vlastní zadání
+                    </label>
+                </div>
+
+                <select id="nf-page" onchange="window.onPageSelectChange(this.value)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-semibold outline-none focus:border-[#14968C]"></select>
+                <input id="nf-page-custom" oninput="window.onPageSelectChange(this.value)" placeholder="např. novinky, sluzby" class="hidden w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-mono outline-none focus:border-[#14968C]">
             </div>
             <div>
                 <label class="text-xs text-neutral-400 font-mono">Název sekce:</label>
-                <input id="nf-section" placeholder="např. Hero, O nás, Galerie" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+                <input id="nf-section" placeholder="např. Hero, O nás, Galerie" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
             </div>
         </div>
+
         <div>
             <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
-            <input id="nf-label" placeholder="např. Hlavní tlačítko" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <input id="nf-label" placeholder="např. Hlavní tlačítko" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
         </div>
+
         <div>
             <label class="text-xs text-neutral-400 font-mono">Unikátní klíč (data-cms="..."):</label>
-            <input id="nf-key" placeholder="např. test_btn_1" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
+            <input id="nf-key" placeholder="např. test_btn_1" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400 outline-none focus:border-[#14968C]">
         </div>
         <input type="hidden" id="nf-type" value="text">
 
-        <!-- Speciální pole pro tlačítko -->
+        <!-- Pole pro tlačítko -->
         <div id="nf-btn-wrapper" class="hidden space-y-3">
             <div>
                 <label class="text-xs text-neutral-400 font-mono">Text na tlačítku:</label>
-                <input id="nf-btn-text" placeholder="např. Zjistit více" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200">
+                <input id="nf-btn-text" placeholder="např. Zjistit více" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
             </div>
             <div>
-                <label class="text-xs text-neutral-400 font-mono">Cílový odkaz tlačítka (URL nebo kotva #):</label>
-                <input id="nf-btn-link" placeholder="kontakt.html nebo #about" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 font-mono">
+                <label class="text-xs text-neutral-400 font-mono">Ruční URL adresa odkazu (např. https://instagram.com nebo kontakt.html):</label>
+                <input id="nf-btn-link" placeholder="https://... nebo kontakt.html" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-300 font-mono outline-none focus:border-[#14968C]">
             </div>
         </div>
 
         <div id="nf-standard-value-wrapper">
             <label class="text-xs text-neutral-400 font-mono">Obsah prvku:</label>
-            <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none"></textarea>
+            <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]"></textarea>
         </div>
 
         <div class="flex gap-2 justify-end pt-2">
@@ -286,8 +297,8 @@
                   <input type="text" value="${btnText}" onblur="window.saveButtonField('${f.key}', this.value, document.getElementById('link-${f.key}').value)" id="text-${f.key}" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none mt-1">
                 </div>
                 <div>
-                  <label class="text-[11px] text-neutral-400 font-mono">Odkaz (URL / kotva #):</label>
-                  <input type="text" value="${btnLink}" onblur="window.saveButtonField('${f.key}', document.getElementById('text-${f.key}').value, this.value)" id="link-${f.key}" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-teal-300 font-mono outline-none mt-1" placeholder="kontakt.html nebo https://...">
+                  <label class="text-[11px] text-neutral-400 font-mono">URL adresa odkazu:</label>
+                  <input type="text" value="${btnLink}" onblur="window.saveButtonField('${f.key}', document.getElementById('text-${f.key}').value, this.value)" id="link-${f.key}" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-teal-300 font-mono outline-none mt-1" placeholder="https://... nebo kontakt.html">
                 </div>
               </div>
             ` : f.type === 'textarea' ? `
@@ -413,19 +424,56 @@
     };
 
     window.openNewFieldModal = () => {
-        document.getElementById('nf-page').value = activePage;
-        window.applyFieldPreset('text');
+        const pageSelect = document.getElementById('nf-page');
+        const pages = [...new Set(contentItems.map(i => i.page))];
+
+        pageSelect.innerHTML = pages.map(p => `
+        <option value="${p}" ${p === activePage ? 'selected' : ''}>${p.toUpperCase()}</option>
+      `).join('');
+
+        document.getElementById('nf-custom-page-toggle').checked = false;
+        document.getElementById('nf-page').classList.remove('hidden');
+        document.getElementById('nf-page-custom').classList.add('hidden');
+
+        window.applyFieldPreset(document.getElementById('nf-preset').value || 'text');
         document.getElementById('modal-new-field').classList.remove('hidden');
     };
 
+    window.toggleCustomPageInput = (isCustom) => {
+        const select = document.getElementById('nf-page');
+        const input = document.getElementById('nf-page-custom');
+        if (isCustom) {
+            select.classList.add('hidden');
+            input.classList.remove('hidden');
+            input.value = activePage;
+        } else {
+            select.classList.remove('hidden');
+            input.classList.add('hidden');
+        }
+        window.onPageSelectChange(isCustom ? input.value : select.value);
+    };
+
+    window.getSelectedTargetPage = () => {
+        const isCustom = document.getElementById('nf-custom-page-toggle').checked;
+        if (isCustom) {
+            return (document.getElementById('nf-page-custom').value || activePage).trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+        }
+        return document.getElementById('nf-page').value || activePage;
+    };
+
+    window.onPageSelectChange = () => {
+        window.applyFieldPreset(document.getElementById('nf-preset').value);
+    };
+
     window.applyFieldPreset = (preset) => {
+        const targetPage = window.getSelectedTargetPage();
         const keyInput = document.getElementById('nf-key');
         const labelInput = document.getElementById('nf-label');
         const typeInput = document.getElementById('nf-type');
         const valInput = document.getElementById('nf-value');
         const btnWrapper = document.getElementById('nf-btn-wrapper');
         const stdWrapper = document.getElementById('nf-standard-value-wrapper');
-        const prefix = `${activePage}_`;
+        const prefix = `${targetPage}_`;
 
         if (preset === 'button') {
             btnWrapper.classList.remove('hidden');
@@ -434,7 +482,7 @@
             labelInput.value = 'Tlačítko';
             keyInput.value = `${prefix}btn_${Date.now().toString().slice(-4)}`;
             document.getElementById('nf-btn-text').value = 'Zjistit více';
-            document.getElementById('nf-btn-link').value = 'kontakt.html';
+            document.getElementById('nf-btn-link').value = 'https://';
         } else {
             btnWrapper.classList.add('hidden');
             stdWrapper.classList.remove('hidden');
@@ -470,7 +518,7 @@
 
     window.submitNewField = async () => {
         const key = document.getElementById('nf-key').value.trim();
-        const page = document.getElementById('nf-page').value.trim().toLowerCase();
+        const page = window.getSelectedTargetPage();
         const section = document.getElementById('nf-section').value.trim() || 'Obecné';
         const label = document.getElementById('nf-label').value.trim();
         const type = document.getElementById('nf-type').value;
@@ -495,6 +543,7 @@
         if (error) return alert('Chyba: ' + error.message);
 
         document.getElementById('modal-new-field').classList.add('hidden');
+        activePage = page;
         await loadContent();
         showToast();
     };
