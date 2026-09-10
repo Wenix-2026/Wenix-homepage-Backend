@@ -11,6 +11,7 @@
     <title>Wenix - Tvorba webů a designu | Moderní digitální agentura</title>
     <meta name="description" content="Wenix je moderní digitální agentura specializující se na tvorbu rychlých statických webů, grafický design a UX/UI. Získejte efektivní online prezentaci.">
 
+    <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="Wenix - Tvorba webů a designu | Moderní digitální agentura">
     <meta property="og:description" content="Wenix je moderní digitální agentura specializující se na tvorbu rychlých statických webů, grafický design a UX/UI. Získejte efektivní online prezentaci.">
     <meta property="og:type" content="website">
@@ -29,13 +30,22 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
         body::after {
             content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .03;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 200px 200px;
         }
+
         .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
+
         .hero-bg {
             background:
                     radial-gradient(ellipse 70% 80% at 30% 30%, rgba(20,150,140,0.7) 0%, transparent 60%),
@@ -50,24 +60,49 @@
             50%  { filter: hue-rotate(6deg) brightness(1.03); }
             100% { filter: hue-rotate(0deg) brightness(1); }
         }
+
         header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
             background: rgba(0,0,0,0.75); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease;
         }
+
         .nav-inner {
             max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 80px;
             display: flex; align-items: center; justify-content: space-between;
         }
-        .container-custom { max-width: 1280px; margin-left: auto; margin-right: auto; width: 100%; }
-        @media (min-width: 1920px) { .container-custom, .nav-inner, .footer-inner { max-width: 1600px; } }
-        @media (min-width: 2560px) { .container-custom, .nav-inner, .footer-inner { max-width: 1920px; } }
-        @media (min-width: 3440px) { .container-custom, .nav-inner, .footer-inner { max-width: 2400px; } }
+
+        .container-custom {
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100%;
+        }
+
+        @media (min-width: 1920px) {
+            .container-custom, .nav-inner, .footer-inner {
+                max-width: 1600px;
+            }
+        }
+
+        @media (min-width: 2560px) {
+            .container-custom, .nav-inner, .footer-inner {
+                max-width: 1920px;
+            }
+        }
+
+        @media (min-width: 3440px) {
+            .container-custom, .nav-inner, .footer-inner {
+                max-width: 2400px;
+            }
+        }
+
         .nav-right { display: flex; align-items: center; gap: 32px; }
-        .desktop-nav { display: none; }
+
         .nav-social { display: flex; align-items: center; gap: 16px; }
         .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
         .nav-social a:hover { opacity: 1; }
+
         #burger-overlay {
             position: fixed; inset: 0; z-index: 90;
             background: rgba(0,0,0,0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -81,6 +116,7 @@
             color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
         }
         #burger-overlay a.menu-link:hover { color: #fff; }
+
         .btn-primary {
             display: inline-flex; align-items: center; gap: 6px; padding: 12px 26px;
             background: #fff; color: #000; font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 500;
@@ -88,6 +124,7 @@
             transition: background .2s, color .2s, transform .15s; white-space: nowrap;
         }
         .btn-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
+
         .btn-secondary {
             display: inline-flex; align-items: center; gap: 6px; padding: 12px 26px;
             background: transparent; color: #fff; font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 400;
@@ -95,6 +132,7 @@
             transition: border-color .2s, background .2s, transform .15s; white-space: nowrap;
         }
         .btn-secondary:hover { border-color: #fff; background: rgba(255,255,255,0.06); transform: translateY(-1px); }
+
         .btn-dark {
             display: inline-flex; align-items: center; gap: 6px; padding: 11px 24px;
             background: transparent; color: #fff; font-size: .875rem; font-weight: 400;
@@ -102,6 +140,7 @@
             transition: border-color .2s, background .2s; white-space: nowrap;
         }
         .btn-dark:hover { border-color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.04); }
+
         .content-card { display: flex; flex-direction: column; gap: 16px; }
         .content-card-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; position: relative; }
         .grad-noise::after {
@@ -109,21 +148,27 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 150px; mix-blend-mode: overlay;
         }
+
         .feature-row { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
         @media (max-width: 767px) { .feature-row { grid-template-columns: 1fr; gap: 24px; } .feature-row-reverse .feature-img { order: -1; } }
         .feature-img { width: 100%; aspect-ratio: 4/3; border-radius: 10px; overflow: hidden; }
         .feature-text { display: flex; flex-direction: column; gap: 14px; }
+
         .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
         @media (max-width: 767px) { .three-col { grid-template-columns: 1fr; gap: 36px; } }
+
         .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: float linear infinite; opacity: 0; }
         @keyframes float { 0% { transform: translateY(100vh) translateX(0); opacity: 0; } 10% { opacity: .6; } 90% { opacity: .3; } 100% { transform: translateY(-10vh) translateX(40px); opacity: 0; } }
+
         .text-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 36px; }
         @media (max-width: 767px) { .text-row { grid-template-columns: 1fr; gap: 24px; } }
         .text-block h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.25rem; letter-spacing: .05em; color: #fff; margin-bottom: 8px; }
         .text-block p { font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
+
         footer { border-top: 1px solid rgba(255,255,255,0.1); background: #000; }
         .footer-inner { max-width: 1280px; margin: 0 auto; padding: 48px 24px 40px; }
         .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1.2fr 1fr; gap: 48px; }
@@ -138,29 +183,114 @@
         .footer-socials { display: flex; gap: 14px; }
         .footer-socials a { color: rgba(255,255,255,0.7); font-size: 1.25rem; transition: color .2s; }
         .footer-socials a:hover { color: #fff; }
-        #progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, #14968c, #3c64a0); z-index: 200; width: 0%; transition: width 0.1s ease; }
-        #back-to-top { position: fixed; bottom: 32px; right: 32px; z-index: 150; width: 40px; height: 40px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s, background 0.2s; text-decoration: none; color: #fff; font-size: 1.1rem; }
-        #back-to-top.visible { opacity: 1; transform: translateY(0); }
-        #back-to-top:hover { background: rgba(255,255,255,0.15); }
-        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .faq-trigger { width: 100%; display: flex; align-items: center; justify-content: space-between; padding: 20px 0; background: none; border: none; cursor: pointer; color: #fff; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500; text-align: left; gap: 16px; transition: color .2s; }
+
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #14968c, #3c64a0);
+            z-index: 200;
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        #back-to-top {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 150;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s, transform 0.3s, background 0.2s;
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.1rem;
+        }
+        #back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #back-to-top:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .faq-trigger {
+            width: 100%; display: flex; align-items: center; justify-content: space-between;
+            padding: 20px 0; background: none; border: none; cursor: pointer;
+            color: #fff; font-family: 'Inter', sans-serif; font-size: 1rem; font-weight: 500;
+            text-align: left; gap: 16px; transition: color .2s;
+        }
         .faq-trigger:hover { color: rgba(255,255,255,0.7); }
         .faq-icon { font-size: 1.2rem; flex-shrink: 0; transition: transform .3s ease; color: rgba(255,255,255,0.4); }
         .faq-item.open .faq-icon { transform: rotate(45deg); color: #fff; }
-        .faq-answer { max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease; }
+        .faq-answer {
+            max-height: 0; overflow: hidden; transition: max-height .4s ease, padding .3s ease;
+        }
         .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
         .faq-answer p { color: rgba(255,255,255,0.55); font-size: .9rem; line-height: 1.8; }
         .faq-answer strong { color: #fff; }
-        .timeline-step { display: grid; grid-template-columns: 1fr 48px 1fr; gap: 24px; align-items: center; }
+
         @media (max-width: 767px) {
-            .timeline-step { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; padding-bottom: 32px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-            .timeline-step:last-child { border-bottom: none; padding-bottom: 0; }
-            .timeline-text, .timeline-box { padding: 0 !important; text-align: left !important; width: 100%; }
-            .timeline-icon { order: 1; }
-            .timeline-text { order: 2; }
-            .timeline-box { order: 3; margin-top: 4px; }
-            .timeline-number { font-size: 2.5rem !important; display: block; margin-bottom: 8px; text-align: left; }
-            .timeline-text h3 { margin-top: 0 !important; }
+            .portfolio-grid { grid-template-columns: 1fr !important; }
+        }
+
+        .timeline-step {
+            display: grid;
+            grid-template-columns: 1fr 48px 1fr;
+            gap: 24px;
+            align-items: center;
+        }
+
+        @media (max-width: 767px) {
+            .timeline-step {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding-bottom: 32px;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .timeline-step:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+            .timeline-text, .timeline-box {
+                padding: 0 !important;
+                text-align: left !important;
+                width: 100%;
+            }
+            .timeline-icon {
+                order: 1;
+            }
+            .timeline-text {
+                order: 2;
+            }
+            .timeline-box {
+                order: 3;
+                margin-top: 4px;
+            }
+            .timeline-number {
+                font-size: 2.5rem !important;
+                display: block;
+                margin-bottom: 8px;
+                text-align: left;
+            }
+            .timeline-text h3 {
+                margin-top: 0 !important;
+            }
         }
     </style>
 </head>
@@ -173,7 +303,7 @@
 
 <body>
 
-<!-- Cookie lišta -->
+<!-- Cookie Banner -->
 <div id="cookie-banner" style="z-index:99999" class="hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-4 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <p class="text-sm text-gray-400 leading-relaxed flex-1">
@@ -187,7 +317,47 @@
     </div>
 </div>
 
-<!-- Horní navigace -->
+<!-- Cookie Modal -->
+<div id="cookie-modal" style="z-index:100000" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[#0f0f0f] border border-white/10 rounded-2xl w-full max-w-lg p-6">
+        <h2 class="text-lg font-semibold text-white mb-5">Nastavení cookies</h2>
+        <div class="space-y-3 mb-6">
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Nezbytné cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Nutné pro fungování webu.</p>
+                </div>
+                <span class="text-xs text-emerald-400 font-medium">Vždy aktivní</span>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Analytické cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Pomáhají nám pochopit návštěvnost.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-analytics" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-black after:rounded-full after:w-4 after:h-4 after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5">
+                <div>
+                    <p class="text-sm font-medium text-white">Marketingové cookies</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Cílená reklama a personalizace.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="toggle-marketing" class="sr-only peer" checked>
+                    <div class="w-10 h-5 bg-white/20 peer-checked:bg-white/70 rounded-full transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-black after:rounded-full after:w-4 after:h-4 after:transition-transform peer-checked:after:translate-x-5"></div>
+                </label>
+            </div>
+        </div>
+        <div class="flex gap-3">
+            <button id="cookie-save-settings" class="flex-1 py-2 text-sm font-medium text-black bg-white hover:bg-gray-100 rounded-lg transition-colors">Uložit nastavení</button>
+            <button id="cookie-modal-close" class="px-4 py-2 text-sm font-medium text-gray-400 hover:text-white border border-white/20 rounded-lg transition-colors">Zavřít</button>
+        </div>
+    </div>
+</div>
+
+<!-- Header -->
 <header>
     <div class="nav-inner">
         <div class="flex items-center">
@@ -212,25 +382,28 @@
 
 <!-- Burger Menu Overlay -->
 <div id="burger-overlay">
-    <nav id="burger-nav-links">
+    <nav>
         <a href="index.html#about" class="menu-link">O NÁS</a>
         <a href="kariera.html" class="menu-link">KARIÉRA</a>
         <a href="kontakt.html" class="menu-link">KONTAKT</a>
         <a href="#services" class="menu-link">SLUŽBY</a>
-        <a href="#faq" class="menu-link">FAQ</a>
+        <a href="#process" class="menu-link">JAK TO FUNGUJE</a>
         <a href="#portfolio" class="menu-link">PORTFOLIO</a>
+        <a href="#faq" class="menu-link">FAQ</a>
 
-        <!-- Dynamické odkazy vytvořené v CMS -->
+        <!-- Dynamické podstránky z CMS -->
         <div id="dynamic-burger-links" class="flex flex-col gap-6"></div>
 
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
     </nav>
 </div>
 
-<!-- Hero Sekce -->
+<!-- Hero Section -->
 <section class="hero-bg w-full h-screen sticky top-0 z-10 flex flex-col items-center overflow-hidden bg-black px-6">
     <div class="hero-gradient"></div>
     <div id="particles" aria-hidden="true"></div>
+
+    <div class="absolute inset-0 z-0 opacity-[0.02]" style="background-image: linear-gradient(rgba(168,85,247,.7) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,.7) 1px, transparent 1px); background-size: 60px 60px;"></div>
 
     <div class="relative z-20 max-w-5xl mx-auto flex flex-col items-center text-center pt-36 sm:pt-44 -mb-10">
         <h1 data-cms="index_hero_title" class="font-bebas text-white leading-none tracking-wide mb-6" style="font-size: clamp(3rem, 7.5vw, 6rem);">
@@ -248,9 +421,9 @@
     </div>
 </section>
 
-<!-- Plovoucí hlavní tělo stránky -->
+<!-- Main Floating Content -->
 <div class="relative z-20 bg-black shadow-[0_-40px_80px_rgba(0,0,0,0.95)]">
-    <!-- Sekce O nás -->
+    <!-- About Section -->
     <section id="about" style="padding: 96px 24px 64px;">
         <div class="container-custom">
             <div style="text-align: center; max-width: 650px; margin: 0 auto 64px;" data-aos="fade-up">
@@ -281,7 +454,8 @@
                 </div>
 
                 <div class="feature-row feature-row-reverse" data-aos="fade-up">
-                    <div class="feature-img grad-noise" style="order: -1 !important; min-height: 280px; background: url('images/figma.png') center/cover no-repeat;"></div>
+                    <div class="feature-img grad-noise" style="order: -1 !important; min-height: 280px; background: url('images/figma.png') center/cover no-repeat;">
+                    </div>
                     <div class="feature-text">
                         <h3 data-cms="index_feat2_title" class="font-bebas" style="font-size: clamp(1.8rem, 3.5vw, 2.5rem); color: #fff; line-height: 1.1;">GRAFICKÝ DESIGN A UX</h3>
                         <p data-cms="index_feat2_p" style="font-size: .9rem; color: rgba(255,255,255,0.7); line-height: 1.7;">
@@ -290,10 +464,237 @@
                     </div>
                 </div>
             </div>
+
+            <div class="text-row" style="margin-top: 80px;" data-aos="fade-up">
+                <div class="text-block">
+                    <h3>BEZPEČNOST A STABILITA</h3>
+                    <p>Statické weby nemají databázi ani složitý backend. Díky tomu jsou prakticky nenapadnutelné a fungují bez výpadků i při vysoké návštěvnosti.</p>
+                </div>
+                <div class="text-block">
+                    <h3>DESIGN PRO KONVERZE</h3>
+                    <p>Neděláme grafiku jen proto, aby hezky vypadala. Grafický design a UX u nás plní jasný cíl - zjednodušit průchod webem a posílit vaši značku.</p>
+                </div>
+                <div class="text-block">
+                    <h3>PŘIPRAVENO RŮST</h3>
+                    <p>Začínáte s jednoduchým webem, ale do budoucna plánujete rozšíření? Naše architektura je flexibilní a plně připravená na další rozvoj.</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Sekce Služby a Karty -->
+    <!-- Process Section -->
+    <section id="process" style="padding: 96px 24px 64px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="container-custom">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">JAK TO FUNGUJE</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: .95rem; max-width: 480px; margin: 0 auto; line-height: 1.7;">
+                    Od první zprávy po spuštění webu — transparentní proces bez překvapení.
+                </p>
+            </div>
+
+            <div style="position: relative;">
+                <div style="position: absolute; left: 50%; top: 24px; bottom: 24px; width: 1px; background: linear-gradient(180deg, rgba(20,150,140,0.6) 0%, rgba(60,100,160,0.3) 100%); transform: translateX(-50%);" class="hidden md:block"></div>
+
+                <div style="display: flex; flex-direction: column; gap: 48px;">
+
+                    <div class="timeline-step" data-aos="fade-up">
+                        <div class="timeline-text" style="text-align: right; padding-right: 32px;">
+                            <span class="timeline-number" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">01</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">KONZULTACE</h3>
+                            <p style="color: rgba(255,255,255,0.7); font-size: .875rem; line-height: 1.7;">Napíšete nám, probereme váš projekt, cíle a představy. Zdarma, bez závazků. Obvykle odpovídáme do 24 hodin.</p>
+                        </div>
+                        <div class="timeline-icon" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-chat" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="timeline-box" style="padding-left: 32px;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Co získáte</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Jasnou představu o rozsahu projektu, časovém harmonogramu a orientační ceně.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-step" data-aos="fade-up">
+                        <div class="timeline-box" style="padding-right: 32px; text-align: right;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; text-align: left;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Nástroje</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Figma pro wireframy a prototypy. Sdílíme náhled, vy komentujete přímo v designu.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-icon" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-palette" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="timeline-text" style="padding-left: 32px;">
+                            <span class="timeline-number" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">02</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">NÁVRH</h3>
+                            <p style="color: rgba(255,255,255,0.7); font-size: .875rem; line-height: 1.7;">Navrhneme vzhled webu ve Figmě. Zapracujeme vaše připomínky dokud nebudete 100% spokojeni.</p>
+                        </div>
+                    </div>
+
+                    <div class="timeline-step" data-aos="fade-up">
+                        <div class="timeline-text" style="text-align: right; padding-right: 32px;">
+                            <span class="timeline-number" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">03</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">VÝVOJ</h3>
+                            <p style="color: rgba(255,255,255,0.7); font-size: .875rem; line-height: 1.7;">Kódujeme čistý HTML/CSS/JS bez zbytečných frameworků. Průběžně sdílíme náhled na testovací adrese.</p>
+                        </div>
+                        <div class="timeline-icon" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-code-alt" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="timeline-box" style="padding-left: 32px;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Technologie</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">HTML · CSS · JavaScript · Nginx · Docker</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-step" data-aos="fade-up">
+                        <div class="timeline-box" style="padding-right: 32px; text-align: right;">
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 20px; text-align: left;">
+                                <p style="color: rgba(255,255,255,0.4); font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;">Co zahrnuje</p>
+                                <p style="color: rgba(255,255,255,0.65); font-size: .875rem; line-height: 1.6;">Nasazení na doménu, SSL certifikát, základní SEO nastavení a předání přístupů.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-icon" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, rgba(20,150,140,0.8), rgba(60,100,160,0.8)); display: flex; align-items: center; justify-content: center; z-index: 1; flex-shrink: 0;">
+                            <i class="bx bx-rocket" style="color: #fff; font-size: 1.2rem;"></i>
+                        </div>
+                        <div class="timeline-text" style="padding-left: 32px;">
+                            <span class="timeline-number" style="font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: rgba(255,255,255,0.04); line-height: 1;">04</span>
+                            <h3 class="font-bebas" style="font-size: 1.6rem; color: #fff; margin-bottom: 8px; margin-top: -16px;">SPUŠTĚNÍ</h3>
+                            <p style="color: rgba(255,255,255,0.7); font-size: .875rem; line-height: 1.7;">Web nasadíme na váš hosting nebo zajistíme hosting my. Předáme přístupy a zůstaneme k dispozici.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 64px;" data-aos="fade-up">
+                <a href="kontakt.html" class="btn-primary">Začít konzultaci zdarma</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" style="padding: 96px 24px 64px; background: #000; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="max-width: 860px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">ČASTÉ OTÁZKY</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: .95rem; line-height: 1.7;">Odpovědi na to co nás zákazníci ptají nejčastěji.</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 2px;" data-aos="fade-up">
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Jak dlouho trvá vytvoření webu?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Celý proces od první konzultace po spuštění trvá typicky <strong>1–2 týdny</strong>. Grafický návrh ve Figmě zabere 2–3 dny, samotné kódování dalších 3–5 dní a nasazení na server 1 den. U složitějších projektů může trvat déle — vždy vás dopředu informujeme.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Kolik web stojí?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Cena závisí na rozsahu projektu. Jednoduchá prezentační stránka začíná od <strong>5 000 Kč</strong>, web s více sekcemi a grafikou na míru od <strong>10 000 Kč</strong>. Orientační nabídku dostanete zdarma po první konzultaci.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Potřebuji vlastní doménu a hosting?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Doménu si zaregistrujete sami (např. na Wedos.cz nebo Forpsi.cz, cena cca 200–300 Kč/rok). Hosting zajistíme my — statické weby lze hostovat zdarma na platformách jako Netlify nebo Vercel. Pokud preferujete vlastní hosting, nastavení provedeme za vás.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Co se stane po spuštění webu?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Předáme vám přístupy ke všem účtům a zůstaneme k dispozici pro případné úpravy. Drobné změny textu nebo obrázků řešíme zdarma v prvních <strong>30 dnech</strong>. Větší rozšíření webu nacenujeme individuálně.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Mohu web později rozšířit?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Ano. Kód píšeme čistě a strukturovaně, takže přidání nových sekcí, stránek nebo funkcí je kdykoli možné. Není potřeba web předělávat od začátku.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger" onclick="toggleFaq(this)">
+                        <span>Děláte také e-shopy?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Aktuálně se specializujeme na <strong>statické prezentační weby</strong>. E-shopy vyžadují komplexní backend — pro tyto projekty doporučujeme platformy jako Shoptet nebo WooCommerce. Rádi ale navrhneme grafiku nebo landing page i pro e-shop projekt.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section id="portfolio" style="padding: 96px 24px 64px; background: #050505; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div class="container-custom">
+            <div style="text-align: center; margin-bottom: 64px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">NAŠE PRÁCE</h2>
+                <p style="color: rgba(255,255,255,0.7); font-size: .95rem; line-height: 1.7; max-width: 480px; margin: 0 auto;">
+                    Aktuálně pracujeme na prvních klientských projektech. Brzy zde uvidíte ukázky naší práce.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;" class="portfolio-grid" data-aos="fade-up">
+
+                <!-- Placeholder 1 -->
+                <a href="https://tk-kruh.pages.dev" target="_blank">
+                    <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                        <div style="position: absolute; inset: 0; background: url('images/tkkruh.png') center/cover no-repeat;"></div>
+                        <i class="bx bx-code-alt" style="font-size: 2rem; color: rgba(255,255,255,1); position: relative; z-index: 1;"></i>
+                        <p style="color: rgba(255,255,255,1); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; position: relative; z-index: 1;">Tenisový Klub Kruh</p>
+                    </div>
+                </a>
+
+                <!-- Placeholder 2 -->
+                <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(60,100,160,0.15) 0%, transparent 70%);"></div>
+                    <i class="bx bx-palette" style="font-size: 2rem; color: rgba(255,255,255,0.15);"></i>
+                    <p style="color: rgba(255,255,255,0.2); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;">Připravujeme</p>
+                </div>
+
+                <!-- Placeholder 3 -->
+                <div style="border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06); background: #0f0f0f; aspect-ratio: 4/3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; position: relative;">
+                    <div style="position: absolute; inset: 0; background: radial-gradient(ellipse 80% 70% at 50% 40%, rgba(80,130,80,0.15) 0%, transparent 70%);"></div>
+                    <i class="bx bx-globe" style="font-size: 2rem; color: rgba(255,255,255,0.15);"></i>
+                    <p style="color: rgba(255,255,255,0.2); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;">Připravujeme</p>
+                </div>
+
+            </div>
+
+            <!-- CTA pod portfoliem -->
+            <div style="text-align: center; margin-top: 48px;" data-aos="fade-up">
+                <p style="color: rgba(255,255,255,0.4); font-size: .9rem; margin-bottom: 20px;">Chcete být jedním z prvních klientů?</p>
+                <a href="kontakt.html" class="btn-primary">Získat web za zvýhodněnou cenu</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Services Section -->
     <section id="services" style="padding: 96px 24px 64px;">
         <div style="max-width: 1280px; margin: 0 auto;">
             <div data-aos="fade-up" style="width: 100%; aspect-ratio: 16/5; border-radius: 14px; overflow: hidden; position: relative; margin-bottom: 64px; background-color: #ffffff;">
@@ -302,18 +703,20 @@
 
             <div class="three-col" data-aos="fade-up">
                 <div class="content-card">
-                    <div class="content-card-img grad-noise" style="min-height: 230px; background: url('images/code.jpg') center/cover no-repeat;"></div>
+                    <div class="content-card-img grad-noise" style="min-height: 230px; background: url('images/code.jpg') center/cover no-repeat;">
+                    </div>
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">STATICKÉ WEBY</h3>
-                        <p style="font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6;">Rychlé a čisté webové prezentace vytvořené v HTML, CSS a JS bez zbytečné pomalé zátěže.</p>
+                        <h3 data-cms="index_feat1_title" style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">STATICKÉ WEBY</h3>
+                        <p data-cms="index_feat1_p" style="font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6;">Rychlé a čisté webové prezentace vytvořené v HTML, CSS a JS bez zbytečné pomalé zátěže.</p>
                     </div>
                 </div>
 
                 <div class="content-card">
-                    <div class="content-card-img grad-noise" style="min-height: 230px; width: 100%; background: url('images/figma2.jpg') center/cover no-repeat;"></div>
+                    <div class="content-card-img grad-noise" style="min-height: 230px; width: 100%; background: url('images/figma2.jpg') center/cover no-repeat;">
+                    </div>
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">UX / UI A ÚPRAVY</h3>
-                        <p style="font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6;">Grafický design a úpravy již stávajících webů s důrazem na lepší uživatelskou zkušenost.</p>
+                        <h3 data-cms="index_feat2_title" style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">UX / UI A ÚPRAVY</h3>
+                        <p data-cms="index_feat2_p" style="font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6;">Grafický design a úpravy již stávajících webů s důrazem na lepší uživatelskou zkušenost.</p>
                     </div>
                 </div>
 
@@ -328,6 +731,7 @@
                         />
                         <div style="position: absolute; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.4) 100%);" class="z-10 pointer-events-none"></div>
                     </div>
+
                     <div>
                         <h3 style="font-size: 1.1rem; font-weight: 500; color: #fff; margin-bottom: 6px;" class="font-bebas tracking-wide text-lg">SPRÁVA A PODPORA</h3>
                         <p style="font-size: .875rem; color: rgba(255,255,255,0.7); line-height: 1.6;">Nasazení na doménu, zajištění hostingu a případné další rozšiřování obsahu v budoucnu.</p>
@@ -337,154 +741,39 @@
         </div>
     </section>
 
-    <!-- Sekce Portfolio -->
-    <section id="portfolio" style="padding: 80px 24px 64px;">
-        <div class="container-custom">
-            <div style="text-align: center; max-width: 600px; margin: 0 auto 56px;" data-aos="fade-up">
-                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">UKÁZKY NAŠÍ PRÁCE</h2>
-                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Vybrané realizace a digitální koncepty z naší dílny.</p>
-            </div>
-
-            <div class="three-col" data-aos="fade-up">
-                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs font-mono text-[#14968C] uppercase">Webová Prezentace</span>
-                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">K9 SPECIALISTS</h3>
-                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Minimalistický web a zákaznické CRM pro výcvikové centrum psů na Floridě.</p>
-                    </div>
-                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
-                </div>
-
-                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs font-mono text-[#14968C] uppercase">Webová Aplikace</span>
-                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">WENIX KALENDÁŘ</h3>
-                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Interní týmový systém pro správu událostí a automatizaci e-mailových notifikací.</p>
-                    </div>
-                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
-                </div>
-
-                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
-                    <div>
-                        <span class="text-xs font-mono text-[#14968C] uppercase">Design & Development</span>
-                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">STUDIO PORTÁL</h3>
-                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Rychlý statický web s integrovaným CMS rozhraním pro přímou editaci obsahu.</p>
-                    </div>
-                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sekce Časová osa (Proces spolupráce) -->
-    <section style="padding: 80px 24px 64px; border-top: 1px solid rgba(255,255,255,0.06);">
-        <div class="container-custom">
-            <div style="text-align: center; max-width: 600px; margin: 0 auto 56px;" data-aos="fade-up">
-                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">JAK PROBÍHÁ SPOLUPRÁCE</h2>
-                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Od první konzultace až po finální nasazení na ostrou doménu.</p>
-            </div>
-
-            <div class="space-y-12 max-w-3xl mx-auto" data-aos="fade-up">
-                <div class="timeline-step">
-                    <div class="timeline-text text-right">
-                        <h3 class="text-lg font-bold text-white mb-1">1. Konzultace a specifikace</h3>
-                        <p class="text-neutral-400 text-xs">Ujasníme si vaše cíle, rozsah webu a připravíme návrh struktury.</p>
-                    </div>
-                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">1</div>
-                    <div class="timeline-box"></div>
-                </div>
-
-                <div class="timeline-step">
-                    <div class="timeline-box"></div>
-                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">2</div>
-                    <div class="timeline-text text-left">
-                        <h3 class="text-lg font-bold text-white mb-1">2. UX/UI Design</h3>
-                        <p class="text-neutral-400 text-xs">Vytvoříme moderní vizuál na míru a doladíme ho k vaší spokojenosti.</p>
-                    </div>
-                </div>
-
-                <div class="timeline-step">
-                    <div class="timeline-text text-right">
-                        <h3 class="text-lg font-bold text-white mb-1">3. Kódování a CMS</h3>
-                        <p class="text-neutral-400 text-xs">Převedeme grafiku do čistého, rychlého kódu s možností editace textů.</p>
-                    </div>
-                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">3</div>
-                    <div class="timeline-box"></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sekce FAQ -->
-    <section id="faq" style="padding: 80px 24px 64px; border-top: 1px solid rgba(255,255,255,0.06);">
-        <div class="container-custom max-w-3xl">
-            <div style="text-align: center; margin-bottom: 48px;" data-aos="fade-up">
-                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">ČASTO KLADENÉ DOTAZY</h2>
-                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Vše, co potřebujete vědět před zahájením projektu.</p>
-            </div>
-
-            <div class="space-y-4" data-aos="fade-up">
-                <div class="faq-item">
-                    <button class="faq-trigger">
-                        <span>Proč zvolit statický web místo WordPressu?</span>
-                        <i class="bx bx-plus faq-icon"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Statické weby nemají žádnou těžkou databázi ani zranitelné pluginy. Načítají se okamžitě (často pod 100 ms), jsou maximálně bezpečné a nevyžadují neustálé placené aktualizace.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-trigger">
-                        <span>Budu si moci texty a fotky na webu upravovat sám?</span>
-                        <i class="bx bx-plus faq-icon"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Ano. K webu dodáváme naše přehledné Wenix CMS rozhraní, kde můžete kdykoliv jednoduše přepisovat veškeré texty i nahrávat nové fotografie.</p>
-                    </div>
-                </div>
-
-                <div class="faq-item">
-                    <button class="faq-trigger">
-                        <span>Jak dlouho trvá tvorba webu na míru?</span>
-                        <i class="bx bx-plus faq-icon"></i>
-                    </button>
-                    <div class="faq-answer">
-                        <p>Standardní webové prezentace doručujeme obvykle do 2 až 3 týdnů od odsouhlasení grafického návrhu a dodání podkladů.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Patička webu -->
+    <!-- Footer -->
     <footer>
         <div class="footer-inner">
             <div class="footer-grid">
                 <div class="footer-col">
                     <span class="footer-logo">WENIX</span>
-                    <p class="footer-tagline">Váš partner pro moderní weby a čistý design bez zbytečného balastu.</p>
+                    <p class="footer-tagline">Váš partner pro moderní weby a čistý design.</p>
                     <div class="footer-socials">
-                        <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
                         <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                        <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                        <a href="#" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
                     </div>
                 </div>
+
                 <div class="footer-col">
                     <h4>Služby</h4>
                     <ul>
                         <li><a href="#services">Statické weby</a></li>
-                        <li><a href="#services">UX / UI Design</a></li>
-                        <li><a href="#services">Správa a podpora</a></li>
+                        <li><a href="#services">Grafický design a úpravy</a></li>
                     </ul>
                 </div>
+
                 <div class="footer-col">
                     <h4>O nás</h4>
                     <ul>
                         <li><a href="#about">O nás</a></li>
                         <li><a href="kariera.html">Kariéra</a></li>
+                        <li><a href="#process">Jak to funguje</a></li>
+                        <li><a href="#faq">FAQ</a></li>
                         <li><a href="#portfolio">Portfolio</a></li>
                     </ul>
                 </div>
+
                 <div class="footer-col">
                     <h4>Systém</h4>
                     <ul>
@@ -495,6 +784,10 @@
                     </ul>
                 </div>
             </div>
+
+            <div style="margin-top: 56px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+                <span style="font-size: .8rem; color: rgba(255,255,255,0.3);">&copy; 2026 Wenix. Všechna práva vyhrazena.</span>
+            </div>
         </div>
     </footer>
 </div>
@@ -503,52 +796,137 @@
 <script>
     AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
 
-    // Obsluha Scroll baru a Back to Top
+    // JS pro Cookies
+    (function() {
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires};path=/;SameSite=Lax`;
+        }
+
+        const banner = document.getElementById('cookie-banner');
+        const modal  = document.getElementById('cookie-modal');
+
+        if (banner && !document.cookie.split('; ').find(c => c.startsWith('wda_cookie_consent='))) {
+            banner.classList.remove('hidden');
+        }
+
+        document.getElementById('cookie-accept')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary_analytics_marketing', 365);
+            banner.remove();
+        });
+
+        document.getElementById('cookie-reject')?.addEventListener('click', () => {
+            setCookie('wda_cookie_consent', 'necessary', 365);
+            banner.remove();
+        });
+
+        document.getElementById('cookie-settings-btn')?.addEventListener('click', () => {
+            modal?.classList.remove('hidden');
+        });
+
+        document.getElementById('cookie-modal-close')?.addEventListener('click', () => {
+            modal?.classList.add('hidden');
+        });
+
+        document.getElementById('cookie-save-settings')?.addEventListener('click', () => {
+            const parts = ['necessary'];
+            if (document.getElementById('toggle-analytics')?.checked) parts.push('analytics');
+            if (document.getElementById('toggle-marketing')?.checked) parts.push('marketing');
+            setCookie('wda_cookie_consent', parts.join('_'), 365);
+            modal?.classList.add('hidden');
+            banner?.remove();
+        });
+
+        modal?.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+        });
+    })();
+
+    // JS pro Burger menu
+    const trigger = document.getElementById('burger-trigger');
+    const overlay = document.getElementById('burger-overlay');
+    const line1   = document.getElementById('line-1');
+    const line2   = document.getElementById('line-2');
+
+    trigger.addEventListener('click', () => {
+        const isOpen = overlay.classList.contains('open');
+
+        if (isOpen) {
+            overlay.classList.remove('open');
+            line1.style.transform = '';
+            line1.style.width = '14px';
+            line2.style.transform = '';
+            document.body.style.overflow = '';
+        } else {
+            overlay.classList.add('open');
+            line1.style.width = '14px';
+            line1.style.transform = 'translateY(3px) rotate(45deg)';
+            line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+
+    overlay.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            overlay.classList.remove('open');
+            line1.style.transform = '';
+            line1.style.width = '14px';
+            line2.style.transform = '';
+            document.body.style.overflow = '';
+        });
+    });
+
+    const header = document.querySelector('header');
     window.addEventListener('scroll', () => {
-        const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
-        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-        const scrolled = (winScroll / height) * 100;
-        document.getElementById('progress-bar').style.width = scrolled + '%';
+        header.style.background = window.scrollY > 8 ? 'rgba(0,0,0,0.94)' : 'rgba(0,0,0,0.75)';
+    }, { passive: true });
 
-        const topBtn = document.getElementById('back-to-top');
-        if (winScroll > 400) topBtn.classList.add('visible');
-        else topBtn.classList.remove('visible');
+    (function initParticles() {
+        const container = document.getElementById('particles');
+        if (!container) return;
+        const colors = ['rgba(20,150,140,0.4)', 'rgba(60,100,160,0.4)', 'rgba(80,130,80,0.2)'];
+        for (let i = 0; i < 22; i++) {
+            const p = document.createElement('div');
+            const size = Math.random() * 3 + 1;
+            p.className = 'particle';
+            p.style.cssText = [
+                `width:${size}px`, `height:${size}px`, `left:${Math.random() * 100}%`,
+                `background:${colors[Math.floor(Math.random() * colors.length)]}`,
+                `animation-duration:${Math.random() * 14 + 8}s`,
+                `animation-delay:${Math.random() * 10}s`
+            ].join(';');
+            container.appendChild(p);
+        }
+    })();
+
+    // Scroll progress bar + zpět nahoru
+    const progressBar = document.getElementById('progress-bar');
+    const backToTop = document.getElementById('back-to-top');
+
+    window.addEventListener('scroll', () => {
+        if (!progressBar) return;
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / docHeight) * 100;
+        progressBar.style.width = progress + '%';
+
+        if (backToTop) {
+            if (scrollTop > 400) backToTop.classList.add('visible');
+            else backToTop.classList.remove('visible');
+        }
+    }, { passive: true });
+
+    backToTop?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Obsluha Burger menu
-    const burgerBtn = document.getElementById('burger-trigger');
-    const burgerOverlay = document.getElementById('burger-overlay');
-    const line1 = document.getElementById('line-1');
-    const line2 = document.getElementById('line-2');
-
-    if (burgerBtn && burgerOverlay) {
-        burgerBtn.addEventListener('click', () => {
-            const isOpen = burgerOverlay.classList.toggle('open');
-            if (isOpen) {
-                line1.style.transform = 'translateY(3px) rotate(45deg)';
-                line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
-            } else {
-                line1.style.transform = 'none';
-                line2.style.transform = 'none';
-            }
-        });
-
-        burgerOverlay.addEventListener('click', (e) => {
-            if (e.target.classList.contains('menu-link')) {
-                burgerOverlay.classList.remove('open');
-                line1.style.transform = 'none';
-                line2.style.transform = 'none';
-            }
-        });
+    function toggleFaq(btn) {
+        const item = btn.parentElement;
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
     }
-
-    // Obsluha FAQ akordeonů
-    document.querySelectorAll('.faq-trigger').forEach(trigger => {
-        trigger.addEventListener('click', () => {
-            const parent = trigger.parentElement;
-            parent.classList.toggle('open');
-        });
-    });
 </script>
 </body>
 </html>
