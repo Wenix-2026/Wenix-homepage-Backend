@@ -4,11 +4,9 @@
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="page-meta-title">Načítání... | Wenix</title>
+    <title id="page-meta-title">Wenix</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
     <style>
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; }
         .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
@@ -23,30 +21,10 @@
 </header>
 
 <main class="flex-grow pt-32 pb-20 px-6 max-w-4xl mx-auto w-full">
-    <!-- Stav načítání -->
-    <div id="page-loading" class="text-center py-20 text-neutral-500 font-mono text-sm">Načítání stránky...</div>
+    <div id="page-loading" class="text-center py-20 text-neutral-500 font-mono text-sm">Načítání obsahu...</div>
 
-    <!-- Chyba 404 -->
-    <div id="page-error" class="hidden text-center py-20">
-        <h1 class="font-bebas text-5xl text-white mb-3">404 · STRÁNKA NENALEZENA</h1>
-        <p class="text-neutral-400 text-sm mb-6">Tato stránka neexistuje nebo byla smazána.</p>
-        <a href="index.html" class="px-5 py-2.5 bg-white text-black text-xs font-semibold rounded-lg">Zpět na hlavní stranu</a>
-    </div>
-
-    <!-- Samotný obsah -->
-    <article id="page-article" class="hidden space-y-8">
-        <div>
-            <span id="page-date" class="text-xs font-mono text-[#14968C]"></span>
-            <h1 id="page-title" class="font-bebas text-5xl md:text-7xl text-white mt-2 mb-4 leading-none"></h1>
-            <p id="page-perex" class="text-neutral-400 text-base md:text-lg leading-relaxed"></p>
-        </div>
-
-        <div id="page-img-container" class="hidden rounded-2xl overflow-hidden border border-white/10 aspect-video max-h-[420px] bg-[#111]">
-            <img id="page-img" src="" class="w-full h-full object-cover" alt="Banner">
-        </div>
-
-        <div id="page-content" class="text-neutral-300 text-sm md:text-base leading-relaxed space-y-4 pt-4 border-t border-white/5"></div>
-    </article>
+    <!-- Dynamický proud prvků v pořadí -->
+    <div id="elements-stream" class="space-y-8 hidden"></div>
 </main>
 
 <script type="module">
@@ -56,44 +34,42 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_OSvxzzEtDG7zgkmaR4j5gw_2oY7otaQ';
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function loadPage() {
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get('p');
+    async function loadStream() {
+        const slug = new URLSearchParams(window.location.search).get('p') || 'test';
+        document.getElementById('page-meta-title').innerText = `${slug.toUpperCase()} | Wenix`;
 
-        if (!slug) {
-            showError();
+        // Načteme všechny prvky dané stránky seřazené podle sort_order
+        const { data, error } = await supabase
+            .from('site_content')
+            .select('*')
+            .eq('page', slug)
+            .order('sort_order', { ascending: true });
+
+        document.getElementById('page-loading').classList.add('hidden');
+        const container = document.getElementById('elements-stream');
+        container.classList.remove('hidden');
+
+        if (!data || data.length === 0) {
+            container.innerHTML = `<div class="text-center py-16 text-neutral-500 font-mono text-sm">Na této stránce zatím není žádný obsah. Přidejte prvky v <a href="admin.html" class="text-teal-400 underline">administraci</a>.</div>`;
             return;
         }
 
-        const { data, error } = await supabase.from('pages').select('*').eq('slug', slug).single();
-
-        document.getElementById('page-loading').classList.add('hidden');
-
-        if (error || !data) {
-            showError();
-            return;
-        }
-
-        document.getElementById('page-meta-title').innerText = `${data.title} | Wenix`;
-        document.getElementById('page-title').innerText = data.title;
-        document.getElementById('page-perex').innerText = data.perex || '';
-        document.getElementById('page-content').innerHTML = data.content || '';
-        document.getElementById('page-date').innerText = new Date(data.created_at).toLocaleDateString('cs-CZ');
-
-        if (data.cover_image) {
-            document.getElementById('page-img').src = data.cover_image;
-            document.getElementById('page-img-container').classList.remove('hidden');
-        }
-
-        document.getElementById('page-article').classList.remove('hidden');
+        container.innerHTML = data.map(item => {
+            if (item.type === 'image') {
+                return `<div class="rounded-2xl overflow-hidden border border-white/10 aspect-video max-h-[460px] bg-[#111]">
+                    <img src="${item.value}" class="w-full h-full object-cover" alt="${item.label}">
+                </div>`;
+            } else if (item.key.includes('hero') || item.key.includes('title') || item.key.includes('heading')) {
+                return `<h2 class="font-bebas text-5xl md:text-7xl text-white leading-none">${item.value}</h2>`;
+            } else if (item.type === 'textarea') {
+                return `<div class="text-neutral-300 text-sm md:text-base leading-relaxed space-y-4">${item.value}</div>`;
+            } else {
+                return `<div class="text-neutral-200 text-base">${item.value}</div>`;
+            }
+        }).join('');
     }
 
-    function showError() {
-        document.getElementById('page-loading').classList.add('hidden');
-        document.getElementById('page-error').classList.remove('hidden');
-    }
-
-    loadPage();
+    loadStream();
 </script>
 </body>
 </html>

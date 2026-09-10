@@ -6,6 +6,7 @@
     <title>Wenix · CMS Administrace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e2e2e2; }
         h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
@@ -28,7 +29,7 @@
         <header class="flex justify-between items-center border-b border-white/10 pb-6">
             <div>
                 <h1 class="text-4xl text-white">SPRÁVA WEBU WENIX</h1>
-                <p class="text-xs text-neutral-400 font-mono">CMS PRO TEXTY, OBRÁZKY A DYNAMICKÉ STRÁNKY</p>
+                <p class="text-xs text-neutral-400 font-mono">VIZUÁLNÍ SPRÁVCE OBSAHU A POŘADÍ PRVKŮ</p>
             </div>
             <div class="flex items-center gap-4">
                 <span id="toast" class="text-xs text-[#14968C] font-semibold transition-opacity opacity-0">ULOŽENO</span>
@@ -36,114 +37,69 @@
             </div>
         </header>
 
-        <!-- Přepínač sekcí -->
-        <div class="flex gap-4 border-b border-white/10 pb-4">
-            <button onclick="window.switchSection('content')" id="tab-btn-content" class="text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white">Texty a Média</button>
-            <button onclick="window.switchSection('pages')" id="tab-btn-pages" class="text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white">Dynamické stránky (Články / Blog)</button>
-        </div>
-
-        <!-- 1. SEKCE: STATICKÉ TEXTY A MÉDIA -->
-        <div id="section-content" class="space-y-6">
-            <div class="flex flex-wrap justify-between items-center gap-2">
+        <!-- Horní lišta stránek -->
+        <div class="space-y-6">
+            <div class="flex flex-wrap justify-between items-center gap-3">
                 <div class="flex flex-wrap gap-2" id="page-tabs"></div>
-                <button onclick="window.openNewFieldModal()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Přidat prvek / pole</button>
+                <button onclick="window.openNewFieldModal()" class="px-3.5 py-2 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition flex items-center gap-1.5">
+                    <i class="bx bx-plus text-sm"></i> Přidat prvek na tuto stránku
+                </button>
             </div>
-            <div id="fields-container" class="space-y-6"></div>
-        </div>
 
-        <!-- 2. SEKCE: DYNAMICKÉ STRÁNKY -->
-        <div id="section-pages" class="hidden space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl text-white">Vytvořené stránky a články</h2>
-                <button onclick="window.openNewPageModal()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Vytvořit novou stránku</button>
-            </div>
-            <div id="pages-list" class="space-y-3"></div>
+            <!-- Kontejner prvků v pořadí -->
+            <div id="fields-container" class="space-y-4"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL: PŘIDAT NOVÉ POLE S PRESETY -->
+<!-- MODAL: PŘIDAT NOVÝ PRVEK -->
 <div id="modal-new-field" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-xl text-white">PŘIDAT ELEMENT DO WEBU</h3>
+        <h3 class="text-xl text-white">PŘIDAT PRVEK DO STRÁNKY</h3>
 
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Vyberte předlohu prvku:</label>
+            <label class="text-xs text-neutral-400 font-mono">Typ prvku:</label>
             <select id="nf-preset" onchange="window.applyFieldPreset(this.value)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-xs text-neutral-200 mt-1 focus:border-[#14968C] outline-none">
-                <option value="text">Jednoduchý jednořádkový text (Nadpis, slogan)</option>
-                <option value="textarea">Dlouhý textový odstavec / Popis</option>
-                <option value="hero">Hero Sekce (Nadpis s gradientním slovem)</option>
+                <option value="text">Jednořádkový text (Nadpis, slogan)</option>
+                <option value="textarea">Textový odstavec / Popis</option>
+                <option value="hero">Hero Nadpis s barevným gradientem</option>
                 <option value="image">Obrázek nebo Banner</option>
-                <option value="button">Tlačítko / CTA Odkaz</option>
-                <option value="card">Obsahová karta (HTML blok)</option>
+                <option value="button">Tlačítko s odkazem</option>
+                <option value="card">Obsahový blok (Karta)</option>
             </select>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
             <div>
-                <label class="text-xs text-neutral-400 font-mono">Stránka webu:</label>
-                <input id="nf-page" placeholder="např. index, kariera" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+                <label class="text-xs text-neutral-400 font-mono">Cílová stránka:</label>
+                <input id="nf-page" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-semibold" readonly>
             </div>
             <div>
-                <label class="text-xs text-neutral-400 font-mono">Sekce webu:</label>
-                <input id="nf-section" placeholder="např. Hero, Služby" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+                <label class="text-xs text-neutral-400 font-mono">Název sekce:</label>
+                <input id="nf-section" placeholder="např. Hero, O nás, Galerie" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
             </div>
         </div>
 
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
-            <input id="nf-label" placeholder="např. Hlavní titulek nabídky" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <label class="text-xs text-neutral-400 font-mono">Popisek prvku:</label>
+            <input id="nf-label" placeholder="např. Hlavní titulek" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
 
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Unikátní HTML klíč (data-cms="..."):</label>
-            <input id="nf-key" placeholder="např. home_promo_title" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
+            <label class="text-xs text-neutral-400 font-mono">Unikátní klíč (data-cms="..."):</label>
+            <input id="nf-key" placeholder="např. test_hero_title" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
         </div>
 
         <input type="hidden" id="nf-type" value="text">
 
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Výchozí hodnota / Obsah:</label>
+            <label class="text-xs text-neutral-400 font-mono">Obsah prvku:</label>
             <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none"></textarea>
         </div>
 
         <div class="flex gap-2 justify-end pt-2">
-            <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
-            <button onclick="window.submitNewField()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Uložit prvek</button>
-        </div>
-    </div>
-</div>
-
-<!-- MODAL: VYTVOŘIT / UPRAVIT STRÁNKU -->
-<div id="modal-page-editor" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-xl w-full space-y-4 max-h-[90vh] overflow-y-auto">
-        <h3 id="page-modal-title" class="text-xl text-white">VYTVOŘIT STRÁNKU / ČLÁNEK</h3>
-        <input type="hidden" id="pe-is-edit" value="false">
-
-        <div>
-            <label class="text-xs text-neutral-400 font-mono">URL Slug (adresa článku):</label>
-            <input id="pe-slug" placeholder="např. novy-web-design" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
-        </div>
-        <div>
-            <label class="text-xs text-neutral-400 font-mono">Nadpis stránky:</label>
-            <input id="pe-title" placeholder="Zadejte název..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
-        </div>
-        <div>
-            <label class="text-xs text-neutral-400 font-mono">Perex / Úvodní shrnutí:</label>
-            <textarea id="pe-perex" rows="2" placeholder="Krátký popis..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
-        </div>
-        <div>
-            <label class="text-xs text-neutral-400 font-mono">URL Titulního obrázku (volitelné):</label>
-            <input id="pe-img" placeholder="https://..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
-        </div>
-        <div>
-            <label class="text-xs text-neutral-400 font-mono">Obsah stránky (podporuje HTML odstavce):</label>
-            <textarea id="pe-content" rows="7" placeholder="<p>Obsah článku...</p>" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 font-mono"></textarea>
-        </div>
-
-        <div class="flex gap-2 justify-end pt-2">
-            <button onclick="document.getElementById('modal-page-editor').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
-            <button onclick="window.submitPage()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Uložit stránku</button>
+            <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3.5 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
+            <button onclick="window.submitNewField()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vložit na konec stránky</button>
         </div>
     </div>
 </div>
@@ -156,21 +112,19 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let contentItems = [];
-    let pagesList = [];
-    let activePage = 'all';
+    let activePage = 'index';
 
     async function init() {
         const { data: { session } } = await supabase.auth.getSession();
         document.getElementById('loading').classList.add('hidden');
         if (session) {
             document.getElementById('dashboard-view').classList.remove('hidden');
-            await loadAllData();
+            await loadContent();
         } else {
             document.getElementById('login-view').classList.remove('hidden');
         }
     }
 
-    // Login & Logout
     document.getElementById('btn-login').onclick = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -184,304 +138,135 @@
         location.reload();
     };
 
-    window.switchSection = (sec) => {
-        if (sec === 'content') {
-            document.getElementById('section-content').classList.remove('hidden');
-            document.getElementById('section-pages').classList.add('hidden');
-            document.getElementById('tab-btn-content').className = 'text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white';
-            document.getElementById('tab-btn-pages').className = 'text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white';
-        } else {
-            document.getElementById('section-content').classList.add('hidden');
-            document.getElementById('section-pages').classList.remove('hidden');
-            document.getElementById('tab-btn-pages').className = 'text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white';
-            document.getElementById('tab-btn-content').className = 'text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white';
+    async function loadContent() {
+        const { data } = await supabase
+            .from('site_content')
+            .select('*')
+            .order('sort_order', { ascending: true })
+            .order('updated_at', { ascending: false });
+
+        if (data) {
+            contentItems = data;
+            const pages = [...new Set(contentItems.map(i => i.page))];
+            if (!pages.includes(activePage) && pages.length > 0) {
+                activePage = pages[0];
+            }
+            renderTabs();
+            renderFields();
         }
-    };
-
-    async function loadAllData() {
-        const [resContent, resPages] = await Promise.all([
-            supabase.from('site_content').select('*').order('page').order('section'),
-            supabase.from('pages').select('*').order('created_at', { ascending: false })
-        ]);
-
-        if (resContent.data) contentItems = resContent.data;
-        if (resPages.data) pagesList = resPages.data;
-
-        renderTabs();
-        renderContent();
-        renderPagesList();
     }
 
     function renderTabs() {
-        const staticPages = [...new Set(contentItems.map(i => i.page))];
-        const dynamicPages = pagesList.map(p => `page:${p.slug}`);
-        const allTabs = ['all', ...staticPages, ...dynamicPages];
-
-        document.getElementById('page-tabs').innerHTML = allTabs.map(tab => {
-            const isDynamic = tab.startsWith('page:');
-            const slug = isDynamic ? tab.replace('page:', '') : tab;
-            const label = tab === 'all' ? 'Všechny stránky' : (isDynamic ? `📄 ${slug}` : slug);
-
-            return `
-          <button onclick="window.switchTab('${tab}')" class="px-3 py-1 text-xs uppercase tracking-wider rounded-md border transition ${
-                activePage === tab
-                    ? 'bg-[#14968C] text-black border-[#14968C] font-semibold'
-                    : 'bg-[#111] text-neutral-400 border-white/10 hover:border-white/20'
-            }">
-            ${label}
-          </button>
-        `;
-        }).join('');
+        const pages = [...new Set(contentItems.map(i => i.page))];
+        document.getElementById('page-tabs').innerHTML = pages.map(p => `
+        <button onclick="window.switchTab('${p}')" class="px-3.5 py-1.5 text-xs uppercase tracking-wider rounded-lg border transition ${
+            activePage === p
+                ? 'bg-[#14968C] text-black border-[#14968C] font-bold shadow-lg shadow-teal-900/30'
+                : 'bg-[#111] text-neutral-400 border-white/10 hover:border-white/20'
+        }">
+          ${p}
+        </button>
+      `).join('');
     }
 
-    window.switchTab = (tab) => {
-        activePage = tab;
+    window.switchTab = (p) => {
+        activePage = p;
         renderTabs();
-        renderContent();
+        renderFields();
     };
 
-    function renderContent() {
+    function renderFields() {
         const container = document.getElementById('fields-container');
+        const filtered = contentItems.filter(i => i.page === activePage);
 
-        if (activePage.startsWith('page:')) {
-            const slug = activePage.replace('page:', '');
-            const page = pagesList.find(p => p.slug === slug);
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="bg-[#111] p-8 text-center text-neutral-500 rounded-xl text-sm font-mono">Tato stránka zatím nemá žádné prvky. Klikněte nahoře na "+ Přidat prvek".</div>';
+            return;
+        }
 
-            if (!page) {
-                container.innerHTML = '<p class="text-xs text-neutral-500">Stránka nenalezena.</p>';
-                return;
-            }
-
-            container.innerHTML = `
-          <div class="bg-[#111] border border-white/10 p-6 rounded-xl space-y-5">
-            <div class="flex justify-between items-center border-b border-white/5 pb-3">
-              <h3 class="text-xl text-[#14968C]">STRÁNKA: ${page.title} (${page.slug})</h3>
-              <div class="flex gap-2">
-                <a href="clanek.html?p=${page.slug}" target="_blank" class="text-xs text-[#14968C] underline px-3 py-1.5">Zobrazit web ↗</a>
-                <button onclick="window.deletePage('${page.slug}')" class="text-xs text-red-400 border border-red-500/20 px-3 py-1.5 rounded-lg hover:bg-red-500/10">Smazat stránku</button>
-              </div>
+        container.innerHTML = filtered.map((f, index) => `
+        <div class="bg-[#111] border border-white/10 p-5 rounded-xl space-y-3 transition hover:border-white/20">
+          <div class="flex items-center justify-between border-b border-white/5 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-mono px-2 py-0.5 bg-white/5 text-neutral-400 rounded">#${index + 1}</span>
+              <span class="text-sm font-semibold text-white">${f.label}</span>
+              <span class="text-xs text-neutral-500 font-mono">(${f.key})</span>
+              <span class="text-[10px] text-teal-400 bg-teal-950/60 border border-teal-800/40 px-2 py-0.5 rounded-full uppercase">${f.section}</span>
             </div>
 
-            <div class="space-y-4">
-              <div>
-                <label class="text-xs text-neutral-400 font-mono">Hlavní nadpis stránky:</label>
-                <input type="text" value="${page.title || ''}" onblur="window.saveDynamicPage('${page.slug}', 'title', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none mt-1">
-              </div>
+            <!-- Tlačítka pro posun a mazání -->
+            <div class="flex items-center gap-1">
+              <button onclick="window.moveItem('${f.key}', -1)" ${index === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:bg-white/10 text-neutral-300"'} title="Posunout výš" class="p-1.5 rounded-md text-xs transition">
+                <i class="bx bx-chevron-up text-base"></i>
+              </button>
+              <button onclick="window.moveItem('${f.key}', 1)" ${index === filtered.length - 1 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:bg-white/10 text-neutral-300"'} title="Posunout níž" class="p-1.5 rounded-md text-xs transition">
+                <i class="bx bx-chevron-down text-base"></i>
+              </button>
+              <button onclick="window.deleteItem('${f.key}')" title="Smazat prvek" class="p-1.5 rounded-md text-xs text-red-400 hover:bg-red-500/10 transition ml-2">
+                <i class="bx bx-trash text-base"></i>
+              </button>
+            </div>
+          </div>
 
-              <div>
-                <label class="text-xs text-neutral-400 font-mono">Perex / Úvodní popis:</label>
-                <textarea rows="2" onblur="window.saveDynamicPage('${page.slug}', 'perex', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none mt-1">${page.perex || ''}</textarea>
-              </div>
-
-              <div>
-                <label class="text-xs text-neutral-400 font-mono">Titulní obrázek (URL / Soubor):</label>
-                <div class="flex items-center gap-4 mt-1">
-                  <img src="${page.cover_image || ''}" class="w-16 h-16 rounded-lg object-cover bg-black border border-white/10" id="preview-page-${page.slug}">
-                  <div class="flex-1 space-y-2">
-                    <input type="text" value="${page.cover_image || ''}" onblur="window.saveDynamicPage('${page.slug}', 'cover_image', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2 text-xs text-neutral-200 outline-none" placeholder="Vlož URL nebo nahraj soubor">
-                    <input type="file" accept="image/*" onchange="window.uploadPageImage('${page.slug}', this)" class="text-xs text-neutral-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-white/10 file:text-neutral-200 hover:file:bg-white/20">
-                  </div>
+          <!-- Editace hodnoty -->
+          <div>
+            ${f.type === 'textarea' ? `
+              <textarea onblur="window.saveField('${f.key}', this.value)" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 outline-none transition">${f.value || ''}</textarea>
+            ` : f.type === 'image' ? `
+              <div class="flex items-center gap-4">
+                <img src="${f.value || ''}" class="w-16 h-16 rounded-lg object-cover bg-black border border-white/10" id="preview-${f.key}">
+                <div class="flex-1 space-y-2">
+                  <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2 text-xs text-neutral-200 outline-none" placeholder="URL obrázku">
+                  <input type="file" accept="image/*" onchange="window.uploadImage('${f.key}', this)" class="text-xs text-neutral-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-white/10 file:text-neutral-200 hover:file:bg-white/20">
                 </div>
               </div>
-
-              <div>
-                <label class="text-xs text-neutral-400 font-mono">Obsah stránky (podporuje HTML odstavce &lt;p&gt;):</label>
-                <textarea rows="8" onblur="window.saveDynamicPage('${page.slug}', 'content', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 font-mono outline-none mt-1">${page.content || ''}</textarea>
-              </div>
-            </div>
-          </div>
-        `;
-            return;
-        }
-
-        const filtered = activePage === 'all' ? contentItems : contentItems.filter(i => i.page === activePage);
-
-        const grouped = filtered.reduce((acc, item) => {
-            const group = `${item.page.toUpperCase()} · ${item.section}`;
-            acc[group] = acc[group] || [];
-            acc[group].push(item);
-            return acc;
-        }, {});
-
-        container.innerHTML = Object.entries(grouped).map(([group, fields]) => `
-        <div class="bg-[#111] border border-white/10 p-5 rounded-xl space-y-4">
-          <h3 class="text-xl text-[#14968C] border-b border-white/5 pb-2">${group}</h3>
-          <div class="space-y-4">
-            ${fields.map(f => `
-              <div class="space-y-1.5">
-                <label class="text-xs text-neutral-400 font-mono">${f.label} <span class="text-neutral-600">(${f.key})</span></label>
-                ${f.type === 'textarea' ? `
-                  <textarea onblur="window.saveField('${f.key}', this.value)" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 outline-none transition">${f.value || ''}</textarea>
-                ` : f.type === 'image' ? `
-                  <div class="flex items-center gap-4">
-                    <img src="${f.value || ''}" class="w-16 h-16 rounded-lg object-cover bg-black border border-white/10" id="preview-${f.key}">
-                    <div class="flex-1 space-y-2">
-                      <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2 text-xs text-neutral-200 outline-none" placeholder="Vlož URL nebo nahraj soubor">
-                      <input type="file" accept="image/*" onchange="window.uploadImage('${f.key}', this)" class="text-xs text-neutral-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-white/10 file:text-neutral-200 hover:file:bg-white/20">
-                    </div>
-                  </div>
-                ` : `
-                  <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none transition">
-                `}
-              </div>
-            `).join('')}
+            ` : `
+              <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none transition">
+            `}
           </div>
         </div>
       `).join('');
     }
 
-    function renderPagesList() {
-        const container = document.getElementById('pages-list');
-        if (pagesList.length === 0) {
-            container.innerHTML = '<p class="text-xs text-neutral-500 font-mono">Zatím nebyly vytvořeny žádné dynamické stránky.</p>';
-            return;
+    // Posun prvku výš (-1) nebo níž (+1)
+    window.moveItem = async (key, direction) => {
+        const pageItems = contentItems.filter(i => i.page === activePage);
+        const currentIndex = pageItems.findIndex(i => i.key === key);
+        const targetIndex = currentIndex + direction;
+
+        if (targetIndex < 0 || targetIndex >= pageItems.length) return;
+
+        const currentItem = pageItems[currentIndex];
+        const targetItem = pageItems[targetIndex];
+
+        const tempOrder = currentItem.sort_order || currentIndex;
+        currentItem.sort_order = targetItem.sort_order || targetIndex;
+        targetItem.sort_order = tempOrder;
+
+        // Pokud mají stejný index, rozlišíme je
+        if (currentItem.sort_order === targetItem.sort_order) {
+            currentItem.sort_order = targetIndex;
+            targetItem.sort_order = currentIndex;
         }
-        container.innerHTML = pagesList.map(p => `
-        <div class="bg-[#111] border border-white/10 p-4 rounded-xl flex items-center justify-between gap-4">
-          <div>
-            <h4 class="text-lg text-white font-bold">${p.title}</h4>
-            <p class="text-xs text-neutral-400 font-mono">Odkaz: <a href="clanek.html?p=${p.slug}" target="_blank" class="text-[#14968C] underline">clanek.html?p=${p.slug}</a></p>
-          </div>
-          <div class="flex items-center gap-2">
-            <button onclick="window.openEditPageModal('${p.slug}')" class="text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-neutral-200">Upravit</button>
-            <button onclick="window.deletePage('${p.slug}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-3 py-1.5 rounded-lg">Smazat</button>
-          </div>
-        </div>
-      `).join('');
-    }
 
-    // Obsluha modálu pro nové prvky a presety
-    window.openNewFieldModal = () => {
-        window.applyFieldPreset('text');
-        document.getElementById('modal-new-field').classList.remove('hidden');
-    };
+        await Promise.all([
+            supabase.from('site_content').update({ sort_order: currentItem.sort_order }).eq('key', currentItem.key),
+            supabase.from('site_content').update({ sort_order: targetItem.sort_order }).eq('key', targetItem.key)
+        ]);
 
-    window.applyFieldPreset = (preset) => {
-        const keyInput = document.getElementById('nf-key');
-        const labelInput = document.getElementById('nf-label');
-        const typeInput = document.getElementById('nf-type');
-        const valInput = document.getElementById('nf-value');
-
-        if (preset === 'text') {
-            typeInput.value = 'text';
-            labelInput.value = 'Textový popisek';
-            keyInput.value = 'custom_text_key';
-            valInput.value = 'Jednoduchý textový řetězec';
-        } else if (preset === 'textarea') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Dlouhý textový odstavec';
-            keyInput.value = 'custom_desc_key';
-            valInput.value = 'Podrobný popis sekce nebo odstavce...';
-        } else if (preset === 'hero') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Hero hlavní nadpis s gradientem';
-            keyInput.value = 'custom_hero_title';
-            valInput.value = 'HLAVNÍ NADPIS NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>';
-        } else if (preset === 'image') {
-            typeInput.value = 'image';
-            labelInput.value = 'Obrázek / Banner';
-            keyInput.value = 'custom_banner_img';
-            valInput.value = 'images/web-banner.png';
-        } else if (preset === 'button') {
-            typeInput.value = 'text';
-            labelInput.value = 'Text tlačítka';
-            keyInput.value = 'custom_btn_text';
-            valInput.value = 'Objednat konzultaci';
-        } else if (preset === 'card') {
-            typeInput.value = 'textarea';
-            labelInput.value = 'Obsahová karta (HTML)';
-            keyInput.value = 'custom_card_box';
-            valInput.value = '<div class="p-4 bg-white/5 rounded-xl"><h4 class="text-white font-bold mb-2">Titulek</h4><p class="text-gray-400 text-sm">Popis karty...</p></div>';
-        }
-    };
-
-    window.submitNewField = async () => {
-        const key = document.getElementById('nf-key').value.trim();
-        const page = document.getElementById('nf-page').value.trim().toLowerCase();
-        const section = document.getElementById('nf-section').value.trim();
-        const label = document.getElementById('nf-label').value.trim();
-        const type = document.getElementById('nf-type').value;
-        const value = document.getElementById('nf-value').value;
-
-        if (!key || !page || !label) return alert('Vyplňte klíč, stránku a popisek!');
-
-        const { error } = await supabase.from('site_content').insert([{ key, page, section, label, type, value }]);
-        if (error) return alert('Chyba: ' + error.message);
-
-        document.getElementById('modal-new-field').classList.add('hidden');
-        await loadAllData();
+        await loadContent();
         showToast();
     };
 
-    // Obsluha modálu pro nové / editované dynamické stránky
-    window.openNewPageModal = () => {
-        document.getElementById('page-modal-title').innerText = 'VYTVOŘIT NOVOU STRÁNKU';
-        document.getElementById('pe-is-edit').value = 'false';
-        document.getElementById('pe-slug').value = '';
-        document.getElementById('pe-slug').disabled = false;
-        document.getElementById('pe-title').value = '';
-        document.getElementById('pe-perex').value = '';
-        document.getElementById('pe-img').value = '';
-        document.getElementById('pe-content').value = '<p>Zde napište první odstavec textu...</p>';
-        document.getElementById('modal-page-editor').classList.remove('hidden');
-    };
-
-    window.openEditPageModal = (slug) => {
-        const page = pagesList.find(p => p.slug === slug);
-        if (!page) return;
-
-        document.getElementById('page-modal-title').innerText = `UPRAVIT STRÁNKU (${slug})`;
-        document.getElementById('pe-is-edit').value = 'true';
-        document.getElementById('pe-slug').value = page.slug;
-        document.getElementById('pe-slug').disabled = true;
-        document.getElementById('pe-title').value = page.title || '';
-        document.getElementById('pe-perex').value = page.perex || '';
-        document.getElementById('pe-img').value = page.cover_image || '';
-        document.getElementById('pe-content').value = page.content || '';
-        document.getElementById('modal-page-editor').classList.remove('hidden');
-    };
-
-    window.submitPage = async () => {
-        const isEdit = document.getElementById('pe-is-edit').value === 'true';
-        const slug = document.getElementById('pe-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-        const title = document.getElementById('pe-title').value;
-        const perex = document.getElementById('pe-perex').value;
-        const cover_image = document.getElementById('pe-img').value;
-        const content = document.getElementById('pe-content').value;
-
-        if (!slug || !title) return alert('Vyplňte slug i nadpis stránky!');
-
-        if (isEdit) {
-            const { error } = await supabase.from('pages').update({
-                title, perex, cover_image, content, updated_at: new Date().toISOString()
-            }).eq('slug', slug);
-
-            if (error) return alert('Chyba při ukládání: ' + error.message);
-        } else {
-            const { error } = await supabase.from('pages').insert([{ slug, title, perex, cover_image, content }]);
-            if (error) return alert('Chyba při vytváření: ' + error.message);
-        }
-
-        document.getElementById('modal-page-editor').classList.add('hidden');
-        await loadAllData();
-        window.switchTab(`page:${slug}`);
-        showToast();
-    };
-
-    // Ukládání a upload
     window.saveField = async (key, value) => {
         const { error } = await supabase.from('site_content').update({ value, updated_at: new Date().toISOString() }).eq('key', key);
         if (!error) showToast();
     };
 
-    window.saveDynamicPage = async (slug, column, value) => {
-        const updateObj = { [column]: value, updated_at: new Date().toISOString() };
-        const { error } = await supabase.from('pages').update(updateObj).eq('slug', slug);
-        if (!error) {
-            showToast();
-            const page = pagesList.find(p => p.slug === slug);
-            if (page) page[column] = value;
-        }
+    window.deleteItem = async (key) => {
+        if (!confirm(`Opravdu chcete smazat prvek ${key}?`)) return;
+        await supabase.from('site_content').delete().eq('key', key);
+        await loadContent();
     };
 
     window.uploadImage = async (key, input) => {
@@ -494,28 +279,76 @@
         const { data: { publicUrl } } = supabase.storage.from('site-assets').getPublicUrl(fileName);
         await window.saveField(key, publicUrl);
         document.getElementById(`preview-${key}`).src = publicUrl;
-        await loadAllData();
+        await loadContent();
     };
 
-    window.uploadPageImage = async (slug, input) => {
-        const file = input.files[0];
-        if (!file) return;
-        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-        const { error } = await supabase.storage.from('site-assets').upload(fileName, file);
+    window.openNewFieldModal = () => {
+        document.getElementById('nf-page').value = activePage;
+        window.applyFieldPreset('text');
+        document.getElementById('modal-new-field').classList.remove('hidden');
+    };
+
+    window.applyFieldPreset = (preset) => {
+        const keyInput = document.getElementById('nf-key');
+        const labelInput = document.getElementById('nf-label');
+        const typeInput = document.getElementById('nf-type');
+        const valInput = document.getElementById('nf-value');
+        const prefix = `${activePage}_`;
+
+        if (preset === 'text') {
+            typeInput.value = 'text';
+            labelInput.value = 'Nový nadpis / text';
+            keyInput.value = `${prefix}heading_${Date.now().toString().slice(-4)}`;
+            valInput.value = 'Ukázkový text sekce';
+        } else if (preset === 'textarea') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Odstavec textu';
+            keyInput.value = `${prefix}perex_${Date.now().toString().slice(-4)}`;
+            valInput.value = 'Podrobný popis sekce a odstavce...';
+        } else if (preset === 'hero') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Hero nadpis s gradientem';
+            keyInput.value = `${prefix}hero_${Date.now().toString().slice(-4)}`;
+            valInput.value = 'NADPIS NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>';
+        } else if (preset === 'image') {
+            typeInput.value = 'image';
+            labelInput.value = 'Obrázek / Fotka';
+            keyInput.value = `${prefix}img_${Date.now().toString().slice(-4)}`;
+            valInput.value = 'images/web-banner.png';
+        } else if (preset === 'button') {
+            typeInput.value = 'text';
+            labelInput.value = 'Tlačítko';
+            keyInput.value = `${prefix}btn_${Date.now().toString().slice(-4)}`;
+            valInput.value = 'Zjistit více';
+        } else if (preset === 'card') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Karta / Blok';
+            keyInput.value = `${prefix}card_${Date.now().toString().slice(-4)}`;
+            valInput.value = '<div class="p-6 bg-white/5 border border-white/10 rounded-xl"><h3 class="text-white font-bold text-lg mb-2">Titulek karty</h3><p class="text-gray-400 text-sm">Obsah karty...</p></div>';
+        }
+    };
+
+    window.submitNewField = async () => {
+        const key = document.getElementById('nf-key').value.trim();
+        const page = document.getElementById('nf-page').value.trim().toLowerCase();
+        const section = document.getElementById('nf-section').value.trim() || 'Obecné';
+        const label = document.getElementById('nf-label').value.trim();
+        const type = document.getElementById('nf-type').value;
+        const value = document.getElementById('nf-value').value;
+
+        if (!key || !page || !label) return alert('Vyplňte klíč a popisek!');
+
+        const maxOrder = contentItems.filter(i => i.page === page).reduce((max, i) => Math.max(max, i.sort_order || 0), 0);
+
+        const { error } = await supabase.from('site_content').insert([{
+            key, page, section, label, type, value, sort_order: maxOrder + 1
+        }]);
+
         if (error) return alert('Chyba: ' + error.message);
 
-        const { data: { publicUrl } } = supabase.storage.from('site-assets').getPublicUrl(fileName);
-        await window.saveDynamicPage(slug, 'cover_image', publicUrl);
-        document.getElementById(`preview-page-${slug}`).src = publicUrl;
-        await loadAllData();
-    };
-
-    window.deletePage = async (slug) => {
-        if (!confirm(`Opravdu chcete smazat stránku ${slug}?`)) return;
-        const { error } = await supabase.from('pages').delete().eq('slug', slug);
-        if (error) alert('Chyba: ' + error.message);
-        activePage = 'all';
-        await loadAllData();
+        document.getElementById('modal-new-field').classList.add('hidden');
+        await loadContent();
+        showToast();
     };
 
     function showToast() {
