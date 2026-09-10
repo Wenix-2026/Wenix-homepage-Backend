@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wenix · CMS Správa obsahu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e2e2e2; }
+        h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8 selection:bg-teal-500/20 selection:text-teal-400">
+<div id="app" class="max-w-4xl mx-auto">
+    <!-- Načítání -->
+    <div id="loading" class="text-center py-20 text-neutral-500 text-sm">Načítání systému...</div>
+
+    <!-- Login formulář -->
+    <div id="login-view" class="hidden max-w-sm mx-auto mt-20 p-6 bg-[#111111] border border-white/10 rounded-xl space-y-4">
+        <h1 class="text-3xl text-white text-center">WENIX ADMIN</h1>
+        <input id="email" type="email" placeholder="E-mail" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-[#14968C]">
+        <input id="password" type="password" placeholder="Heslo" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-[#14968C]">
+        <button id="btn-login" class="w-full bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 rounded-lg transition text-sm">Přihlásit se</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-view" class="hidden space-y-8">
+        <header class="flex justify-between items-center border-b border-white/10 pb-6">
+            <div>
+                <h1 class="text-4xl text-white">SPRÁVA WEBU WENIX</h1>
+                <p class="text-xs text-neutral-400 font-mono tracking-wider">UPRAVTE TEXTY A MÉDIA V REÁLNÉM ČASE</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="toast" class="text-xs text-[#14968C] font-semibold transition-opacity opacity-0">ULOŽENO</span>
+                <button id="btn-logout" class="text-xs border border-white/10 hover:border-white/30 px-3 py-1.5 rounded-lg text-neutral-300">Odhlásit se</button>
+            </div>
+        </header>
+
+        <!-- Filtr stránek -->
+        <div class="flex gap-2 border-b border-white/5 pb-4" id="page-tabs"></div>
+
+        <!-- Kontejner pro formuláře -->
+        <div id="fields-container" class="space-y-6"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const SUPABASE_URL = 'https://TVOJE-PROJEKTOVA-URL.supabase.co';
+    const SUPABASE_ANON_KEY = 'TVUJ-ANON-PUBLIC-KLIC';
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let contentItems = [];
+    let activePage = 'all';
+
+    async function init() {
+        const { data: { session } } = await supabase.auth.getSession();
+        document.getElementById('loading').classList.add('hidden');
+        if (session) {
+            showDashboard();
+        } else {
+            document.getElementById('login-view').classList.remove('hidden');
+        }
+    }
+
+    // Login & Logout
+    document.getElementById('btn-login').onclick = async () => {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) alert('Chyba: ' + error.message);
+        else location.reload();
+    };
+
+    document.getElementById('btn-logout').onclick = async () => {
+        await supabase.auth.signOut();
+        location.reload();
+    };
+
+    async function showDashboard() {
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        await loadContent();
+    }
+
+    async function loadContent() {
+        const { data } = await supabase.from('site_content').select('*').order('page').order('section');
+        if (data) {
+            contentItems = data;
+            renderTabs();
+            renderFields();
+        }
+    }
+
+    function renderTabs() {
+        const pages = ['all', ...new Set(contentItems.map(i => i.page))];
+        const tabs = document.getElementById('page-tabs');
+        tabs.innerHTML = pages.map(p => `
+        <button onclick="window.switchTab('${p}')" class="px-3 py-1 text-xs uppercase tracking-wider rounded-md border ${activePage === p ? 'bg-[#14968C] text-black border-[#14968C] font-semibold' : 'bg-[#111111] text-neutral-400 border-white/10 hover:border-white/20'}">
+          ${p === 'all' ? 'Všechny stránky' : p}
+        </button>
+      `).join('');
+    }
+
+    window.switchTab = (p) => {
+        activePage = p;
+        renderTabs();
+        renderFields();
+    };
+
+    function renderFields() {
+        const container = document.getElementById('fields-container');
+        const filtered = activePage === 'all' ? contentItems : contentItems.filter(i => i.page === activePage);
+
+        const grouped = filtered.reduce((acc, item) => {
+            const group = `${item.page.toUpperCase()} · ${item.section}`;
+            acc[group] = acc[group] || [];
+            acc[group].push(item);
+            return acc;
+        }, {});
+
+        container.innerHTML = Object.entries(grouped).map(([group, fields]) => `
+        <div class="bg-[#111111] border border-white/10 p-5 rounded-xl space-y-4">
+          <h3 class="text-xl text-[#14968C] border-b border-white/5 pb-2">${group}</h3>
+          <div class="space-y-4">
+            ${fields.map(f => `
+              <div class="space-y-1.5">
+                <label class="text-xs text-neutral-400 font-mono">${f.label} <span class="text-neutral-600">(${f.key})</span></label>
+                ${f.type === 'textarea' ? `
+                  <textarea onblur="window.saveField('${f.key}', this.value)" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 outline-none transition">${f.value || ''}</textarea>
+                ` : f.type === 'image' ? `
+                  <div class="flex items-center gap-4">
+                    <img src="${f.value || ''}" class="w-16 h-16 rounded-lg object-cover bg-black border border-white/10" id="preview-${f.key}">
+                    <div class="flex-1 space-y-2">
+                      <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2 text-xs text-neutral-200 outline-none" placeholder="Vlož URL nebo nahraj soubor">
+                      <input type="file" accept="image/*" onchange="window.uploadImage('${f.key}', this)" class="text-xs text-neutral-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:bg-white/10 file:text-neutral-200 hover:file:bg-white/20">
+                    </div>
+                  </div>
+                ` : `
+                  <input type="text" value="${f.value || ''}" onblur="window.saveField('${f.key}', this.value)" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-2.5 text-sm text-neutral-200 outline-none transition">
+                `}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.saveField = async (key, value) => {
+        const { error } = await supabase.from('site_content').update({ value, updated_at: new Date().toISOString() }).eq('key', key);
+        if (!error) showToast();
+    };
+
+    window.uploadImage = async (key, input) => {
+        const file = input.files[0];
+        if (!file) return;
+        const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+
+        const { data, error } = await supabase.storage.from('site-assets').upload(fileName, file);
+        if (error) return alert('Chyba nahrávání: ' + error.message);
+
+        const { data: { publicUrl } } = supabase.storage.from('site-assets').getPublicUrl(fileName);
+        await window.saveField(key, publicUrl);
+        document.getElementById(`preview-${key}`).src = publicUrl;
+        await loadContent();
+    };
+
+    function showToast() {
+        const t = document.getElementById('toast');
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2000);
+    }
+
+    init();
+</script>
+</body>
+</html>

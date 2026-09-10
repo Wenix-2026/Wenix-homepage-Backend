@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
+    <script type="module" src="/cms.js"></script>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
@@ -18,38 +19,26 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
-
-        body {
-            background: #000;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         body::after {
             content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .03;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 200px 200px;
         }
-
         .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
-
         header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
             background: rgba(0,0,0,0.75); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
             border-bottom: 1px solid rgba(255,255,255,0.06); transition: background 0.2s ease;
         }
-
         .nav-inner {
             max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 80px;
             display: flex; align-items: center; justify-content: space-between;
         }
-
         .nav-right { display: flex; align-items: center; gap: 32px; }
         .nav-social { display: flex; align-items: center; gap: 16px; }
         .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
         .nav-social a:hover { opacity: 1; }
-
         #burger-overlay {
             position: fixed; inset: 0; z-index: 90;
             background: rgba(0,0,0,0.98); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -63,15 +52,10 @@
             color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
         }
         #burger-overlay a.menu-link:hover { color: #fff; }
-
         .legal-section { border-left: 1px solid rgba(255,255,255,0.08); padding-left: 1.5rem; }
         .legal-section:hover { border-left-color: rgba(255,255,255,0.2); transition: border-color 0.3s ease; }
-        @keyframes wiggle {
-            0%, 100% { transform: rotate(-3deg); }
-            50%       { transform: rotate(3deg); }
-        }
+        @keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
         .cookie-icon:hover { animation: wiggle 0.4s ease-in-out infinite; }
-
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
@@ -91,7 +75,7 @@
         </div>
         <div class="nav-right">
             <nav class="nav-social">
-                <<a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
                 <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
                 <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
                 <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
@@ -111,19 +95,18 @@
     </nav>
 </div>
 
-<!-- Právní Obsah -->
 <main class="relative z-20 max-w-3xl mx-auto px-6 pt-32 pb-24">
     <div class="mb-14" data-aos="fade-up">
         <div class="text-5xl mb-6 cookie-icon inline-block cursor-default select-none">🍪</div>
-        <h1 class="font-bebas text-6xl text-white tracking-wide mb-3 uppercase">
+        <h1 data-cms="cookies_title" class="font-bebas text-6xl text-white tracking-wide mb-3 uppercase">
             Zásady používání<br>souborů cookie
         </h1>
         <p class="text-gray-500 text-sm">
-            Poslední aktualizace: <span class="text-gray-300">30.05.2026</span>
+            Poslední aktualizace: <span data-cms="cookies_updated" class="text-gray-300">30.05.2026</span>
         </p>
     </div>
 
-    <p class="text-gray-300 text-sm leading-relaxed mb-12 pb-12 border-b border-white/5" data-aos="fade-up" data-aos-delay="50">
+    <p data-cms="cookies_intro" class="text-gray-300 text-sm leading-relaxed mb-12 pb-12 border-b border-white/5" data-aos="fade-up" data-aos-delay="50">
         Provozovatelem tohoto webu je <strong class="text-white">Daniel Auersvald (Wenix)</strong>. Na našich webových stránkách využíváme soubory cookies, abychom vám zajistili co nejlepší uživatelský zážitek a mohli analyzovat výkon našeho systému.
     </p>
 
@@ -132,9 +115,9 @@
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-xs font-mono text-white/20">01</span>
-                <h2 class="text-white font-medium text-base">Co jsou to soubory cookie?</h2>
+                <h2 data-cms="cookies_s1_title" class="text-white font-medium text-base">Co jsou to soubory cookie?</h2>
             </div>
-            <p class="text-gray-300 text-sm leading-relaxed">
+            <p data-cms="cookies_s1_text" class="text-gray-300 text-sm leading-relaxed">
                 Cookies jsou malé textové soubory, které internetové stránky ukládají do vašeho počítače nebo mobilního zařízení v okamžiku, kdy tyto stránky začnete využívat. Slouží k rozpoznání vašeho prohlížeče a zapamatování určitých informací.
             </p>
         </div>
@@ -143,7 +126,7 @@
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-xs font-mono text-white/20">02</span>
-                <h2 class="text-white font-medium text-base">Jaké cookies používáme?</h2>
+                <h2 data-cms="cookies_s2_title" class="text-white font-medium text-base">Jaké cookies používáme?</h2>
             </div>
             <div class="space-y-2">
                 <div class="p-4 bg-white/[0.02] rounded-xl border border-white/5">
@@ -194,9 +177,9 @@
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-xs font-mono text-white/20">03</span>
-                <h2 class="text-white font-medium text-base">Správa a smazání cookies</h2>
+                <h2 data-cms="cookies_s3_title" class="text-white font-medium text-base">Správa a smazání cookies</h2>
             </div>
-            <p class="text-gray-300 text-sm leading-relaxed mb-4">
+            <p data-cms="cookies_s3_text" class="text-gray-300 text-sm leading-relaxed mb-4">
                 Své preference můžete kdykoliv změnit prostřednictvím cookie lišty na našem webu. Většina webových prohlížečů navíc umožňuje správu a smazání souborů cookie přímo v nastavení samotného prohlížeče.
             </p>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -223,9 +206,9 @@
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-xs font-mono text-white/20">04</span>
-                <h2 class="text-white font-medium text-base">Právní základ</h2>
+                <h2 data-cms="cookies_s4_title" class="text-white font-medium text-base">Právní základ</h2>
             </div>
-            <p class="text-gray-300 text-sm leading-relaxed">
+            <p data-cms="cookies_s4_text" class="text-gray-300 text-sm leading-relaxed">
                 Zpracování cookies provádíme na základě vašeho <strong class="text-white">svobodného a informovaného souhlasu</strong> dle čl. 6 odst. 1 písm. a) GDPR. Souhlas udělujete při první návštěvě webu prostřednictvím cookie lišty a můžete jej kdykoliv odvolat.
             </p>
         </div>
@@ -234,11 +217,11 @@
         <div class="legal-section">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-xs font-mono text-white/20">05</span>
-                <h2 class="text-white font-medium text-base">Kontakt</h2>
+                <h2 data-cms="cookies_s5_title" class="text-white font-medium text-base">Kontakt</h2>
             </div>
             <p class="text-gray-300 text-sm leading-relaxed">
                 Dotazy ohledně cookies zasílejte na
-                <a href="mailto:info@Wenix.cz" class="text-white underline underline-offset-2 hover:text-gray-300 transition-colors">info@Wenix.cz</a>.
+                <a href="mailto:info@Wenix.cz" data-cms="cookies_s5_email" class="text-white underline underline-offset-2 hover:text-gray-300 transition-colors">info@Wenix.cz</a>.
             </p>
         </div>
     </div>

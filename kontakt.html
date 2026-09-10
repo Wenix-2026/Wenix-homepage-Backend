@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
+    <script type="module" src="/cms.js"></script>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kontaktujte nás | Wenix - Digitální agentura</title>
-    <meta name="description" content="Máte dotaz nebo zájem o spolupráci? Kontaktujte digitální agenturu Wenix prostřednictvím e-mailu nebo telefonu.">
-    <meta property="og:title" content="Kontaktujte nás | Wenix - Digitální agentura">
-    <meta property="og:description" content="Máte dotaz nebo zájem o spolupráci? Kontaktujte digitální agenturu Wenix.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.wenix.cz/kontakt">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,15 +21,12 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
         body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
-
         body::after {
             content: ''; position: fixed; inset: 0; z-index: 1000; pointer-events: none; opacity: .03;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
             background-size: 200px 200px;
         }
-
         .font-bebas { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.02em; }
-
         header {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
             background: rgba(0,0,0,0.75); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -43,24 +36,6 @@
             max-width: 1280px; margin: 0 auto; padding: 0 24px; height: 80px;
             display: flex; align-items: center; justify-content: space-between;
         }
-        .nav-social { display: flex; align-items: center; gap: 16px; }
-        .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
-        .nav-social a:hover { opacity: 1; }
-
-        #burger-overlay {
-            position: fixed; inset: 0; z-index: 90;
-            background: rgba(0,0,0,0.98); backdrop-filter: blur(24px);
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; transition: opacity 0.3s ease;
-        }
-        #burger-overlay.open { display: flex; opacity: 1; }
-        #burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 32px; }
-        #burger-overlay a.menu-link {
-            font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 5vw, 3.5rem);
-            color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
-        }
-        #burger-overlay a.menu-link:hover { color: #fff; }
-
         .contact-card {
             background: #111;
             border: 1px solid rgba(255,255,255,0.08);
@@ -70,217 +45,80 @@
             align-items: center;
             justify-content: space-between;
             gap: 32px;
-            transition: border-color 0.2s;
         }
-        .contact-card:hover { border-color: rgba(255,255,255,0.15); }
-        @media (max-width: 768px) {
-            .contact-card { flex-direction: column; align-items: flex-start; }
-        }
-
+        @media (max-width: 768px) { .contact-card { flex-direction: column; align-items: flex-start; } }
         .btn-contact-primary {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             padding: 16px 28px; background: #fff; color: #000;
             font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 500;
-            border: none; border-radius: 10px; cursor: pointer; text-decoration: none;
-            transition: background .2s, transform .15s; white-space: nowrap; width: 100%;
+            border: none; border-radius: 10px; cursor: pointer; text-decoration: none; width: 100%;
         }
-        .btn-contact-primary:hover { background: rgba(255,255,255,0.88); transform: translateY(-1px); }
-
         .btn-contact-secondary {
             display: flex; align-items: center; justify-content: center; gap: 8px;
             padding: 16px 28px; background: #1a1a1a; color: #fff;
             font-family: 'Inter', sans-serif; font-size: .9rem; font-weight: 400;
-            border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; cursor: pointer;
-            transition: border-color .2s, background .2s, transform .15s; white-space: nowrap; width: 100%;
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 10px; cursor: pointer; width: 100%;
         }
-        .btn-contact-secondary:hover { border-color: rgba(255,255,255,0.3); background: #222; transform: translateY(-1px); }
-
-        .toast {
-            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
-            background: #fff; color: #000; padding: 12px 20px; border-radius: 10px;
-            font-size: .875rem; font-weight: 500; display: flex; align-items: center; gap: 8px;
-            opacity: 0; transform: translateY(8px); transition: opacity .3s, transform .3s;
-            pointer-events: none;
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
     </style>
 </head>
 <body>
 
 <header>
     <div class="nav-inner">
-        <div class="flex items-center">
-            <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
-            <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
-            <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
-                <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
-                <span id="line-2" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease;"></span>
-            </button>
-        </div>
-        <nav class="nav-social">
-            <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
-            <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
-            <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
-            <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
-        </nav>
+        <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
     </div>
 </header>
 
-<div id="burger-overlay">
-    <nav>
-        <a href="index.html#about" class="menu-link">O NÁS</a>
-        <a href="kariera.html" class="menu-link">KARIÉRA</a>
-        <a href="kontakt.html" class="menu-link">KONTAKT</a>
-        <a href="index.html#faq" class="menu-link">FAQ</a>
-        <a href="index.html#portfolio" class="menu-link">PORTFOLIO</a>
-        <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
-    </nav>
-</div>
-
 <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120px 24px 64px;">
     <div style="width: 100%; max-width: 860px;">
-
-        <!-- Nadpis -->
         <div style="text-align: center; margin-bottom: 16px;">
-            <h1 class="font-bebas" style="font-size: clamp(2.5rem, 6vw, 4.5rem); color: #fff; letter-spacing: 0.04em;">KONTAKTUJTE NÁS</h1>
-            <p style="color: rgba(255,255,255,0.5); font-size: .95rem; line-height: 1.7; margin-top: 12px; max-width: 520px; margin-left: auto; margin-right: auto;">
+            <h1 data-cms="kontakt_title" class="font-bebas" style="font-size: clamp(2.5rem, 6vw, 4.5rem); color: #fff; letter-spacing: 0.04em;">KONTAKTUJTE NÁS</h1>
+            <p data-cms="kontakt_subtitle" style="color: rgba(255,255,255,0.5); font-size: .95rem; line-height: 1.7; margin-top: 12px; max-width: 520px; margin-left: auto; margin-right: auto;">
                 Máte nápad na nový projekt, potřebujete upravit web nebo se jen chcete na něco zeptat? Jsme tu pro vás.
             </p>
         </div>
 
-        <!-- Karty -->
         <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 48px;">
-
-            <!-- Email karta -->
+            <!-- Email -->
             <div class="contact-card">
                 <div style="flex: 1;">
                     <h2 class="font-bebas" style="font-size: 1.6rem; color: #fff; letter-spacing: 0.05em; margin-bottom: 8px;">NAPIŠTE NÁM E-MAIL</h2>
-                    <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7; margin-bottom: 16px;">
-                        Nejrychlejší způsob, jak se s námi spojit. Odpovídáme většinou do 24 hodin, ať už jde o poptávku nebo technický dotaz.
-                    </p>
-                    <p style="color: #fff; font-size: 1.1rem; font-weight: 500;">info@wenix.cz</p>
+                    <p data-cms="kontakt_email_val" style="color: #fff; font-size: 1.1rem; font-weight: 500;">info@wenix.cz</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; min-width: 220px;">
                     <a href="mailto:info@wenix.cz" target="_blank" class="btn-contact-primary">
-                        <i class="bx bx-envelope"></i>
-                        Otevřít v e-mailovém klientu
+                        <i class="bx bx-envelope"></i> Otevřít v e-mailovém klientu
                     </a>
-                    <button onclick="copyEmail('info@wenix.cz')" class="btn-contact-secondary">
-                        <i class="bx bx-copy"></i>
-                        Zkopírovat do schránky
-                    </button>
                 </div>
             </div>
 
-            <!-- Telefon karta -->
+            <!-- Phone -->
             <div class="contact-card">
                 <div style="flex: 1;">
                     <h2 class="font-bebas" style="font-size: 1.6rem; color: #fff; letter-spacing: 0.05em; margin-bottom: 8px;">ZAVOLEJTE NÁM</h2>
-                    <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7; margin-bottom: 16px;">
-                        Preferujete přímý rozhovor? Zavolejte nám a probereme váš projekt rovnou.
-                    </p>
-                    <p style="color: #fff; font-size: 1.1rem; font-weight: 500;">+420 734 155 697</p>
+                    <p data-cms="kontakt_phone_val" style="color: #fff; font-size: 1.1rem; font-weight: 500;">+420 734 155 697</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; min-width: 220px;">
                     <a href="tel:+420734155697" class="btn-contact-primary">
-                        <i class="bx bx-phone"></i>
-                        Zavolat
+                        <i class="bx bx-phone"></i> Zavolat
                     </a>
-                    <button onclick="copyEmail('+420734155697')" class="btn-contact-secondary">
-                        <i class="bx bx-copy"></i>
-                        Zkopírovat číslo
-                    </button>
                 </div>
             </div>
 
-            <!-- LinkedIn karta -->
+            <!-- LinkedIn -->
             <div class="contact-card">
                 <div style="flex: 1;">
                     <h2 class="font-bebas" style="font-size: 1.6rem; color: #fff; letter-spacing: 0.05em; margin-bottom: 8px;">LINKEDIN</h2>
-                    <p style="color: rgba(255,255,255,0.5); font-size: .875rem; line-height: 1.7; margin-bottom: 16px;">
-                        Spojte se s námi na LinkedIn pro profesionální dotazy nebo spolupráci.
-                    </p>
-                    <p style="color: #fff; font-size: 1.1rem; font-weight: 500;">Daniel Auersvald</p>
+                    <p data-cms="kontakt_linkedin_val" style="color: #fff; font-size: 1.1rem; font-weight: 500;">Daniel Auersvald</p>
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px; min-width: 220px;">
                     <a href="https://www.linkedin.com/in/daniel-auersvald/" target="_blank" class="btn-contact-primary">
-                        <i class="bx bxl-linkedin"></i>
-                        Otevřít LinkedIn
+                        <i class="bx bxl-linkedin"></i> Otevřít LinkedIn
                     </a>
                 </div>
             </div>
-
         </div>
-
-        <!-- Zpět na hlavní stranu -->
-        <div style="text-align: center; margin-top: 48px;">
-            <a href="index.html" style="color: rgba(255,255,255,0.35); font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; text-decoration: none; transition: color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,0.35)'">
-                Zpět na hlavní stranu
-            </a>
-        </div>
-
     </div>
 </main>
-
-<!-- Toast notifikace -->
-<div class="toast" id="toast">
-    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-    <span id="toast-text">Zkopírováno!</span>
-</div>
-
-<script>
-    // Burger menu
-    const trigger = document.getElementById('burger-trigger');
-    const overlay = document.getElementById('burger-overlay');
-    const line1   = document.getElementById('line-1');
-    const line2   = document.getElementById('line-2');
-
-    trigger.addEventListener('click', () => {
-        const isOpen = overlay.classList.contains('open');
-        if (isOpen) {
-            overlay.classList.remove('open');
-            line1.style.transform = '';
-            line1.style.width = '14px';
-            line2.style.transform = '';
-            document.body.style.overflow = '';
-        } else {
-            overlay.classList.add('open');
-            line1.style.width = '14px';
-            line1.style.transform = 'translateY(3px) rotate(45deg)';
-            line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
-            document.body.style.overflow = 'hidden';
-        }
-    });
-
-    overlay.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-            overlay.classList.remove('open');
-            line1.style.transform = '';
-            line1.style.width = '14px';
-            line2.style.transform = '';
-            document.body.style.overflow = '';
-        });
-    });
-
-    const header = document.querySelector('header');
-    window.addEventListener('scroll', () => {
-        header.style.background = window.scrollY > 8 ? 'rgba(0,0,0,0.94)' : 'rgba(0,0,0,0.75)';
-    }, { passive: true });
-
-    // Kopírování + toast
-    function copyEmail(text) {
-        navigator.clipboard.writeText(text).then(() => {
-            const toast = document.getElementById('toast');
-            const toastText = document.getElementById('toast-text');
-            toastText.textContent = text.includes('@') ? 'E-mail zkopírován!' : 'Číslo zkopírováno!';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        });
-    }
-</script>
 </body>
 </html>
