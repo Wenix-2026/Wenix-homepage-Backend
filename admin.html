@@ -36,7 +36,7 @@
             </div>
         </header>
 
-        <!-- Hlavní sekce CMS: Přepínač -->
+        <!-- Přepínač sekcí -->
         <div class="flex gap-4 border-b border-white/10 pb-4">
             <button onclick="window.switchSection('content')" id="tab-btn-content" class="text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white">Texty a Média</button>
             <button onclick="window.switchSection('pages')" id="tab-btn-pages" class="text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white">Dynamické stránky (Články / Blog)</button>
@@ -44,72 +44,107 @@
 
         <!-- 1. SEKCE: STATICKÉ TEXTY A MÉDIA -->
         <div id="section-content" class="space-y-6">
-            <div class="flex justify-between items-center">
+            <div class="flex flex-wrap justify-between items-center gap-2">
                 <div class="flex flex-wrap gap-2" id="page-tabs"></div>
-                <button onclick="document.getElementById('modal-new-field').classList.remove('hidden')" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Přidat nové pole</button>
+                <button onclick="window.openNewFieldModal()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Přidat prvek / pole</button>
             </div>
             <div id="fields-container" class="space-y-6"></div>
         </div>
 
-        <!-- 2. SEKCE: DYNAMICKÉ STRÁNKY / ČLÁNKY -->
+        <!-- 2. SEKCE: DYNAMICKÉ STRÁNKY -->
         <div id="section-pages" class="hidden space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl text-white">Vytvořené stránky a články</h2>
-                <button onclick="document.getElementById('modal-new-page').classList.remove('hidden')" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Vytvořit novou stránku</button>
+                <button onclick="window.openNewPageModal()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Vytvořit novou stránku</button>
             </div>
             <div id="pages-list" class="space-y-3"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL: PŘIDAT NOVÉ POLE -->
+<!-- MODAL: PŘIDAT NOVÉ POLE S PRESETY -->
 <div id="modal-new-field" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-md w-full space-y-4">
-        <h3 class="text-xl text-white">PŘIDAT NOVÉ TEXTOVÉ POLE</h3>
-        <input id="nf-key" placeholder="Unikátní klíč (např. kariera_bonus_plat)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
-        <input id="nf-page" placeholder="Stránka (např. index, kariera, kontakt)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
-        <input id="nf-section" placeholder="Sekce (např. Hero, Benefity)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
-        <input id="nf-label" placeholder="Popisek (např. Výše nástupního platu)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
-        <select id="nf-type" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs text-neutral-300">
-            <option value="text">Jednořádkový text</option>
-            <option value="textarea">Dlouhý text (Textarea)</option>
-            <option value="image">Obrázek (Image URL / Upload)</option>
-        </select>
-        <input id="nf-value" placeholder="Výchozí hodnota" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl text-white">PŘIDAT ELEMENT DO WEBU</h3>
+
+        <!-- Volba předpřipravené šablony -->
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Vyberte předlohu prvku:</label>
+            <select id="nf-preset" onchange="window.applyFieldPreset(this.value)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-xs text-neutral-200 mt-1 focus:border-[#14968C] outline-none">
+                <option value="text">Jednoduchý jednořádkový text (Nadpis, slogan)</option>
+                <option value="textarea">Dlouhý textový odstavec / Popis</option>
+                <option value="hero">Hero Sekce (Nadpis s gradientním slovem)</option>
+                <option value="image">Obrázek nebo Banner</option>
+                <option value="button">Tlačítko / CTA Odkaz</option>
+                <option value="card">Obsahová karta (HTML blok)</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="text-xs text-neutral-400 font-mono">Stránka webu:</label>
+                <input id="nf-page" placeholder="např. index, kariera" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            </div>
+            <div>
+                <label class="text-xs text-neutral-400 font-mono">Sekce webu:</label>
+                <input id="nf-section" placeholder="např. Hero, Služby" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            </div>
+        </div>
+
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
+            <input id="nf-label" placeholder="např. Hlavní titulek nabídky" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+        </div>
+
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Unikátní HTML klíč (data-cms="..."):</label>
+            <input id="nf-key" placeholder="např. home_promo_title" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
+        </div>
+
+        <input type="hidden" id="nf-type" value="text">
+
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Výchozí hodnota / Obsah:</label>
+            <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none"></textarea>
+        </div>
+
         <div class="flex gap-2 justify-end pt-2">
-            <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg">Zrušit</button>
-            <button onclick="window.submitNewField()" class="px-3 py-1.5 bg-white text-black font-semibold text-xs rounded-lg">Uložit pole</button>
+            <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
+            <button onclick="window.submitNewField()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Uložit prvek</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL: VYTVOŘIT NOVOU STRÁNKU -->
-<div id="modal-new-page" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+<!-- MODAL: VYTVOŘIT / UPRAVIT STRÁNKU -->
+<div id="modal-page-editor" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-xl w-full space-y-4 max-h-[90vh] overflow-y-auto">
-        <h3 class="text-xl text-white">VYTVOŘIT NOVOU STRÁNKU / ČLÁNEK</h3>
+        <h3 id="page-modal-title" class="text-xl text-white">VYTVOŘIT STRÁNKU / ČLÁNEK</h3>
+        <input type="hidden" id="pe-is-edit" value="false">
+
         <div>
-            <label class="text-xs text-neutral-400 font-mono">URL Slug (např. novy-web-design):</label>
-            <input id="np-slug" placeholder="novy-web-design" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <label class="text-xs text-neutral-400 font-mono">URL Slug (adresa článku):</label>
+            <input id="pe-slug" placeholder="např. novy-web-design" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
         </div>
         <div>
             <label class="text-xs text-neutral-400 font-mono">Nadpis stránky:</label>
-            <input id="np-title" placeholder="Jak jsme vytvořili nový web..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <input id="pe-title" placeholder="Zadejte název..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
         <div>
             <label class="text-xs text-neutral-400 font-mono">Perex / Úvodní shrnutí:</label>
-            <textarea id="np-perex" rows="2" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
+            <textarea id="pe-perex" rows="2" placeholder="Krátký popis..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
         </div>
         <div>
             <label class="text-xs text-neutral-400 font-mono">URL Titulního obrázku (volitelné):</label>
-            <input id="np-img" placeholder="https://..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+            <input id="pe-img" placeholder="https://..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Obsah článku (podporuje HTML odstavce):</label>
-            <textarea id="np-content" rows="6" placeholder="<p>První odstavec textu...</p>" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
+            <label class="text-xs text-neutral-400 font-mono">Obsah stránky (podporuje HTML odstavce):</label>
+            <textarea id="pe-content" rows="7" placeholder="<p>Obsah článku...</p>" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 font-mono"></textarea>
         </div>
+
         <div class="flex gap-2 justify-end pt-2">
-            <button onclick="document.getElementById('modal-new-page').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg">Zrušit</button>
-            <button onclick="window.submitNewPage()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg">Publikovat stránku</button>
+            <button onclick="document.getElementById('modal-page-editor').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
+            <button onclick="window.submitPage()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Uložit stránku</button>
         </div>
     </div>
 </div>
@@ -137,7 +172,7 @@
         }
     }
 
-    // Login & Logout
+    // Autentizace
     document.getElementById('btn-login').onclick = async () => {
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
@@ -165,20 +200,13 @@
         }
     };
 
+    // Načítání a správa polí
     async function loadContent() {
         const { data } = await supabase.from('site_content').select('*').order('page').order('section');
         if (data) {
             contentItems = data;
             renderTabs();
             renderFields();
-        }
-    }
-
-    async function loadPages() {
-        const { data } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
-        if (data) {
-            pagesList = data;
-            renderPagesList();
         }
     }
 
@@ -235,23 +263,6 @@
       `).join('');
     }
 
-    function renderPagesList() {
-        const container = document.getElementById('pages-list');
-        if (pagesList.length === 0) {
-            container.innerHTML = '<p class="text-xs text-neutral-500 font-mono">Zatím nebyly vytvořeny žádné dynamické stránky.</p>';
-            return;
-        }
-        container.innerHTML = pagesList.map(p => `
-        <div class="bg-[#111] border border-white/10 p-4 rounded-xl flex items-center justify-between gap-4">
-          <div>
-            <h4 class="text-lg text-white font-bold">${p.title}</h4>
-            <p class="text-xs text-neutral-400 font-mono">Odkaz: <a href="clanek.html?p=${p.slug}" target="_blank" class="text-[#14968C] underline">clanek.html?p=${p.slug}</a></p>
-          </div>
-          <button onclick="window.deletePage('${p.slug}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-3 py-1.5 rounded-lg">Smazat</button>
-        </div>
-      `).join('');
-    }
-
     window.saveField = async (key, value) => {
         const { error } = await supabase.from('site_content').update({ value, updated_at: new Date().toISOString() }).eq('key', key);
         if (!error) showToast();
@@ -270,11 +281,56 @@
         await loadContent();
     };
 
+    // Přednastavené presety pro nová pole
+    window.openNewFieldModal = () => {
+        window.applyFieldPreset('text');
+        document.getElementById('modal-new-field').classList.remove('hidden');
+    };
+
+    window.applyFieldPreset = (preset) => {
+        const keyInput = document.getElementById('nf-key');
+        const labelInput = document.getElementById('nf-label');
+        const typeInput = document.getElementById('nf-type');
+        const valInput = document.getElementById('nf-value');
+
+        if (preset === 'text') {
+            typeInput.value = 'text';
+            labelInput.value = 'Textový popisek';
+            keyInput.value = 'custom_text_key';
+            valInput.value = 'Jednoduchý textový řetězec';
+        } else if (preset === 'textarea') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Dlouhý textový odstavec';
+            keyInput.value = 'custom_desc_key';
+            valInput.value = 'Podrobný popis sekce nebo odstavce...';
+        } else if (preset === 'hero') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Hero hlavní nadpis s gradientem';
+            keyInput.value = 'custom_hero_title';
+            valInput.value = 'HLAVNÍ NADPIS NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>';
+        } else if (preset === 'image') {
+            typeInput.value = 'image';
+            labelInput.value = 'Obrázek / Banner';
+            keyInput.value = 'custom_banner_img';
+            valInput.value = 'images/web-banner.png';
+        } else if (preset === 'button') {
+            typeInput.value = 'text';
+            labelInput.value = 'Text tlačítka';
+            keyInput.value = 'custom_btn_text';
+            valInput.value = 'Objednat konzultaci';
+        } else if (preset === 'card') {
+            typeInput.value = 'textarea';
+            labelInput.value = 'Obsahová karta (HTML)';
+            keyInput.value = 'custom_card_box';
+            valInput.value = '<div class="p-4 bg-white/5 rounded-xl"><h4 class="text-white font-bold mb-2">Titulek</h4><p class="text-gray-400 text-sm">Popis karty...</p></div>';
+        }
+    };
+
     window.submitNewField = async () => {
-        const key = document.getElementById('nf-key').value;
-        const page = document.getElementById('nf-page').value;
-        const section = document.getElementById('nf-section').value;
-        const label = document.getElementById('nf-label').value;
+        const key = document.getElementById('nf-key').value.trim();
+        const page = document.getElementById('nf-page').value.trim().toLowerCase();
+        const section = document.getElementById('nf-section').value.trim();
+        const label = document.getElementById('nf-label').value.trim();
         const type = document.getElementById('nf-type').value;
         const value = document.getElementById('nf-value').value;
 
@@ -287,25 +343,92 @@
         await loadContent();
     };
 
-    window.submitNewPage = async () => {
-        const slug = document.getElementById('np-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-        const title = document.getElementById('np-title').value;
-        const perex = document.getElementById('np-perex').value;
-        const cover_image = document.getElementById('np-img').value;
-        const content = document.getElementById('np-content').value;
+    // DYNAMICKÉ STRÁNKY (CRUD & Editace)
+    async function loadPages() {
+        const { data } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
+        if (data) {
+            pagesList = data;
+            renderPagesList();
+        }
+    }
+
+    function renderPagesList() {
+        const container = document.getElementById('pages-list');
+        if (pagesList.length === 0) {
+            container.innerHTML = '<p class="text-xs text-neutral-500 font-mono">Zatím nebyly vytvořeny žádné dynamické stránky.</p>';
+            return;
+        }
+        container.innerHTML = pagesList.map(p => `
+        <div class="bg-[#111] border border-white/10 p-4 rounded-xl flex items-center justify-between gap-4">
+          <div>
+            <h4 class="text-lg text-white font-bold">${p.title}</h4>
+            <p class="text-xs text-neutral-400 font-mono">Odkaz: <a href="clanek.html?p=${p.slug}" target="_blank" class="text-[#14968C] underline">clanek.html?p=${p.slug}</a></p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="window.openEditPageModal('${p.slug}')" class="text-xs bg-white text-black font-semibold px-3 py-1.5 rounded-lg hover:bg-neutral-200">Upravit</button>
+            <button onclick="window.deletePage('${p.slug}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-3 py-1.5 rounded-lg">Smazat</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.openNewPageModal = () => {
+        document.getElementById('page-modal-title').innerText = 'VYTVOŘIT NOVOU STRÁNKU';
+        document.getElementById('pe-is-edit').value = 'false';
+        document.getElementById('pe-slug').value = '';
+        document.getElementById('pe-slug').disabled = false;
+        document.getElementById('pe-title').value = '';
+        document.getElementById('pe-perex').value = '';
+        document.getElementById('pe-img').value = '';
+        document.getElementById('pe-content').value = '<p>Zde napište první odstavec textu...</p>';
+        document.getElementById('modal-page-editor').classList.remove('hidden');
+    };
+
+    window.openEditPageModal = (slug) => {
+        const page = pagesList.find(p => p.slug === slug);
+        if (!page) return;
+
+        document.getElementById('page-modal-title').innerText = `UPRAVIT STRÁNKU (${slug})`;
+        document.getElementById('pe-is-edit').value = 'true';
+        document.getElementById('pe-slug').value = page.slug;
+        document.getElementById('pe-slug').disabled = true; // Slug při editaci neměníme
+        document.getElementById('pe-title').value = page.title || '';
+        document.getElementById('pe-perex').value = page.perex || '';
+        document.getElementById('pe-img').value = page.cover_image || '';
+        document.getElementById('pe-content').value = page.content || '';
+        document.getElementById('modal-page-editor').classList.remove('hidden');
+    };
+
+    window.submitPage = async () => {
+        const isEdit = document.getElementById('pe-is-edit').value === 'true';
+        const slug = document.getElementById('pe-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        const title = document.getElementById('pe-title').value;
+        const perex = document.getElementById('pe-perex').value;
+        const cover_image = document.getElementById('pe-img').value;
+        const content = document.getElementById('pe-content').value;
 
         if (!slug || !title) return alert('Vyplňte slug i nadpis stránky!');
 
-        const { error } = await supabase.from('pages').insert([{ slug, title, perex, cover_image, content }]);
-        if (error) return alert('Chyba: ' + error.message);
+        if (isEdit) {
+            const { error } = await supabase.from('pages').update({
+                title, perex, cover_image, content, updated_at: new Date().toISOString()
+            }).eq('slug', slug);
 
-        document.getElementById('modal-new-page').classList.add('hidden');
+            if (error) return alert('Chyba při ukládání: ' + error.message);
+        } else {
+            const { error } = await supabase.from('pages').insert([{ slug, title, perex, cover_image, content }]);
+            if (error) return alert('Chyba při vytváření: ' + error.message);
+        }
+
+        document.getElementById('modal-page-editor').classList.add('hidden');
         await loadPages();
+        showToast();
     };
 
     window.deletePage = async (slug) => {
         if (!confirm(`Opravdu chcete smazat stránku ${slug}?`)) return;
-        await supabase.from('pages').delete().eq('slug', slug);
+        const { error } = await supabase.from('pages').delete().eq('slug', slug);
+        if (error) alert('Chyba: ' + error.message);
         await loadPages();
     };
 
