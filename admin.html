@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wenix · CMS Správa obsahu</title>
+    <title>Wenix · CMS Administrace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -11,17 +11,16 @@
         h1, h2, h3 { font-family: 'Bebas Neue', sans-serif; letter-spacing: 0.04em; }
     </style>
 </head>
-<body class="min-h-screen p-4 sm:p-8 selection:bg-teal-500/20 selection:text-teal-400">
-<div id="app" class="max-w-4xl mx-auto">
-    <!-- Načítání -->
+<body class="min-h-screen p-4 sm:p-8">
+<div class="max-w-5xl mx-auto">
     <div id="loading" class="text-center py-20 text-neutral-500 text-sm">Načítání systému...</div>
 
     <!-- Login formulář -->
-    <div id="login-view" class="hidden max-w-sm mx-auto mt-20 p-6 bg-[#111111] border border-white/10 rounded-xl space-y-4">
+    <div id="login-view" class="hidden max-w-sm mx-auto mt-20 p-6 bg-[#111] border border-white/10 rounded-xl space-y-4">
         <h1 class="text-3xl text-white text-center">WENIX ADMIN</h1>
         <input id="email" type="email" placeholder="E-mail" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-[#14968C]">
         <input id="password" type="password" placeholder="Heslo" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-sm outline-none focus:border-[#14968C]">
-        <button id="btn-login" class="w-full bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 rounded-lg transition text-sm">Přihlásit se</button>
+        <button id="btn-login" class="w-full bg-white hover:bg-neutral-200 text-black font-semibold py-2.5 rounded-lg text-sm transition">Přihlásit se</button>
     </div>
 
     <!-- Dashboard -->
@@ -29,7 +28,7 @@
         <header class="flex justify-between items-center border-b border-white/10 pb-6">
             <div>
                 <h1 class="text-4xl text-white">SPRÁVA WEBU WENIX</h1>
-                <p class="text-xs text-neutral-400 font-mono tracking-wider">UPRAVTE TEXTY A MÉDIA V REÁLNÉM ČASE</p>
+                <p class="text-xs text-neutral-400 font-mono">CMS PRO TEXTY, OBRÁZKY A DYNAMICKÉ STRÁNKY</p>
             </div>
             <div class="flex items-center gap-4">
                 <span id="toast" class="text-xs text-[#14968C] font-semibold transition-opacity opacity-0">ULOŽENO</span>
@@ -37,11 +36,81 @@
             </div>
         </header>
 
-        <!-- Filtr stránek -->
-        <div class="flex gap-2 border-b border-white/5 pb-4" id="page-tabs"></div>
+        <!-- Hlavní sekce CMS: Přepínač -->
+        <div class="flex gap-4 border-b border-white/10 pb-4">
+            <button onclick="window.switchSection('content')" id="tab-btn-content" class="text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white">Texty a Média</button>
+            <button onclick="window.switchSection('pages')" id="tab-btn-pages" class="text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white">Dynamické stránky (Články / Blog)</button>
+        </div>
 
-        <!-- Kontejner pro formuláře -->
-        <div id="fields-container" class="space-y-6"></div>
+        <!-- 1. SEKCE: STATICKÉ TEXTY A MÉDIA -->
+        <div id="section-content" class="space-y-6">
+            <div class="flex justify-between items-center">
+                <div class="flex flex-wrap gap-2" id="page-tabs"></div>
+                <button onclick="document.getElementById('modal-new-field').classList.remove('hidden')" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Přidat nové pole</button>
+            </div>
+            <div id="fields-container" class="space-y-6"></div>
+        </div>
+
+        <!-- 2. SEKCE: DYNAMICKÉ STRÁNKY / ČLÁNKY -->
+        <div id="section-pages" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl text-white">Vytvořené stránky a články</h2>
+                <button onclick="document.getElementById('modal-new-page').classList.remove('hidden')" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">+ Vytvořit novou stránku</button>
+            </div>
+            <div id="pages-list" class="space-y-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: PŘIDAT NOVÉ POLE -->
+<div id="modal-new-field" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-md w-full space-y-4">
+        <h3 class="text-xl text-white">PŘIDAT NOVÉ TEXTOVÉ POLE</h3>
+        <input id="nf-key" placeholder="Unikátní klíč (např. kariera_bonus_plat)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+        <input id="nf-page" placeholder="Stránka (např. index, kariera, kontakt)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+        <input id="nf-section" placeholder="Sekce (např. Hero, Benefity)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+        <input id="nf-label" placeholder="Popisek (např. Výše nástupního platu)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+        <select id="nf-type" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs text-neutral-300">
+            <option value="text">Jednořádkový text</option>
+            <option value="textarea">Dlouhý text (Textarea)</option>
+            <option value="image">Obrázek (Image URL / Upload)</option>
+        </select>
+        <input id="nf-value" placeholder="Výchozí hodnota" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs">
+        <div class="flex gap-2 justify-end pt-2">
+            <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg">Zrušit</button>
+            <button onclick="window.submitNewField()" class="px-3 py-1.5 bg-white text-black font-semibold text-xs rounded-lg">Uložit pole</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: VYTVOŘIT NOVOU STRÁNKU -->
+<div id="modal-new-page" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+    <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-xl w-full space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl text-white">VYTVOŘIT NOVOU STRÁNKU / ČLÁNEK</h3>
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">URL Slug (např. novy-web-design):</label>
+            <input id="np-slug" placeholder="novy-web-design" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+        </div>
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Nadpis stránky:</label>
+            <input id="np-title" placeholder="Jak jsme vytvořili nový web..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+        </div>
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Perex / Úvodní shrnutí:</label>
+            <textarea id="np-perex" rows="2" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
+        </div>
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">URL Titulního obrázku (volitelné):</label>
+            <input id="np-img" placeholder="https://..." class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
+        </div>
+        <div>
+            <label class="text-xs text-neutral-400 font-mono">Obsah článku (podporuje HTML odstavce):</label>
+            <textarea id="np-content" rows="6" placeholder="<p>První odstavec textu...</p>" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1"></textarea>
+        </div>
+        <div class="flex gap-2 justify-end pt-2">
+            <button onclick="document.getElementById('modal-new-page').classList.add('hidden')" class="px-3 py-1.5 border border-white/10 text-xs rounded-lg">Zrušit</button>
+            <button onclick="window.submitNewPage()" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg">Publikovat stránku</button>
+        </div>
     </div>
 </div>
 
@@ -53,13 +122,16 @@
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let contentItems = [];
+    let pagesList = [];
     let activePage = 'all';
 
     async function init() {
         const { data: { session } } = await supabase.auth.getSession();
         document.getElementById('loading').classList.add('hidden');
         if (session) {
-            showDashboard();
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            await loadContent();
+            await loadPages();
         } else {
             document.getElementById('login-view').classList.remove('hidden');
         }
@@ -79,10 +151,19 @@
         location.reload();
     };
 
-    async function showDashboard() {
-        document.getElementById('dashboard-view').classList.remove('hidden');
-        await loadContent();
-    }
+    window.switchSection = (sec) => {
+        if (sec === 'content') {
+            document.getElementById('section-content').classList.remove('hidden');
+            document.getElementById('section-pages').classList.add('hidden');
+            document.getElementById('tab-btn-content').className = 'text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white';
+            document.getElementById('tab-btn-pages').className = 'text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white';
+        } else {
+            document.getElementById('section-content').classList.add('hidden');
+            document.getElementById('section-pages').classList.remove('hidden');
+            document.getElementById('tab-btn-pages').className = 'text-sm font-semibold pb-1 border-b-2 border-[#14968C] text-white';
+            document.getElementById('tab-btn-content').className = 'text-sm font-semibold pb-1 border-b-2 border-transparent text-neutral-400 hover:text-white';
+        }
+    };
 
     async function loadContent() {
         const { data } = await supabase.from('site_content').select('*').order('page').order('section');
@@ -93,11 +174,18 @@
         }
     }
 
+    async function loadPages() {
+        const { data } = await supabase.from('pages').select('*').order('created_at', { ascending: false });
+        if (data) {
+            pagesList = data;
+            renderPagesList();
+        }
+    }
+
     function renderTabs() {
         const pages = ['all', ...new Set(contentItems.map(i => i.page))];
-        const tabs = document.getElementById('page-tabs');
-        tabs.innerHTML = pages.map(p => `
-        <button onclick="window.switchTab('${p}')" class="px-3 py-1 text-xs uppercase tracking-wider rounded-md border ${activePage === p ? 'bg-[#14968C] text-black border-[#14968C] font-semibold' : 'bg-[#111111] text-neutral-400 border-white/10 hover:border-white/20'}">
+        document.getElementById('page-tabs').innerHTML = pages.map(p => `
+        <button onclick="window.switchTab('${p}')" class="px-3 py-1 text-xs uppercase tracking-wider rounded-md border ${activePage === p ? 'bg-[#14968C] text-black border-[#14968C] font-semibold' : 'bg-[#111] text-neutral-400 border-white/10 hover:border-white/20'}">
           ${p === 'all' ? 'Všechny stránky' : p}
         </button>
       `).join('');
@@ -121,7 +209,7 @@
         }, {});
 
         container.innerHTML = Object.entries(grouped).map(([group, fields]) => `
-        <div class="bg-[#111111] border border-white/10 p-5 rounded-xl space-y-4">
+        <div class="bg-[#111] border border-white/10 p-5 rounded-xl space-y-4">
           <h3 class="text-xl text-[#14968C] border-b border-white/5 pb-2">${group}</h3>
           <div class="space-y-4">
             ${fields.map(f => `
@@ -147,6 +235,23 @@
       `).join('');
     }
 
+    function renderPagesList() {
+        const container = document.getElementById('pages-list');
+        if (pagesList.length === 0) {
+            container.innerHTML = '<p class="text-xs text-neutral-500 font-mono">Zatím nebyly vytvořeny žádné dynamické stránky.</p>';
+            return;
+        }
+        container.innerHTML = pagesList.map(p => `
+        <div class="bg-[#111] border border-white/10 p-4 rounded-xl flex items-center justify-between gap-4">
+          <div>
+            <h4 class="text-lg text-white font-bold">${p.title}</h4>
+            <p class="text-xs text-neutral-400 font-mono">Odkaz: <a href="clanek.html?p=${p.slug}" target="_blank" class="text-[#14968C] underline">clanek.html?p=${p.slug}</a></p>
+          </div>
+          <button onclick="window.deletePage('${p.slug}')" class="text-xs text-red-400 hover:text-red-300 border border-red-500/20 px-3 py-1.5 rounded-lg">Smazat</button>
+        </div>
+      `).join('');
+    }
+
     window.saveField = async (key, value) => {
         const { error } = await supabase.from('site_content').update({ value, updated_at: new Date().toISOString() }).eq('key', key);
         if (!error) showToast();
@@ -156,14 +261,52 @@
         const file = input.files[0];
         if (!file) return;
         const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-
-        const { data, error } = await supabase.storage.from('site-assets').upload(fileName, file);
-        if (error) return alert('Chyba nahrávání: ' + error.message);
+        const { error } = await supabase.storage.from('site-assets').upload(fileName, file);
+        if (error) return alert('Chyba: ' + error.message);
 
         const { data: { publicUrl } } = supabase.storage.from('site-assets').getPublicUrl(fileName);
         await window.saveField(key, publicUrl);
         document.getElementById(`preview-${key}`).src = publicUrl;
         await loadContent();
+    };
+
+    window.submitNewField = async () => {
+        const key = document.getElementById('nf-key').value;
+        const page = document.getElementById('nf-page').value;
+        const section = document.getElementById('nf-section').value;
+        const label = document.getElementById('nf-label').value;
+        const type = document.getElementById('nf-type').value;
+        const value = document.getElementById('nf-value').value;
+
+        if (!key || !page || !label) return alert('Vyplňte klíč, stránku a popisek!');
+
+        const { error } = await supabase.from('site_content').insert([{ key, page, section, label, type, value }]);
+        if (error) return alert('Chyba: ' + error.message);
+
+        document.getElementById('modal-new-field').classList.add('hidden');
+        await loadContent();
+    };
+
+    window.submitNewPage = async () => {
+        const slug = document.getElementById('np-slug').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        const title = document.getElementById('np-title').value;
+        const perex = document.getElementById('np-perex').value;
+        const cover_image = document.getElementById('np-img').value;
+        const content = document.getElementById('np-content').value;
+
+        if (!slug || !title) return alert('Vyplňte slug i nadpis stránky!');
+
+        const { error } = await supabase.from('pages').insert([{ slug, title, perex, cover_image, content }]);
+        if (error) return alert('Chyba: ' + error.message);
+
+        document.getElementById('modal-new-page').classList.add('hidden');
+        await loadPages();
+    };
+
+    window.deletePage = async (slug) => {
+        if (!confirm(`Opravdu chcete smazat stránku ${slug}?`)) return;
+        await supabase.from('pages').delete().eq('slug', slug);
+        await loadPages();
     };
 
     function showToast() {
