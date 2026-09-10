@@ -11,19 +11,19 @@ export async function initCMS() {
     data.forEach(item => {
         if (!item.value) return;
 
-        // 1. Texty & HTML (innerHTML zajistí funkčnost gradientů a spanů)
+        // 1. Texty & HTML (musí být innerHTML, aby fungoval span i br)
         const textElements = document.querySelectorAll(`[data-cms="${item.key}"]`);
         textElements.forEach(el => {
             el.innerHTML = item.value;
         });
 
-        // 2. Odkazy pro tlačítka (URL adresa)
+        // 2. Odkazy (href)
         const linkElements = document.querySelectorAll(`[data-cms-href="${item.key}"]`);
         linkElements.forEach(el => {
             el.href = item.value;
         });
 
-        // 3. Obrázky a pozadí
+        // 3. Obrázky
         const imgElements = document.querySelectorAll(`[data-cms-img="${item.key}"]`);
         imgElements.forEach(el => {
             if (el.tagName === 'IMG') {
