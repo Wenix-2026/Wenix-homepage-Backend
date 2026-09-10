@@ -52,27 +52,40 @@
                 </div>
             </div>
 
+            <!-- Odkazová lišta pro vybranou stránku -->
+            <div id="page-info-bar" class="hidden bg-[#111] border border-teal-500/30 p-4 rounded-xl flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-neutral-400 font-mono">Veřejný odkaz:</span>
+                    <a id="page-direct-link" href="#" target="_blank" class="text-xs text-[#14968C] underline font-mono"></a>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="window.addToNavigation()" class="px-3 py-1.5 bg-white/5 border border-white/15 text-xs text-neutral-200 rounded-lg hover:bg-white/10 transition">
+                        + Přidat odkaz na tuto stránku do Navigace / Menu
+                    </button>
+                    <a id="page-visit-btn" href="#" target="_blank" class="px-3 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400 transition">
+                        Otevřít stránku ↗
+                    </a>
+                </div>
+            </div>
+
             <!-- Seznam prvků stránky -->
             <div id="fields-container" class="space-y-4"></div>
         </div>
     </div>
 </div>
 
-<!-- MODAL 1: VYTVOŘIT NOVOU STRÁNKU -->
+<!-- MODAL: NOVÁ STRÁNKA -->
 <div id="modal-new-page" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-md w-full space-y-4">
         <h3 class="text-xl text-white">VYTVOŘIT NOVOU STRÁNKU</h3>
-
         <div>
-            <label class="text-xs text-neutral-400 font-mono">Identifikátor stránky / URL slug (bez mezer a diakritiky):</label>
-            <input id="np-page-slug" placeholder="např. blog, sluzby, reference" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-mono outline-none focus:border-[#14968C]">
+            <label class="text-xs text-neutral-400 font-mono">Identifikátor stránky / URL slug (např. blog, tym, reference):</label>
+            <input id="np-page-slug" placeholder="novinky" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-teal-400 font-mono outline-none focus:border-[#14968C]">
         </div>
-
         <div>
             <label class="text-xs text-neutral-400 font-mono">Hlavní nadpis nové stránky:</label>
-            <input id="np-page-title" placeholder="např. Naše reference a projekty" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
+            <input id="np-page-title" placeholder="Novinky a články" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none focus:border-[#14968C]">
         </div>
-
         <div class="flex gap-2 justify-end pt-2">
             <button onclick="document.getElementById('modal-new-page').classList.add('hidden')" class="px-3.5 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
             <button onclick="window.submitNewPage()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vytvořit stránku</button>
@@ -80,11 +93,10 @@
     </div>
 </div>
 
-<!-- MODAL 2: PŘIDAT NOVÝ PRVEK -->
+<!-- MODAL: NOVÝ PRVEK -->
 <div id="modal-new-field" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
     <div class="bg-[#111] border border-white/10 rounded-xl p-6 max-w-lg w-full space-y-4 max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl text-white">PŘIDAT PRVEK DO STRÁNKY</h3>
-
         <div>
             <label class="text-xs text-neutral-400 font-mono">Typ prvku:</label>
             <select id="nf-preset" onchange="window.applyFieldPreset(this.value)" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2.5 text-xs text-neutral-200 mt-1 focus:border-[#14968C] outline-none">
@@ -96,7 +108,6 @@
                 <option value="card">Obsahový blok (Karta)</option>
             </select>
         </div>
-
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label class="text-xs text-neutral-400 font-mono">Cílová stránka:</label>
@@ -107,24 +118,19 @@
                 <input id="nf-section" placeholder="např. Hero, O nás, Galerie" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
             </div>
         </div>
-
         <div>
             <label class="text-xs text-neutral-400 font-mono">Popisek prvku v administraci:</label>
             <input id="nf-label" placeholder="např. Hlavní titulek" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1">
         </div>
-
         <div>
             <label class="text-xs text-neutral-400 font-mono">Unikátní klíč (data-cms="..."):</label>
             <input id="nf-key" placeholder="např. test_hero_title" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 font-mono text-teal-400">
         </div>
-
         <input type="hidden" id="nf-type" value="text">
-
         <div>
             <label class="text-xs text-neutral-400 font-mono">Obsah prvku:</label>
             <textarea id="nf-value" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 rounded-lg p-2 text-xs mt-1 text-neutral-200 outline-none"></textarea>
         </div>
-
         <div class="flex gap-2 justify-end pt-2">
             <button onclick="document.getElementById('modal-new-field').classList.add('hidden')" class="px-3.5 py-1.5 border border-white/10 text-xs rounded-lg text-neutral-400 hover:text-white">Zrušit</button>
             <button onclick="window.submitNewField()" class="px-3.5 py-1.5 bg-[#14968C] text-black font-semibold text-xs rounded-lg hover:bg-teal-400">Vložit na konec stránky</button>
@@ -180,6 +186,7 @@
                 activePage = pages[0];
             }
             renderTabs();
+            updatePageInfoBar();
             renderFields();
         }
     }
@@ -197,9 +204,24 @@
       `).join('');
     }
 
+    function updatePageInfoBar() {
+        const infoBar = document.getElementById('page-info-bar');
+        const directLink = document.getElementById('page-direct-link');
+        const visitBtn = document.getElementById('page-visit-btn');
+
+        const isStatic = ['index', 'kariera', 'kontakt', 'privacy', 'cookies', 'reviews'].includes(activePage);
+        const url = isStatic ? `${activePage}.html` : `clanek.html?p=${activePage}`;
+
+        directLink.innerText = url;
+        directLink.href = url;
+        visitBtn.href = url;
+        infoBar.classList.remove('hidden');
+    }
+
     window.switchTab = (p) => {
         activePage = p;
         renderTabs();
+        updatePageInfoBar();
         renderFields();
     };
 
@@ -222,7 +244,6 @@
               <span class="text-[10px] text-teal-400 bg-teal-950/60 border border-teal-800/40 px-2 py-0.5 rounded-full uppercase">${f.section}</span>
             </div>
 
-            <!-- Tlačítka pro posun a mazání -->
             <div class="flex items-center gap-1">
               <button onclick="window.moveItem('${f.key}', -1)" ${index === 0 ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="hover:bg-white/10 text-neutral-300"'} title="Posunout výš" class="p-1.5 rounded-md text-xs transition">
                 <i class="bx bx-chevron-up text-base"></i>
@@ -236,7 +257,6 @@
             </div>
           </div>
 
-          <!-- Editace hodnoty -->
           <div>
             ${f.type === 'textarea' ? `
               <textarea onblur="window.saveField('${f.key}', this.value)" rows="3" class="w-full bg-[#0a0a0a] border border-white/10 focus:border-[#14968C] rounded-lg p-3 text-sm text-neutral-200 outline-none transition">${f.value || ''}</textarea>
@@ -256,7 +276,22 @@
       `).join('');
     }
 
-    // Posun prvku výš (-1) nebo níž (+1)
+    // Přidání odkazu na novou stránku do navigace na webu
+    window.addToNavigation = async () => {
+        const linkUrl = `clanek.html?p=${activePage}`;
+        const linkText = activePage.toUpperCase();
+        const navKeyText = `nav_btn_${activePage}_text`;
+        const navKeyHref = `nav_btn_${activePage}_href`;
+
+        await supabase.from('site_content').upsert([
+            { key: navKeyText, page: 'index', section: 'Navigace', label: `Odkaz v menu - ${linkText}`, type: 'text', value: linkText, sort_order: 1 },
+            { key: navKeyHref, page: 'index', section: 'Navigace', label: `Odkaz v menu URL - ${linkText}`, type: 'text', value: linkUrl, sort_order: 2 }
+        ]);
+
+        alert(`Stránka byla přidána do navigace (Text: ${linkText}, Odkaz: ${linkUrl})!`);
+        await loadContent();
+    };
+
     window.moveItem = async (key, direction) => {
         const pageItems = contentItems.filter(i => i.page === activePage);
         const currentIndex = pageItems.findIndex(i => i.key === key);
@@ -309,7 +344,6 @@
         await loadContent();
     };
 
-    // Nová stránka
     window.openNewPageModal = () => {
         document.getElementById('np-page-slug').value = '';
         document.getElementById('np-page-title').value = '';
@@ -341,7 +375,6 @@
         showToast();
     };
 
-    // Nové pole
     window.openNewFieldModal = () => {
         document.getElementById('nf-page').value = activePage;
         window.applyFieldPreset('text');

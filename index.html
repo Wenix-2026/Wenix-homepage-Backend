@@ -187,35 +187,43 @@
     </div>
 </div>
 
+<!-- Navigace nahoře -->
 <header>
     <div class="nav-inner">
         <div class="flex items-center">
             <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
             <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
+
+            <!-- Burger trigger button -->
             <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
                 <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
                 <span id="line-2" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease;"></span>
             </button>
         </div>
 
+        <!-- Desktop menu odkazy -->
+        <nav class="desktop-nav" id="main-nav-links">
+            <a href="index.html#about">O nás</a>
+            <a href="kariera.html">Kariéra</a>
+            <a href="kontakt.html">Kontakt</a>
+        </nav>
+
         <div class="nav-right">
             <nav class="nav-social">
                 <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
-                <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
                 <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
-                <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
             </nav>
         </div>
     </div>
 </header>
 
+<!-- Plnoobrazovkový Burger Overlay -->
 <div id="burger-overlay">
-    <nav>
+    <nav id="burger-nav-links">
         <a href="index.html#about" class="menu-link">O NÁS</a>
         <a href="kariera.html" class="menu-link">KARIÉRA</a>
         <a href="kontakt.html" class="menu-link">KONTAKT</a>
-        <a href="#faq" class="menu-link">FAQ</a>
-        <a href="#portfolio" class="menu-link">PORTFOLIO</a>
+        <a href="index.html#services" class="menu-link">SLUŽBY</a>
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
     </nav>
 </div>
@@ -365,5 +373,36 @@
 <script>
     AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
 </script>
+
+<script>
+    // Obsluha otevírání a zavírání burger menu
+    const burgerBtn = document.getElementById('burger-trigger');
+    const burgerOverlay = document.getElementById('burger-overlay');
+    const line1 = document.getElementById('line-1');
+    const line2 = document.getElementById('line-2');
+
+    if (burgerBtn && burgerOverlay) {
+        burgerBtn.addEventListener('click', () => {
+            const isOpen = burgerOverlay.classList.toggle('open');
+            if (isOpen) {
+                line1.style.transform = 'translateY(3px) rotate(45deg)';
+                line2.style.transform = 'translateY(-3.5px) rotate(-45deg)';
+            } else {
+                line1.style.transform = 'none';
+                line2.style.transform = 'none';
+            }
+        });
+
+        // Zavření po kliknutí na libovolný odkaz
+        document.querySelectorAll('.menu-link').forEach(link => {
+            link.addEventListener('click', () => {
+                burgerOverlay.classList.remove('open');
+                line1.style.transform = 'none';
+                line2.style.transform = 'none';
+            });
+        });
+    }
+</script>
+
 </body>
 </html>
