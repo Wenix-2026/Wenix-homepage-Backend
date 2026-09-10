@@ -56,7 +56,10 @@
                     <span class="text-xs text-neutral-400 font-mono">Veřejný odkaz:</span>
                     <a id="page-direct-link" href="#" target="_blank" class="text-xs text-[#14968C] underline font-mono"></a>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="window.deleteCurrentPage()" class="px-3 py-1.5 bg-red-500/10 border border-red-500/30 text-xs text-red-400 rounded-lg hover:bg-red-500/20 transition flex items-center gap-1">
+                        <i class="bx bx-trash"></i> Smazat celou stránku
+                    </button>
                     <button onclick="window.addToNavigation()" class="px-3 py-1.5 bg-white/5 border border-white/15 text-xs text-neutral-200 rounded-lg hover:bg-white/10 transition">
                         + Přidat do Burger menu
                     </button>
@@ -319,6 +322,27 @@
       `;
         }).join('');
     }
+
+    // Funkce pro smazání celé aktuálně vybrané stránky
+    window.deleteCurrentPage = async () => {
+        if (!confirm(`Opravdu chcete smazat celou stránku "${activePage}" a všechny její prvky? Tuto akci nelze vrátit.`)) {
+            return;
+        }
+
+        const { error } = await supabase
+            .from('site_content')
+            .delete()
+            .eq('page', activePage);
+
+        if (error) {
+            alert('Chyba při mazání stránky: ' + error.message);
+            return;
+        }
+
+        showToast();
+        activePage = 'index'; // Přepneme zpět na hlavní stránku
+        await loadContent();
+    };
 
     window.saveButtonField = async (key, text, link) => {
         const combined = `${text.trim()} | ${link.trim()}`;
