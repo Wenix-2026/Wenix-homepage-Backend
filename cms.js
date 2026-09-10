@@ -2,7 +2,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const SUPABASE_URL = 'https://semffcznljmbmftbaogl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_OSvxzzEtDG7zgkmaR4j5gw_2oY7otaQ';
-
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export async function initCMS() {
@@ -12,13 +11,19 @@ export async function initCMS() {
     data.forEach(item => {
         if (!item.value) return;
 
-        // 1. Texty a textarey
+        // 1. Texty & HTML (innerHTML zajistí funkčnost gradientů a spanů)
         const textElements = document.querySelectorAll(`[data-cms="${item.key}"]`);
         textElements.forEach(el => {
-            el.textContent = item.value;
+            el.innerHTML = item.value;
         });
 
-        // 2. Obrázky a pozadí
+        // 2. Odkazy pro tlačítka (URL adresa)
+        const linkElements = document.querySelectorAll(`[data-cms-href="${item.key}"]`);
+        linkElements.forEach(el => {
+            el.href = item.value;
+        });
+
+        // 3. Obrázky a pozadí
         const imgElements = document.querySelectorAll(`[data-cms-img="${item.key}"]`);
         imgElements.forEach(el => {
             if (el.tagName === 'IMG') {
