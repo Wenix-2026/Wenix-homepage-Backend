@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <script type="module" src="/cms.js"></script>
+    <script type="module" src="/cms.js?v=3"></script>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
@@ -64,10 +64,7 @@
         @media (min-width: 2560px) { .container-custom, .nav-inner, .footer-inner { max-width: 1920px; } }
         @media (min-width: 3440px) { .container-custom, .nav-inner, .footer-inner { max-width: 2400px; } }
         .nav-right { display: flex; align-items: center; gap: 32px; }
-        .desktop-nav { display: none; gap: 24px; }
-        @media (min-width: 768px) { .desktop-nav { display: flex; } }
-        .desktop-nav a { font-size: 0.9rem; color: rgba(255,255,255,0.7); transition: color 0.2s; font-weight: 500; text-transform: uppercase; }
-        .desktop-nav a:hover { color: #fff; }
+        .desktop-nav { display: none; }
         .nav-social { display: flex; align-items: center; gap: 16px; }
         .nav-social a { color: #fff; opacity: .75; transition: opacity .2s; font-size: 1.45rem; line-height: 1; }
         .nav-social a:hover { opacity: 1; }
@@ -78,7 +75,7 @@
             opacity: 0; transition: opacity 0.3s ease;
         }
         #burger-overlay.open { display: flex; opacity: 1; }
-        #burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 32px; }
+        #burger-overlay nav { display: flex; flex-direction: column; text-align: center; gap: 28px; }
         #burger-overlay a.menu-link {
             font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.2rem, 5vw, 3.5rem);
             color: rgba(255,255,255,0.65); text-decoration: none; letter-spacing: 0.04em; transition: color .2s;
@@ -168,12 +165,15 @@
     </style>
 </head>
 
+<div id="progress-bar"></div>
+
 <a href="#" id="back-to-top" aria-label="Zpět nahoru">
     <i class="bx bx-chevron-up"></i>
 </a>
 
 <body>
 
+<!-- Cookie lišta -->
 <div id="cookie-banner" style="z-index:99999" class="hidden fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-4 shadow-2xl">
     <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <p class="text-sm text-gray-400 leading-relaxed flex-1">
@@ -187,53 +187,52 @@
     </div>
 </div>
 
-<!-- Navigace nahoře -->
+<!-- Horní navigace -->
 <header>
     <div class="nav-inner">
         <div class="flex items-center">
             <a href="index.html" class="font-bebas text-white hover:text-gray-300 transition-colors" style="font-size: 2rem; letter-spacing: .05em; text-decoration: none;">Wenix</a>
             <div style="width: 1px; height: 24px; background: rgba(255,255,255,0.25); margin: 0 16px;"></div>
-
-            <!-- Burger trigger button -->
             <button id="burger-trigger" class="focus:outline-none flex flex-col gap-[5px] cursor-pointer p-2 hover:opacity-70 transition-opacity" aria-label="Menu">
                 <span id="line-1" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease, width 0.2s ease;"></span>
                 <span id="line-2" style="width: 14px; height: 1.5px; background: #fff; border-radius: 1px; transition: transform 0.2s ease;"></span>
             </button>
         </div>
 
-        <!-- Desktop menu odkazy -->
-        <nav class="desktop-nav" id="main-nav-links">
-            <a href="index.html#about">O nás</a>
-            <a href="kariera.html">Kariéra</a>
-            <a href="kontakt.html">Kontakt</a>
-        </nav>
-
         <div class="nav-right">
             <nav class="nav-social">
                 <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="#" aria-label="YouTube"><i class="bx bxl-youtube"></i></a>
                 <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="#" aria-label="LinkedIn"><i class="bx bxl-linkedin"></i></a>
             </nav>
         </div>
     </div>
 </header>
 
-<!-- Plnoobrazovkový Burger Overlay -->
+<!-- Burger Menu Overlay -->
 <div id="burger-overlay">
     <nav id="burger-nav-links">
         <a href="index.html#about" class="menu-link">O NÁS</a>
         <a href="kariera.html" class="menu-link">KARIÉRA</a>
         <a href="kontakt.html" class="menu-link">KONTAKT</a>
-        <a href="index.html#services" class="menu-link">SLUŽBY</a>
+        <a href="#services" class="menu-link">SLUŽBY</a>
+        <a href="#faq" class="menu-link">FAQ</a>
+        <a href="#portfolio" class="menu-link">PORTFOLIO</a>
+
+        <!-- Dynamické odkazy vytvořené v CMS -->
+        <div id="dynamic-burger-links" class="flex flex-col gap-6"></div>
+
         <div class="h-px w-20 bg-white/10 my-4 mx-auto"></div>
     </nav>
 </div>
 
+<!-- Hero Sekce -->
 <section class="hero-bg w-full h-screen sticky top-0 z-10 flex flex-col items-center overflow-hidden bg-black px-6">
     <div class="hero-gradient"></div>
     <div id="particles" aria-hidden="true"></div>
 
     <div class="relative z-20 max-w-5xl mx-auto flex flex-col items-center text-center pt-36 sm:pt-44 -mb-10">
-        <!-- Hlavní nadpis s podporou gradientu -->
         <h1 data-cms="index_hero_title" class="font-bebas text-white leading-none tracking-wide mb-6" style="font-size: clamp(3rem, 7.5vw, 6rem);">
             STATICKÉ WEBY NA<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 via-cyan-400 to-blue-400">MAXIMUM</span>
         </h1>
@@ -242,7 +241,6 @@
             Kódujeme bleskově rychlé a bezpečné statické webové stránky na míru a navrhujeme moderní grafický design.
         </p>
 
-        <!-- Editovatelná tlačítka (Text i Cíl odkazu) -->
         <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;" data-aos="fade-up" data-aos-delay="120">
             <a data-cms="index_hero_btn1_text" data-cms-href="index_hero_btn1_link" href="kontakt.html" class="btn-primary">Chci konzultaci</a>
             <a data-cms="index_hero_btn2_text" data-cms-href="index_hero_btn2_link" href="#about" class="btn-secondary">O nás</a>
@@ -250,10 +248,12 @@
     </div>
 </section>
 
+<!-- Plovoucí hlavní tělo stránky -->
 <div class="relative z-20 bg-black shadow-[0_-40px_80px_rgba(0,0,0,0.95)]">
+    <!-- Sekce O nás -->
     <section id="about" style="padding: 96px 24px 64px;">
         <div class="container-custom">
-            <div style="text-align: center; max-w: 650px; margin: 0 auto 64px;" data-aos="fade-up">
+            <div style="text-align: center; max-width: 650px; margin: 0 auto 64px;" data-aos="fade-up">
                 <h2 data-cms="index_about_h2" class="font-bebas" style="font-size: clamp(2.4rem, 5.5vw, 4rem); color: #fff; margin-bottom: 16px;">WENIX</h2>
                 <p data-cms="index_about_p" style="color: rgba(255,255,255,0.6); font-size: .95rem; line-height: 1.7;">
                     Jsme technologický partner pro vaši online prezentaci. Navrhujeme a kódujeme čisté statické weby, které plní svůj účel a nemají zbytečný technologický dluh.
@@ -293,6 +293,7 @@
         </div>
     </section>
 
+    <!-- Sekce Služby a Karty -->
     <section id="services" style="padding: 96px 24px 64px;">
         <div style="max-width: 1280px; margin: 0 auto;">
             <div data-aos="fade-up" style="width: 100%; aspect-ratio: 16/5; border-radius: 14px; overflow: hidden; position: relative; margin-bottom: 64px; background-color: #ffffff;">
@@ -336,17 +337,144 @@
         </div>
     </section>
 
+    <!-- Sekce Portfolio -->
+    <section id="portfolio" style="padding: 80px 24px 64px;">
+        <div class="container-custom">
+            <div style="text-align: center; max-width: 600px; margin: 0 auto 56px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">UKÁZKY NAŠÍ PRÁCE</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Vybrané realizace a digitální koncepty z naší dílny.</p>
+            </div>
+
+            <div class="three-col" data-aos="fade-up">
+                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-[#14968C] uppercase">Webová Prezentace</span>
+                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">K9 SPECIALISTS</h3>
+                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Minimalistický web a zákaznické CRM pro výcvikové centrum psů na Floridě.</p>
+                    </div>
+                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
+                </div>
+
+                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-[#14968C] uppercase">Webová Aplikace</span>
+                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">WENIX KALENDÁŘ</h3>
+                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Interní týmový systém pro správu událostí a automatizaci e-mailových notifikací.</p>
+                    </div>
+                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
+                </div>
+
+                <div class="p-6 bg-[#0c0c0e] border border-white/10 rounded-xl flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-mono text-[#14968C] uppercase">Design & Development</span>
+                        <h3 class="font-bebas text-2xl text-white mt-2 mb-3">STUDIO PORTÁL</h3>
+                        <p class="text-neutral-400 text-xs leading-relaxed mb-6">Rychlý statický web s integrovaným CMS rozhraním pro přímou editaci obsahu.</p>
+                    </div>
+                    <a href="kontakt.html" class="text-xs text-white underline hover:text-[#14968C]">Zobrazit případovou studii →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sekce Časová osa (Proces spolupráce) -->
+    <section style="padding: 80px 24px 64px; border-top: 1px solid rgba(255,255,255,0.06);">
+        <div class="container-custom">
+            <div style="text-align: center; max-width: 600px; margin: 0 auto 56px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">JAK PROBÍHÁ SPOLUPRÁCE</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Od první konzultace až po finální nasazení na ostrou doménu.</p>
+            </div>
+
+            <div class="space-y-12 max-w-3xl mx-auto" data-aos="fade-up">
+                <div class="timeline-step">
+                    <div class="timeline-text text-right">
+                        <h3 class="text-lg font-bold text-white mb-1">1. Konzultace a specifikace</h3>
+                        <p class="text-neutral-400 text-xs">Ujasníme si vaše cíle, rozsah webu a připravíme návrh struktury.</p>
+                    </div>
+                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">1</div>
+                    <div class="timeline-box"></div>
+                </div>
+
+                <div class="timeline-step">
+                    <div class="timeline-box"></div>
+                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">2</div>
+                    <div class="timeline-text text-left">
+                        <h3 class="text-lg font-bold text-white mb-1">2. UX/UI Design</h3>
+                        <p class="text-neutral-400 text-xs">Vytvoříme moderní vizuál na míru a doladíme ho k vaší spokojenosti.</p>
+                    </div>
+                </div>
+
+                <div class="timeline-step">
+                    <div class="timeline-text text-right">
+                        <h3 class="text-lg font-bold text-white mb-1">3. Kódování a CMS</h3>
+                        <p class="text-neutral-400 text-xs">Převedeme grafiku do čistého, rychlého kódu s možností editace textů.</p>
+                    </div>
+                    <div class="timeline-icon flex items-center justify-center w-10 h-10 rounded-full bg-[#14968C]/20 border border-[#14968C] text-[#14968C] font-mono text-sm mx-auto">3</div>
+                    <div class="timeline-box"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sekce FAQ -->
+    <section id="faq" style="padding: 80px 24px 64px; border-top: 1px solid rgba(255,255,255,0.06);">
+        <div class="container-custom max-w-3xl">
+            <div style="text-align: center; margin-bottom: 48px;" data-aos="fade-up">
+                <h2 class="font-bebas" style="font-size: clamp(2rem, 4.5vw, 3.2rem); color: #fff; margin-bottom: 12px;">ČASTO KLADENÉ DOTAZY</h2>
+                <p style="color: rgba(255,255,255,0.6); font-size: .9rem;">Vše, co potřebujete vědět před zahájením projektu.</p>
+            </div>
+
+            <div class="space-y-4" data-aos="fade-up">
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>Proč zvolit statický web místo WordPressu?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Statické weby nemají žádnou těžkou databázi ani zranitelné pluginy. Načítají se okamžitě (často pod 100 ms), jsou maximálně bezpečné a nevyžadují neustálé placené aktualizace.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>Budu si moci texty a fotky na webu upravovat sám?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Ano. K webu dodáváme naše přehledné Wenix CMS rozhraní, kde můžete kdykoliv jednoduše přepisovat veškeré texty i nahrávat nové fotografie.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-trigger">
+                        <span>Jak dlouho trvá tvorba webu na míru?</span>
+                        <i class="bx bx-plus faq-icon"></i>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Standardní webové prezentace doručujeme obvykle do 2 až 3 týdnů od odsouhlasení grafického návrhu a dodání podkladů.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Patička webu -->
     <footer>
         <div class="footer-inner">
             <div class="footer-grid">
                 <div class="footer-col">
                     <span class="footer-logo">WENIX</span>
-                    <p class="footer-tagline">Váš partner pro moderní weby a čistý design.</p>
+                    <p class="footer-tagline">Váš partner pro moderní weby a čistý design bez zbytečného balastu.</p>
+                    <div class="footer-socials">
+                        <a href="https://www.facebook.com/share/1CiXdqpNnF/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bx bxl-facebook"></i></a>
+                        <a href="https://www.instagram.com/wenix.cz?igsh=MWN5Nm56dm00ZmV6aw%3D%3D" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bx bxl-instagram"></i></a>
+                    </div>
                 </div>
                 <div class="footer-col">
                     <h4>Služby</h4>
                     <ul>
                         <li><a href="#services">Statické weby</a></li>
+                        <li><a href="#services">UX / UI Design</a></li>
+                        <li><a href="#services">Správa a podpora</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -354,6 +482,7 @@
                     <ul>
                         <li><a href="#about">O nás</a></li>
                         <li><a href="kariera.html">Kariéra</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">
@@ -362,6 +491,7 @@
                         <li><a href="kontakt.html">Kontakt</a></li>
                         <li><a href="privacy.html">Privacy Policy</a></li>
                         <li><a href="cookies.html">Cookies</a></li>
+                        <li><a href="admin.html">Správa webu</a></li>
                     </ul>
                 </div>
             </div>
@@ -372,10 +502,20 @@
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script>
     AOS.init({ duration: 650, easing: 'ease-out-quart', once: true, offset: 40 });
-</script>
 
-<script>
-    // Obsluha otevírání a zavírání burger menu
+    // Obsluha Scroll baru a Back to Top
+    window.addEventListener('scroll', () => {
+        const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+        const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (winScroll / height) * 100;
+        document.getElementById('progress-bar').style.width = scrolled + '%';
+
+        const topBtn = document.getElementById('back-to-top');
+        if (winScroll > 400) topBtn.classList.add('visible');
+        else topBtn.classList.remove('visible');
+    });
+
+    // Obsluha Burger menu
     const burgerBtn = document.getElementById('burger-trigger');
     const burgerOverlay = document.getElementById('burger-overlay');
     const line1 = document.getElementById('line-1');
@@ -393,16 +533,22 @@
             }
         });
 
-        // Zavření po kliknutí na libovolný odkaz
-        document.querySelectorAll('.menu-link').forEach(link => {
-            link.addEventListener('click', () => {
+        burgerOverlay.addEventListener('click', (e) => {
+            if (e.target.classList.contains('menu-link')) {
                 burgerOverlay.classList.remove('open');
                 line1.style.transform = 'none';
                 line2.style.transform = 'none';
-            });
+            }
         });
     }
-</script>
 
+    // Obsluha FAQ akordeonů
+    document.querySelectorAll('.faq-trigger').forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            const parent = trigger.parentElement;
+            parent.classList.toggle('open');
+        });
+    });
+</script>
 </body>
 </html>
